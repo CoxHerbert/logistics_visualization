@@ -2,6 +2,28 @@
 
 > 目标：在现有芋道三端基础上，通过 Codex 分阶段自动化推进“后台管理端 + 用户门户端 + 移动端”的建设。
 
+## 快速启动（直接执行）
+
+1. 查看里程碑和本期任务：
+   - `cat .codex/tasks/roadmap.yaml`
+   - `cat .codex/tasks/sprint-1.yaml`
+2. 选择一个任务（建议从 `S1-1` 开始），并复制对应 Prompt 给 Codex：
+   - `cat .codex/prompts/02-backend-crud.prompt.md`
+   - `cat .codex/prompts/03-admin-pages.prompt.md`
+   - `cat .codex/prompts/04-portal-pages.prompt.md`
+3. Codex 完成改动后，执行对应验收命令：
+   - 后端：`cd ruoyi-vue-pro && mvn -pl yudao-server -am test`
+   - 后台：`cd yudao-ui-admin-vue3 && pnpm lint:eslint && pnpm ts:check`
+   - 门户：`cd yudao-ui-admin-uniapp && pnpm dev:h5`
+4. 每个任务单独提交：
+   - `git add <changed_files>`
+   - `git commit -m "feat(logistics): <task-id> <short description>"`
+5. 可用启动脚本自动打印“下一步动作”：
+   - `bash .codex/scripts/start.sh`
+   - `bash .codex/scripts/start.sh S1-2`
+
+---
+
 ## 1. 当前基座与职责划分
 
 - 后端基座：`ruoyi-vue-pro`（Spring Boot 多模块）
