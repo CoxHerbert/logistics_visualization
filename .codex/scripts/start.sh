@@ -42,3 +42,9 @@ echo
 echo "4) 完成后提交"
 echo '   git add <changed_files>'
 echo '   git commit -m "feat(logistics): <task-id> <short description>"'
+
+
+echo
+echo "5) 极速执行（自动打印 Prompt + 验收）"
+echo "   bash .codex/scripts/auto.sh ${TASK}"
+echo "   bash .codex/scripts/auto.sh ${TASK} --verify"

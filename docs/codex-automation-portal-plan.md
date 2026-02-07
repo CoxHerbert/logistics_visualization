@@ -4,6 +4,27 @@
 
 ## 快速启动（直接执行）
 
+## 快速交付模式（不走 8 周，先 1 天打样）
+
+如果目标是“尽快看到可运行结果”，建议改为：
+
+- Day 0（今天）：只做 `S1-2`（后台报价管理页面）或 `S1-1`（后端 quote CRUD）
+- Day 1：补另一端（前/后端联通）
+- Day 2：再接门户 `S1-3`
+
+直接执行：
+
+- `bash .codex/scripts/auto.sh S1-1`
+- `bash .codex/scripts/auto.sh S1-2`
+- `bash .codex/scripts/auto.sh S1-3`
+
+如果你只想快速校验：
+
+- `bash .codex/scripts/auto.sh S1-1 --verify`
+- `bash .codex/scripts/auto.sh S1-2 --verify`
+
+---
+
 1. 查看里程碑和本期任务：
    - `cat .codex/tasks/roadmap.yaml`
    - `cat .codex/tasks/sprint-1.yaml`

@@ -4,6 +4,25 @@
 
 ## 0. 前置准备
 
+## 极速模式（10~30 分钟看到结果）
+
+如果你觉得步骤太多，直接用一条命令：
+
+```bash
+bash .codex/scripts/auto.sh S1-2
+```
+
+含义：
+- 自动打印该任务 Prompt（复制给 Codex）
+- 自动执行该任务验收命令（S1-1/S1-2 可直接跑）
+- 自动给出提交命令
+
+仅跑验收（不展示 Prompt）：
+
+```bash
+bash .codex/scripts/auto.sh S1-2 --verify
+```
+
 在仓库根目录执行：
 
 ```bash
