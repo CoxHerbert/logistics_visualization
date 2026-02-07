@@ -30,6 +30,12 @@ body {
   font-weight: 600;
 }
 
+.top-menu {
+  min-width: 180px;
+  border-bottom: none;
+  background: transparent;
+}
+
 .portal-content {
   padding: 24px;
 }
