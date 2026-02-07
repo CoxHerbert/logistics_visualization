@@ -1,0 +1,24 @@
+project: logistics-portal
+version: v1
+milestones:
+  - id: M1
+    name: backend-domain
+    status: todo
+    owner: codex
+    done_definition:
+      - quote/order/track/bill CRUD 可用
+      - 单元测试通过
+  - id: M2
+    name: admin-console
+    status: todo
+    owner: codex
+    done_definition:
+      - 后台报价/订单/轨迹/账单页面可用
+      - lint 与 ts 检查通过
+  - id: M3
+    name: user-portal-h5
+    status: todo
+    owner: codex
+    done_definition:
+      - 登录后可完成 询价->下单->查轨迹 闭环
+      - H5 端基础验收通过

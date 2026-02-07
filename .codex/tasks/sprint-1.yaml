@@ -1,0 +1,22 @@
+sprint: 1
+goal: 完成报价模块端到端闭环
+items:
+  - id: S1-1
+    title: 后端报价表与 CRUD
+    repo: ruoyi-vue-pro
+    status: todo
+    verify:
+      - mvn -pl yudao-server -am test
+  - id: S1-2
+    title: 后台报价管理页面
+    repo: yudao-ui-admin-vue3
+    status: todo
+    verify:
+      - pnpm lint:eslint
+      - pnpm ts:check
+  - id: S1-3
+    title: 门户在线询价页面(H5)
+    repo: yudao-ui-admin-uniapp
+    status: todo
+    verify:
+      - pnpm dev:h5
