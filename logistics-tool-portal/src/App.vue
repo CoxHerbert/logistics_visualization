@@ -3,7 +3,7 @@
     <a-layout-header class="portal-header">
       <div class="brand">
         <div class="brand-title">Global Freight Link</div>
-        <div class="brand-sub">国际货运代理一站式服务平台</div>
+        <div class="brand-sub">中美专线国际货运代理平台</div>
       </div>
 
       <a-menu mode="horizontal" theme="dark" :selected-keys="[activeKey]" class="top-menu">

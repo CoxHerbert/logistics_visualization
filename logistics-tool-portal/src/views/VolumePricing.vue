@@ -7,16 +7,18 @@ const pricing = reactive({
   height: 0,
   weight: 0,
   mode: '空运',
-  unitPrice: 32
+  unitPrice: 5.5,
+  fuelRate: 0.12
 })
 
 const volumeWeight = computed(() => (pricing.length * pricing.width * pricing.height) / 6000)
 const billingWeight = computed(() => Math.max(volumeWeight.value, pricing.weight))
-const estimatedCost = computed(() => billingWeight.value * pricing.unitPrice)
+const baseCost = computed(() => billingWeight.value * pricing.unitPrice)
+const estimatedCost = computed(() => baseCost.value * (1 + pricing.fuelRate))
 </script>
 
 <template>
-  <a-card title="输入货物体积计算价格">
+  <a-card title="中美线体积计价（空运/快递）">
     <a-form layout="vertical">
       <a-row :gutter="16">
         <a-col :xs="24" :md="6"><a-form-item label="长(cm)"><a-input-number v-model:value="pricing.length" :min="0" style="width:100%" /></a-form-item></a-col>
@@ -34,15 +36,21 @@ const estimatedCost = computed(() => billingWeight.value * pricing.unitPrice)
           </a-form-item>
         </a-col>
         <a-col :xs="24" :md="6">
-          <a-form-item label="单价(元/kg)">
-            <a-input-number v-model:value="pricing.unitPrice" :min="0" style="width:100%" />
+          <a-form-item label="单价(USD/kg)">
+            <a-input-number v-model:value="pricing.unitPrice" :min="0" :step="0.1" style="width:100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :xs="24" :md="6">
+          <a-form-item label="燃油附加比例">
+            <a-input-number v-model:value="pricing.fuelRate" :min="0" :max="1" :step="0.01" style="width:100%" />
           </a-form-item>
         </a-col>
       </a-row>
     </a-form>
 
-    <a-alert type="info" show-icon :message="`体积重：${volumeWeight.toFixed(2)} kg`" style="margin-bottom: 8px" />
+    <a-alert type="info" show-icon :message="`体积重：${volumeWeight.toFixed(2)} kg（中美线常用除数 6000）`" style="margin-bottom: 8px" />
     <a-alert type="info" show-icon :message="`计费重：${billingWeight.toFixed(2)} kg`" style="margin-bottom: 8px" />
-    <a-alert type="success" show-icon :message="`预估运费：¥ ${estimatedCost.toFixed(2)}`" />
+    <a-alert type="info" show-icon :message="`基础运费：USD ${baseCost.toFixed(2)}`" style="margin-bottom: 8px" />
+    <a-alert type="success" show-icon :message="`预估总运费（含燃油）：USD ${estimatedCost.toFixed(2)}`" />
   </a-card>
 </template>
