@@ -8,6 +8,12 @@ type RouteItem = {
   priceHint: string
 }
 
+type VesselProvider = {
+  key: string
+  label: string
+  url: string
+}
+
 const formState = reactive({
   origin: '上海',
   destination: '洛杉矶',
@@ -24,10 +30,12 @@ const mockData: RouteItem[] = [
   { route: '深圳 → 洛杉矶', mode: '空运', transit: '3-5 天', priceHint: 'USD 5.2 / KG 起' }
 ]
 
-const vesselLinks = [
-  { label: 'VesselFinder 船名航次查询', url: 'https://www.vesselfinder.com/' },
-  { label: 'MarineTraffic 船舶动态', url: 'https://www.marinetraffic.com/' }
+const vesselProviders: VesselProvider[] = [
+  { key: 'vesselfinder', label: 'VesselFinder 船名航次查询', url: 'https://www.vesselfinder.com/' },
+  { key: 'marinetraffic', label: 'MarineTraffic 船舶动态', url: 'https://www.marinetraffic.com/' }
 ]
+
+const activeProvider = ref<VesselProvider>(vesselProviders[0])
 
 const queryRoutes = () => {
   result.value = mockData.filter(
@@ -47,23 +55,32 @@ queryRoutes()
       type="info"
       show-icon
       style="margin-bottom: 16px"
-      message="船名航次查询（第三方）"
-      description="可通过以下第三方平台查询船名、航次、实时船舶位置。"
+      message="船名航次查询（站内 iframe）"
+      description="以下为第三方页面嵌入，若平台限制 iframe 显示，可点击“新窗口打开”。"
     />
-    <a-space wrap style="margin-bottom: 16px">
+
+    <a-space wrap style="margin-bottom: 12px">
       <a-button
-        v-for="item in vesselLinks"
-        :key="item.url"
-        type="default"
-        :href="item.url"
-        target="_blank"
-        rel="noopener noreferrer"
+        v-for="item in vesselProviders"
+        :key="item.key"
+        :type="activeProvider.key === item.key ? 'primary' : 'default'"
+        @click="activeProvider = item"
       >
         {{ item.label }}
       </a-button>
+      <a-button type="link" :href="activeProvider.url" target="_blank" rel="noopener noreferrer">
+        新窗口打开
+      </a-button>
     </a-space>
 
-    <a-form layout="inline">
+    <iframe
+      :src="activeProvider.url"
+      title="船名航次查询"
+      class="vessel-iframe"
+      referrerpolicy="no-referrer"
+    />
+
+    <a-form layout="inline" style="margin-top: 16px">
       <a-form-item label="中国起运港/城市">
         <a-input v-model:value="formState.origin" placeholder="例如：上海" />
       </a-form-item>
@@ -95,3 +112,13 @@ queryRoutes()
     />
   </a-card>
 </template>
+
+<style scoped>
+.vessel-iframe {
+  width: 100%;
+  height: 560px;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: #fff;
+}
+</style>
