@@ -44,3 +44,36 @@ export function updateFreightLead(data: {
 }) {
   return requestClient.put('/freight/lead/update', data);
 }
+
+
+export namespace FreightLeadActivityApi {
+  export interface Activity {
+    id: number;
+    leadId: number;
+    content: string;
+    nextContactTime?: string;
+    creatorType: number;
+    creator?: string;
+    createTime?: string;
+  }
+
+  export interface ActivityCreateReqVO {
+    leadId: number;
+    content: string;
+    nextContactTime?: string;
+  }
+}
+
+/** 查询线索跟进记录 */
+export function getFreightLeadActivityList(leadId: number) {
+  return requestClient.get<FreightLeadActivityApi.Activity[]>(
+    `/freight/lead-activity/list?leadId=${leadId}`,
+  );
+}
+
+/** 新增线索跟进记录 */
+export function createFreightLeadActivity(
+  data: FreightLeadActivityApi.ActivityCreateReqVO,
+) {
+  return requestClient.post<number>('/freight/lead-activity/create', data);
+}
