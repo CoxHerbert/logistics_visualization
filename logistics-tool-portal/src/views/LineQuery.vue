@@ -24,6 +24,11 @@ const mockData: RouteItem[] = [
   { route: '深圳 → 洛杉矶', mode: '空运', transit: '3-5 天', priceHint: 'USD 5.2 / KG 起' }
 ]
 
+const vesselLinks = [
+  { label: 'VesselFinder 船名航次查询', url: 'https://www.vesselfinder.com/' },
+  { label: 'MarineTraffic 船舶动态', url: 'https://www.marinetraffic.com/' }
+]
+
 const queryRoutes = () => {
   result.value = mockData.filter(
     (item) =>
@@ -38,6 +43,26 @@ queryRoutes()
 
 <template>
   <a-card title="中美航线查询">
+    <a-alert
+      type="info"
+      show-icon
+      style="margin-bottom: 16px"
+      message="船名航次查询（第三方）"
+      description="可通过以下第三方平台查询船名、航次、实时船舶位置。"
+    />
+    <a-space wrap style="margin-bottom: 16px">
+      <a-button
+        v-for="item in vesselLinks"
+        :key="item.url"
+        type="default"
+        :href="item.url"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ item.label }}
+      </a-button>
+    </a-space>
+
     <a-form layout="inline">
       <a-form-item label="中国起运港/城市">
         <a-input v-model:value="formState.origin" placeholder="例如：上海" />
