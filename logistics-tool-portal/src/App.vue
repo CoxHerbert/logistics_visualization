@@ -19,6 +19,9 @@
         <a-menu-item key="hs-lookup">
           <RouterLink to="/hs-lookup">HS 查询</RouterLink>
         </a-menu-item>
+        <a-menu-item key="get-plan">
+          <RouterLink to="/get-plan">获取方案</RouterLink>
+        </a-menu-item>
       </a-menu>
 
       <div class="header-actions">
@@ -41,6 +44,7 @@ const activeKey = computed(() => {
   if (route.path.startsWith('/line-query')) return 'line-query'
   if (route.path.startsWith('/volume-pricing')) return 'volume-pricing'
   if (route.path.startsWith('/hs-lookup')) return 'hs-lookup'
+  if (route.path.startsWith('/get-plan')) return 'get-plan'
   return 'home'
 })
 </script>

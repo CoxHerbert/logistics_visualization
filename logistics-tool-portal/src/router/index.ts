@@ -22,7 +22,12 @@ const router = createRouter({
       path: '/hs-lookup',
       name: 'hs-lookup',
       component: () => import('@/views/HsLookup.vue')
-    }
+    },
+    {
+      path: '/get-plan',
+      name: 'get-plan',
+      component: () => import('@/views/GetPlan.vue')
+    },
   ]
 })
 

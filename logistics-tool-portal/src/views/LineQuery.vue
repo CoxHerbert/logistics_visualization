@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
+import { computed, reactive, ref } from 'vue'
 
 type RouteItem = {
   route: string
@@ -47,6 +48,14 @@ const queryRoutes = () => {
 }
 
 queryRoutes()
+
+const leadQuery = computed(() => ({
+  origin: formState.origin,
+  destination: formState.destination,
+  shipMode: formState.mode === '海运' ? 20 : 10,
+  cargoType: 10,
+  remark: `来源工具：航线查询；运输方式：${formState.mode}`
+}))
 </script>
 
 <template>
@@ -95,6 +104,11 @@ queryRoutes()
       </a-form-item>
       <a-form-item>
         <a-button type="primary" @click="queryRoutes">查询</a-button>
+      </a-form-item>
+      <a-form-item>
+        <RouterLink :to="{ path: '/get-plan', query: leadQuery }">
+          <a-button>根据条件获取方案</a-button>
+        </RouterLink>
       </a-form-item>
     </a-form>
 

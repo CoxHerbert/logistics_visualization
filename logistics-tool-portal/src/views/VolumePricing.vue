@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const pricing = reactive({
   length: 0,
@@ -15,6 +16,14 @@ const volumeWeight = computed(() => (pricing.length * pricing.width * pricing.he
 const billingWeight = computed(() => Math.max(volumeWeight.value, pricing.weight))
 const baseCost = computed(() => billingWeight.value * pricing.unitPrice)
 const estimatedCost = computed(() => baseCost.value * (1 + pricing.fuelRate))
+const leadQuery = computed(() => ({
+  origin: '上海',
+  destination: '洛杉矶',
+  shipMode: pricing.mode === '空运' ? 10 : 20,
+  cargoType: 10,
+  remark: `来源工具：体积计价；体积重：${volumeWeight.value.toFixed(2)}kg；计费重：${billingWeight.value.toFixed(2)}kg；预估费用：USD ${estimatedCost.value.toFixed(2)}`
+}))
+
 </script>
 
 <template>
@@ -52,5 +61,11 @@ const estimatedCost = computed(() => baseCost.value * (1 + pricing.fuelRate))
     <a-alert type="info" show-icon :message="`计费重：${billingWeight.toFixed(2)} kg`" style="margin-bottom: 8px" />
     <a-alert type="info" show-icon :message="`基础运费：USD ${baseCost.toFixed(2)}`" style="margin-bottom: 8px" />
     <a-alert type="success" show-icon :message="`预估总运费（含燃油）：USD ${estimatedCost.toFixed(2)}`" />
+
+    <div style="margin-top: 16px">
+      <RouterLink :to="{ path: '/get-plan', query: leadQuery }">
+        <a-button type="primary">按当前计价参数获取方案</a-button>
+      </RouterLink>
+    </div>
   </a-card>
 </template>

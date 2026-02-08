@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 type HsItem = {
   hsCode: string
@@ -23,6 +24,14 @@ const doSearch = () => {
     ? mockList.filter((i) => i.product.includes(key) || i.hsCode.includes(key))
     : []
 }
+
+const leadQuery = computed(() => ({
+  origin: '上海',
+  destination: '洛杉矶',
+  shipMode: 20,
+  cargoType: 10,
+  remark: `来源工具：HS 查询；关键词：${keyword.value || '未填写'}`
+}))
 </script>
 
 <template>
@@ -33,6 +42,12 @@ const doSearch = () => {
       enter-button="查询"
       @search="doSearch"
     />
+
+    <div style="margin-top: 12px">
+      <RouterLink :to="{ path: '/get-plan', query: leadQuery }">
+        <a-button type="primary">按当前查询获取运输方案</a-button>
+      </RouterLink>
+    </div>
 
     <a-table
       style="margin-top: 16px"
