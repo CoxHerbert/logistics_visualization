@@ -1,0 +1,29 @@
+import { createRouter, createWebHistory } from 'vue-router'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/views/PortalHome.vue')
+    },
+    {
+      path: '/line-query',
+      name: 'line-query',
+      component: () => import('@/views/LineQuery.vue')
+    },
+    {
+      path: '/volume-pricing',
+      name: 'volume-pricing',
+      component: () => import('@/views/VolumePricing.vue')
+    },
+    {
+      path: '/hs-lookup',
+      name: 'hs-lookup',
+      component: () => import('@/views/HsLookup.vue')
+    }
+  ]
+})
+
+export default router
