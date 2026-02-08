@@ -1,0 +1,20 @@
+<svg width="1200" height="520" viewBox="0 0 1200 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="40" y1="20" x2="1120" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A2A52"/>
+      <stop offset="1" stop-color="#1A6BC2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="520" rx="28" fill="url(#bg)"/>
+  <circle cx="1020" cy="80" r="160" fill="white" fill-opacity="0.08"/>
+  <circle cx="160" cy="480" r="140" fill="white" fill-opacity="0.06"/>
+  <path d="M90 360H1110" stroke="white" stroke-opacity="0.25" stroke-width="4"/>
+  <rect x="250" y="300" width="680" height="70" rx="12" fill="#F8FBFF" fill-opacity="0.95"/>
+  <rect x="300" y="275" width="500" height="42" rx="8" fill="#C8DDF6"/>
+  <rect x="740" y="250" width="120" height="50" rx="8" fill="#1D7ED6"/>
+  <rect x="865" y="250" width="40" height="50" rx="8" fill="#144F88"/>
+  <circle cx="335" cy="380" r="24" fill="#0B3A6F"/>
+  <circle cx="845" cy="380" r="24" fill="#0B3A6F"/>
+  <text x="86" y="110" fill="#ffffff" font-size="44" font-family="Arial" font-weight="700">Global Freight Express</text>
+  <text x="88" y="156" fill="#d8e8ff" font-size="24" font-family="Arial">Ocean / Air / Rail / Truck · End-to-End Logistics</text>
+</svg>

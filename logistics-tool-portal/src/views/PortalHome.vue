@@ -1,7 +1,7 @@
 <template>
   <section class="hero-section">
     <a-row :gutter="24" align="middle">
-      <a-col :xs="24" :lg="14">
+      <a-col :xs="24" :lg="13">
         <h1>国际货运代理官网门户</h1>
         <p>
           覆盖海运、空运、铁路与多式联运，提供订舱、报关、仓储、拖车、保险等全链路物流解决方案。
@@ -10,14 +10,21 @@
           <a-button type="primary" size="large">立即询价</a-button>
           <a-button size="large">联系我们</a-button>
         </a-space>
+        <a-row :gutter="12" class="hero-tags">
+          <a-col v-for="tag in strengths" :key="tag"><a-tag color="blue">{{ tag }}</a-tag></a-col>
+        </a-row>
       </a-col>
-      <a-col :xs="24" :lg="10">
-        <a-card title="今日运营概览" :loading="portalStore.loading">
-          <a-statistic title="今日询价" :value="portalStore.stats[0]?.value" />
-          <a-divider style="margin: 12px 0" />
-          <a-statistic title="在途票数" :value="portalStore.stats[1]?.value" />
-          <a-divider style="margin: 12px 0" />
-          <a-statistic title="异常预警" :value="portalStore.stats[2]?.value" />
+      <a-col :xs="24" :lg="11">
+        <img class="hero-image" src="/images/hero-freight.svg" alt="国际货运代理官网主视觉" />
+      </a-col>
+    </a-row>
+  </section>
+
+  <section class="overview-section">
+    <a-row :gutter="16">
+      <a-col :xs="24" :md="8" v-for="item in portalStore.stats" :key="item.label">
+        <a-card>
+          <a-statistic :title="item.label" :value="item.value" :loading="portalStore.loading" />
         </a-card>
       </a-col>
     </a-row>
@@ -40,6 +47,10 @@
     </a-row>
   </section>
 
+  <section class="tools-banner-wrapper">
+    <img src="/images/tools-banner.svg" alt="货代工具功能横幅" class="tools-banner" />
+  </section>
+
   <section>
     <h2 class="section-title">优势航线</h2>
     <a-table :pagination="false" :data-source="hotRoutes" :columns="columns" row-key="route" />
@@ -57,6 +68,8 @@ import {
 import { usePortalStore } from '@/stores/portal'
 
 const portalStore = usePortalStore()
+
+const strengths = ['全球代理网络', '7×24 客服响应', '节点可视化追踪', '专业关务支持']
 
 const services = [
   { title: '海运整箱/拼箱', desc: '主力港口周班服务，覆盖欧美、东南亚、中东、非洲。', icon: GlobalOutlined },
