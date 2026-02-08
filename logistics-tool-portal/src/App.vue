@@ -21,7 +21,9 @@
         </a-menu-item>
       </a-menu>
 
-      <a-input-search placeholder="搜索航线 / 服务 / 国家" style="width: 260px" />
+      <div class="header-actions">
+        <a-input-search placeholder="搜索航线 / 服务 / 国家" class="header-search" />
+      </div>
     </a-layout-header>
 
     <a-layout-content class="portal-content">

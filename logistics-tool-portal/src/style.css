@@ -17,13 +17,18 @@ body {
 }
 
 .portal-header {
-  display: grid;
-  grid-template-columns: 300px 1fr 260px;
+  display: flex;
   align-items: center;
   gap: 16px;
   background: #0b1e36;
   color: #fff;
-  padding-inline: 20px;
+  padding: 10px 20px;
+  height: auto;
+  line-height: normal;
+}
+
+.brand {
+  min-width: 260px;
 }
 
 .brand-title {
@@ -38,9 +43,20 @@ body {
 }
 
 .top-menu {
-  min-width: 360px;
+  flex: 1;
+  min-width: 0;
   border-bottom: none;
   background: transparent;
+}
+
+.header-actions {
+  width: 280px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.header-search {
+  width: 100%;
 }
 
 .portal-content {
@@ -104,9 +120,14 @@ body {
 
 @media (max-width: 1024px) {
   .portal-header {
-    grid-template-columns: 1fr;
-    height: auto;
-    padding-block: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .brand,
+  .header-actions {
+    width: 100%;
   }
 
   .top-menu {
