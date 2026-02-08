@@ -20,7 +20,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: #0b1e36;
+  background: linear-gradient(90deg, #0b1e36 0%, #124a83 100%);
   color: #fff;
   padding: 10px 20px;
   height: auto;
@@ -35,11 +35,13 @@ body {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+  color: #ffd666;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .brand-sub {
   font-size: 12px;
-  color: #b7c4d6;
+  color: #e4eeff;
 }
 
 .top-menu {
@@ -133,4 +135,13 @@ body {
   .top-menu {
     min-width: auto;
   }
+}
+
+
+.top-menu .ant-menu-item a {
+  color: #eaf2ff;
+}
+
+.top-menu .ant-menu-item-selected a {
+  color: #ffd666 !important;
 }
