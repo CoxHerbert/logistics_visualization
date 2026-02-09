@@ -166,6 +166,7 @@ public interface ErrorCodeConstants {
 
     // ========== 货运线索 1-002-029-000 ==========
     ErrorCode FREIGHT_LEAD_NOT_EXISTS = new ErrorCode(1_002_029_000, "货运线索不存在");
+    ErrorCode FREIGHT_QUOTE_NOT_EXISTS = new ErrorCode(1_002_029_001, "货运报价不存在");
     ErrorCode FREIGHT_LEAD_SUBMIT_TOO_FAST = new ErrorCode(42901, "提交过于频繁，请 60 秒后再试");
 
     // ========== 站内信模版 1-002-027-000 ==========
