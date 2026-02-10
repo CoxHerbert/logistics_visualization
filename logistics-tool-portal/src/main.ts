@@ -5,11 +5,7 @@ import * as Icons from '@ant-design/icons-vue'
 import 'ant-design-vue/dist/reset.css'
 import App from './App.vue'
 import router from './router'
-import appStyle from './style.scss?raw'
-
-const styleEl = document.createElement('style')
-styleEl.textContent = appStyle
-document.head.appendChild(styleEl)
+import './style.scss'
 
 const app = createApp(App)
 
