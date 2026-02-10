@@ -23,7 +23,8 @@ body {
   backdrop-filter: blur(10px);
   background: linear-gradient(120deg, #041a33 0%, #0a2f5f 55%, #0f4c8c 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 20px;
+  padding: 16px 24px;
+  min-height: 84px;
   height: auto;
   line-height: normal;
 }
@@ -70,7 +71,7 @@ body {
 }
 
 .top-menu.ant-menu-horizontal {
-  line-height: 42px;
+  line-height: 50px;
 }
 
 .top-menu .ant-menu-item {
