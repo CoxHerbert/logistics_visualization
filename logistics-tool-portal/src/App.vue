@@ -19,6 +19,9 @@
         <a-menu-item key="hs-lookup">
           <RouterLink to="/hs-lookup">HS 查询</RouterLink>
         </a-menu-item>
+        <a-menu-item key="me">
+          <RouterLink to="/me">我的名片</RouterLink>
+        </a-menu-item>
         <a-menu-item key="get-plan">
           <RouterLink to="/get-plan">获取方案</RouterLink>
         </a-menu-item>
@@ -32,6 +35,12 @@
     <a-layout-content class="portal-content">
       <RouterView />
     </a-layout-content>
+
+    <div class="floating-cta">
+      <RouterLink to="/get-plan?remark=来源入口：全站悬浮CTA">
+        <a-button type="primary" size="large">获取运输方案</a-button>
+      </RouterLink>
+    </div>
   </a-layout>
 </template>
 
@@ -44,6 +53,7 @@ const activeKey = computed(() => {
   if (route.path.startsWith('/line-query')) return 'line-query'
   if (route.path.startsWith('/volume-pricing')) return 'volume-pricing'
   if (route.path.startsWith('/hs-lookup')) return 'hs-lookup'
+  if (route.path.startsWith('/me')) return 'me'
   if (route.path.startsWith('/get-plan')) return 'get-plan'
   return 'home'
 })

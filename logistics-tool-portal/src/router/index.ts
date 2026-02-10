@@ -28,6 +28,12 @@ const router = createRouter({
       name: 'get-plan',
       component: () => import('@/views/GetPlan.vue')
     },
+
+    {
+      path: '/me',
+      name: 'me',
+      component: () => import('@/views/Me.vue')
+    },
   ]
 })
 

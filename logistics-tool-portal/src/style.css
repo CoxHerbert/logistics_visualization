@@ -145,3 +145,23 @@ body {
 .top-menu .ant-menu-item-selected a {
   color: #ffd666 !important;
 }
+
+
+.floating-cta {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 999;
+}
+
+.floating-cta .ant-btn {
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(11, 30, 54, 0.28);
+}
+
+@media (max-width: 768px) {
+  .floating-cta {
+    right: 12px;
+    bottom: 12px;
+  }
+}
