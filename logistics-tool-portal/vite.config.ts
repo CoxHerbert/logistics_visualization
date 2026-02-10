@@ -8,5 +8,18 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:48080/admin-api',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/web-api': {
+        target: 'http://localhost:48080',
+        changeOrigin: true
+      }
+    }
   }
 })
