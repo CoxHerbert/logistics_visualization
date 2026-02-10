@@ -122,13 +122,13 @@ class SocialClientServiceImplTest extends BaseDbUnitTest {
     @Test
     void testCreateUpdateDeleteSocialClient() {
         SocialClientSaveReqVO createReqVO = randomPojo(SocialClientSaveReqVO.class, o -> o.setId(null)
-                .setSocialType(SocialTypeEnum.GITEE.getType()).setUserType(1));
+                .setSocialType(SocialTypeEnum.GITEE.getType()).setUserType(1).setStatus(CommonStatusEnum.ENABLE.getStatus()));
 
         Long id = socialClientService.createSocialClient(createReqVO);
         assertNotNull(id);
 
         SocialClientSaveReqVO updateReqVO = randomPojo(SocialClientSaveReqVO.class, o -> o.setId(id)
-                .setSocialType(SocialTypeEnum.GITEE.getType()).setUserType(1));
+                .setSocialType(SocialTypeEnum.GITEE.getType()).setUserType(1).setStatus(CommonStatusEnum.ENABLE.getStatus()));
         socialClientService.updateSocialClient(updateReqVO);
 
         SocialClientDO socialClient = socialClientService.getSocialClient(id);
@@ -141,11 +141,11 @@ class SocialClientServiceImplTest extends BaseDbUnitTest {
 
     @Test
     void testValidateUniqueAndNotExists() {
-        SocialClientDO exist = randomPojo(SocialClientDO.class, o -> o.setSocialType(SocialTypeEnum.DINGTALK.getType()).setUserType(2));
+        SocialClientDO exist = randomPojo(SocialClientDO.class, o -> o.setSocialType(SocialTypeEnum.DINGTALK.getType()).setUserType(2).setStatus(CommonStatusEnum.ENABLE.getStatus()));
         socialClientMapper.insert(exist);
 
         SocialClientSaveReqVO duplicateReqVO = randomPojo(SocialClientSaveReqVO.class, o -> o.setId(null)
-                .setSocialType(SocialTypeEnum.DINGTALK.getType()).setUserType(2));
+                .setSocialType(SocialTypeEnum.DINGTALK.getType()).setUserType(2).setStatus(CommonStatusEnum.ENABLE.getStatus()));
         assertServiceException(() -> socialClientService.createSocialClient(duplicateReqVO), SOCIAL_CLIENT_UNIQUE);
 
         assertServiceException(() -> socialClientService.deleteSocialClient(randomLongId()), SOCIAL_CLIENT_NOT_EXISTS);
