@@ -8,6 +8,14 @@ spring:
   main:
     allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
 
+  # 生产环境若使用外部配置（例如 --spring.config.additional-location），
+  # 且历史上配置了下列微信自动配置排除项，请先保持注释，避免启动失败：
+  # spring:
+  #   autoconfigure:
+  #     exclude:
+  #       # - com.binarywang.spring.starter.wxjava.mp.config.WxMpServiceAutoConfiguration
+  #       # - com.binarywang.spring.starter.wxjava.miniapp.config.WxMaServiceAutoConfiguration
+
   # Servlet 配置
   servlet:
     # 文件上传相关配置项
