@@ -29,3 +29,11 @@ npm run preview
 ```bash
 VITE_API_BASE_URL=/api
 ```
+
+
+## 本地代理
+
+开发环境已内置 Vite 代理：
+
+- `/api/*` -> `http://localhost:48080/admin-api/*`
+- `/web-api/*` -> `http://localhost:48080/web-api/*`

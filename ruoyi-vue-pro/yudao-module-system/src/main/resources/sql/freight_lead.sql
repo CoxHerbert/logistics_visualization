@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS `freight_lead` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `contact_name` varchar(64) NOT NULL COMMENT '联系人',
+  `contact_phone` varchar(32) NOT NULL COMMENT '联系电话',
+  `departure_city` varchar(64) DEFAULT NULL COMMENT '出发地',
+  `destination_city` varchar(64) DEFAULT NULL COMMENT '目的地',
+  `ship_mode` tinyint NOT NULL COMMENT '运输方式',
+  `cargo_type` tinyint NOT NULL COMMENT '货物类型',
+  `status` tinyint NOT NULL DEFAULT '10' COMMENT '线索状态',
+  `source` tinyint NOT NULL DEFAULT '10' COMMENT '线索来源',
+  `remark` varchar(512) DEFAULT NULL COMMENT '备注',
+  `creator` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT '0' COMMENT '租户编号',
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_contact` (`contact_phone`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='货运线索表';

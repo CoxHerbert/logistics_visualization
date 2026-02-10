@@ -7,8 +7,12 @@
           聚焦中国至美国海运与空运专线，提供订舱、报关、清关、尾程派送与保险服务，适配跨境电商与一般贸易场景。
         </p>
         <a-space>
-          <a-button type="primary" size="large">获取中美报价</a-button>
-          <a-button size="large">咨询清关方案</a-button>
+          <RouterLink to="/get-plan?origin=上海&destination=洛杉矶&shipMode=20&cargoType=10">
+            <a-button type="primary" size="large">获取中美报价</a-button>
+          </RouterLink>
+          <RouterLink to="/get-plan?origin=上海&destination=纽约&shipMode=10&cargoType=10&remark=咨询清关方案">
+            <a-button size="large">咨询清关方案</a-button>
+          </RouterLink>
         </a-space>
         <a-row :gutter="12" class="hero-tags">
           <a-col v-for="tag in strengths" :key="tag"><a-tag color="blue">{{ tag }}</a-tag></a-col>
@@ -59,6 +63,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import {
   GlobalOutlined,
   RocketOutlined,

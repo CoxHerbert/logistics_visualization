@@ -157,6 +157,15 @@ const menuGroupsData: MenuGroup[] = [
         url: '/pages-system/area/index',
         iconColor: '#f5222d',
       },
+      {
+        key: 'freightLeadList',
+        name: '货运线索',
+        icon: 'list',
+        url: '/pages/freight/lead-list/index',
+        iconColor: '#1677ff',
+        permission: 'freight:lead:query',
+      },
+
     ],
   },
   {
