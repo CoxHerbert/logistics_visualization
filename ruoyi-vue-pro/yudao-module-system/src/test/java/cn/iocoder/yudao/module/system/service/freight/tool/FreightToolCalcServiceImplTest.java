@@ -41,7 +41,7 @@ public class FreightToolCalcServiceImplTest extends BaseDbUnitTest {
 
         WebFreightToolCalcRespVO respVO = freightToolCalcService.calcLcl(reqVO);
         assertEquals(2, respVO.getCostBreakdown().size());
-        assertEquals(new BigDecimal("1400.0"), respVO.getTotal()); // max(2*420, 500*1.2) + 80
+        assertEquals(new BigDecimal("920"), respVO.getTotal()); // max(2*420, 500*1.2) + 80 = 920
         assertFalse(respVO.getNotes().isEmpty());
     }
 
