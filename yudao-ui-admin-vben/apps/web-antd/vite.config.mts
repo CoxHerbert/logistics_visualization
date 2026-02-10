@@ -11,7 +11,7 @@ export default defineConfig(async () => {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/admin-api/, ''),
             // mock代理目标地址
-            target: 'http://localhost:48080/admin-api',
+            target: 'http://118.178.56.162:48080/admin-api',
             ws: true,
           },
         },
