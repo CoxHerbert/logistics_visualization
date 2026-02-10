@@ -28,31 +28,6 @@ public enum SocialTypeEnum implements ArrayValuable<Integer> {
      * @see <a href="https://developers.dingtalk.com/document/app/obtain-identity-credentials">接入文档</a>
      */
     DINGTALK(20, "DINGTALK"),
-
-    /**
-     * 企业微信
-     *
-     * @see <a href="https://xkcoding.com/2019/08/06/use-justauth-integration-wechat-enterprise.html">接入文档</a>
-     */
-    WECHAT_ENTERPRISE(30, "WECHAT_ENTERPRISE"),
-    /**
-     * 微信公众平台 - 移动端 H5
-     *
-     * @see <a href="https://www.cnblogs.com/juewuzhe/p/11905461.html">接入文档</a>
-     */
-    WECHAT_MP(31, "WECHAT_MP"),
-    /**
-     * 微信开放平台 - 网站应用 PC 端扫码授权登录
-     *
-     * @see <a href="https://justauth.wiki/guide/oauth/wechat_open/#_2-申请开发者资质认证">接入文档</a>
-     */
-    WECHAT_OPEN(32, "WECHAT_OPEN"),
-    /**
-     * 微信小程序
-     *
-     * @see <a href="https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html">接入文档</a>
-     */
-    WECHAT_MINI_PROGRAM(34, "WECHAT_MINI_PROGRAM"),
     ;
 
     public static final Integer[] ARRAYS = Arrays.stream(values()).map(SocialTypeEnum::getType).toArray(Integer[]::new);
