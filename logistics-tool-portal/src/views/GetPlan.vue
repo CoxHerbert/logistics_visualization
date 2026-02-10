@@ -30,6 +30,7 @@ const cargoTypeOptions = [
 ]
 
 const handleSubmit = async () => {
+  console.log('formState')
   try {
     const leadId = await createFreightLead(formState)
     message.success(`提交成功，线索编号：${leadId}`)
@@ -41,26 +42,17 @@ const handleSubmit = async () => {
 
 <template>
   <a-card title="获取运输方案 / 留资" class="get-plan-card">
-    <a-alert
-      type="info"
-      show-icon
-      style="margin-bottom: 16px"
-      message="提交后将由顾问回访，提供中美线运输与清关方案。"
-    />
+    <a-alert type="info" show-icon style="margin-bottom: 16px" message="提交后将由顾问回访，提供中美线运输与清关方案。" />
 
     <a-form layout="vertical" @finish="handleSubmit">
       <a-row :gutter="16">
         <a-col :xs="24" :md="12">
-          <a-form-item label="联系人" name="contactName" :rules="[{ required: true, message: '请输入联系人' }]">
+          <a-form-item label="联系人" name="contactName">
             <a-input v-model:value="formState.contactName" placeholder="请输入联系人" />
           </a-form-item>
         </a-col>
         <a-col :xs="24" :md="12">
-          <a-form-item
-            label="联系电话"
-            name="contactPhone"
-            :rules="[{ required: true, message: '请输入联系电话' }]"
-          >
+          <a-form-item label="联系电话" name="contactPhone">
             <a-input v-model:value="formState.contactPhone" placeholder="请输入联系电话" />
           </a-form-item>
         </a-col>
@@ -93,11 +85,7 @@ const handleSubmit = async () => {
       </a-row>
 
       <a-form-item label="补充说明">
-        <a-textarea
-          v-model:value="formState.remark"
-          :rows="4"
-          placeholder="可填写货物品类、重量体积、预计发运时间等"
-        />
+        <a-textarea v-model:value="formState.remark" :rows="4" placeholder="可填写货物品类、重量体积、预计发运时间等" />
       </a-form-item>
 
       <a-form-item>
