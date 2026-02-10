@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { FreightLeadActivityApi, FreightLeadApi } from '#/api/freight/lead';
+import type {
+  FreightLeadActivityApi,
+  FreightLeadApi,
+} from '#/api/freight/lead';
 
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -7,7 +10,17 @@ import { useRoute, useRouter } from 'vue-router';
 import { Page } from '@vben/common-ui';
 
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
-import { Button, Card, DatePicker, Descriptions, Form, Input, message, Select, Timeline } from 'ant-design-vue';
+import {
+  Button,
+  Card,
+  DatePicker,
+  Descriptions,
+  Form,
+  Input,
+  message,
+  Select,
+  Timeline,
+} from 'ant-design-vue';
 
 import {
   createFreightLeadActivity,
@@ -109,6 +122,12 @@ onMounted(loadLeadDetail);
 <template>
   <Page auto-content-height title="线索详情" :loading="loading">
     <template #extra>
+      <Button
+        type="primary"
+        @click="router.push(`/freight/quote-editor?leadId=${leadId}`)"
+      >
+        生成报价
+      </Button>
       <Button @click="router.push('/freight/leads')">
         <template #icon>
           <ArrowLeftOutlined />
@@ -120,20 +139,38 @@ onMounted(loadLeadDetail);
     <Card title="线索信息">
       <Descriptions :column="2" bordered size="small">
         <Descriptions.Item label="线索编号">{{ lead?.id }}</Descriptions.Item>
-        <Descriptions.Item label="创建时间">{{ lead?.createTime || '-' }}</Descriptions.Item>
-        <Descriptions.Item label="联系人">{{ lead?.contactName || '-' }}</Descriptions.Item>
-        <Descriptions.Item label="联系电话">{{ lead?.contactPhone || '-' }}</Descriptions.Item>
-        <Descriptions.Item label="出发地">{{ lead?.departureCity || '-' }}</Descriptions.Item>
-        <Descriptions.Item label="目的地">{{ lead?.destinationCity || '-' }}</Descriptions.Item>
-        <Descriptions.Item label="运输方式">{{ lead?.shipMode }}</Descriptions.Item>
-        <Descriptions.Item label="货物类型">{{ lead?.cargoType }}</Descriptions.Item>
+        <Descriptions.Item label="创建时间">
+          {{ lead?.createTime || '-' }}
+        </Descriptions.Item>
+        <Descriptions.Item label="联系人">
+          {{ lead?.contactName || '-' }}
+        </Descriptions.Item>
+        <Descriptions.Item label="联系电话">
+          {{ lead?.contactPhone || '-' }}
+        </Descriptions.Item>
+        <Descriptions.Item label="出发地">
+          {{ lead?.departureCity || '-' }}
+        </Descriptions.Item>
+        <Descriptions.Item label="目的地">
+          {{ lead?.destinationCity || '-' }}
+        </Descriptions.Item>
+        <Descriptions.Item label="运输方式">
+          {{ lead?.shipMode }}
+        </Descriptions.Item>
+        <Descriptions.Item label="货物类型">
+          {{ lead?.cargoType }}
+        </Descriptions.Item>
       </Descriptions>
     </Card>
 
     <Card class="mt-4" title="状态调整">
       <Form layout="inline">
         <Form.Item label="线索状态">
-          <Select v-model:value="statusForm.status" :options="statusOptions" style="width: 160px" />
+          <Select
+            v-model:value="statusForm.status"
+            :options="statusOptions"
+            style="width: 160px"
+          />
         </Form.Item>
         <Form.Item label="备注">
           <Input
@@ -169,7 +206,11 @@ onMounted(loadLeadDetail);
           />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" :loading="creatingActivity" @click="handleCreateActivity">
+          <Button
+            type="primary"
+            :loading="creatingActivity"
+            @click="handleCreateActivity"
+          >
             新增跟进
           </Button>
         </Form.Item>
@@ -180,9 +221,10 @@ onMounted(loadLeadDetail);
       <Timeline v-if="activityList.length > 0">
         <Timeline.Item v-for="item in activityList" :key="item.id">
           <div class="text-[14px]">{{ item.content }}</div>
-          <div class="text-[12px] text-gray-500 mt-1">
+          <div class="mt-1 text-[12px] text-gray-500">
             {{ item.createTime || '-' }} · {{ item.creator || '-' }}
-            <span v-if="item.nextContactTime"> · 下次联系：{{ item.nextContactTime }}</span>
+            <span v-if="item.nextContactTime"> · 下次联系：</span>
+            <span v-if="item.nextContactTime">{{ item.nextContactTime }}</span>
           </div>
         </Timeline.Item>
       </Timeline>

@@ -30,6 +30,28 @@ const routes: RouteRecordRaw[] = [
           authority: ['freight:lead:query'],
         },
       },
+      {
+        path: 'quote-editor',
+        name: 'FreightQuoteEditor',
+        component: () => import('#/views/freight/quote-editor/index.vue'),
+        meta: {
+          title: '报价编辑器',
+          activePath: '/freight/leads',
+          hideInMenu: true,
+          authority: ['freight:quote:create'],
+        },
+      },
+      {
+        path: 'quote-preview/:id',
+        name: 'FreightQuotePreview',
+        component: () => import('#/views/freight/quote-preview/index.vue'),
+        meta: {
+          title: '报价预览',
+          activePath: '/freight/leads',
+          hideInMenu: true,
+          authority: ['freight:quote:query'],
+        },
+      },
     ],
   },
 ];
