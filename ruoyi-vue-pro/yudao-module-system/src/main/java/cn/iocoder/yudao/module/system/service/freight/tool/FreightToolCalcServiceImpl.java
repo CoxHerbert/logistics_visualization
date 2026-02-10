@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Service
 public class FreightToolCalcServiceImpl implements FreightToolCalcService {
@@ -45,7 +48,7 @@ public class FreightToolCalcServiceImpl implements FreightToolCalcService {
         WebFreightToolCalcRespVO respVO = new WebFreightToolCalcRespVO();
         respVO.setCostBreakdown(costs);
         respVO.setTotal(oceanFreight.add(docFee));
-        respVO.setNotes(List.of(
+        respVO.setNotes(Arrays.asList(
                 "LCL pricing is estimated by max(volume*ratePerCbm, weight*ratePerKg)",
                 String.format("Route: %s -> %s", reqVO.getOrigin(), reqVO.getDestination())
         ));
@@ -65,7 +68,7 @@ public class FreightToolCalcServiceImpl implements FreightToolCalcService {
         WebFreightToolCalcRespVO respVO = new WebFreightToolCalcRespVO();
         respVO.setCostBreakdown(costs);
         respVO.setTotal(oceanFreight.add(docFee));
-        respVO.setNotes(List.of(
+        respVO.setNotes(Arrays.asList(
                 String.format("Container: %s x %s", reqVO.getContainerType(), reqVO.getContainerCount()),
                 String.format("Route: %s -> %s", reqVO.getOrigin(), reqVO.getDestination())
         ));
@@ -76,7 +79,7 @@ public class FreightToolCalcServiceImpl implements FreightToolCalcService {
     public WebFreightToolCalcRespVO checkSensitive(WebFreightToolSensitiveCheckReqVO reqVO) {
         String configWords = configApi.getConfigValueByKey(KEY_SENSITIVE_WORDS);
         List<String> words = StrUtil.isBlank(configWords)
-                ? List.of("battery", "powder", "liquid", "magnet")
+                ? Arrays.asList("battery", "powder", "liquid", "magnet")
                 : StrUtil.split(configWords, ',');
 
         String cargo = reqVO.getCargoDesc().toLowerCase(Locale.ROOT);
@@ -84,14 +87,14 @@ public class FreightToolCalcServiceImpl implements FreightToolCalcService {
                 .map(String::trim)
                 .filter(StrUtil::isNotBlank)
                 .filter(word -> cargo.contains(word.toLowerCase(Locale.ROOT)))
-                .toList();
+                .collect(Collectors.toList());
 
         WebFreightToolCalcRespVO respVO = new WebFreightToolCalcRespVO();
-        respVO.setCostBreakdown(List.of(cost("Matched Words", BigDecimal.valueOf(matched.size()))));
+        respVO.setCostBreakdown(Collections.singletonList(cost("Matched Words", BigDecimal.valueOf(matched.size()))));
         respVO.setTotal(BigDecimal.ZERO);
         respVO.setNotes(matched.isEmpty()
-                ? List.of("No obvious sensitive words detected")
-                : List.of("Sensitive words detected: " + String.join(",", matched)));
+                ? Collections.singletonList("No obvious sensitive words detected")
+                : Collections.singletonList("Sensitive words detected: " + String.join(",", matched)));
         return respVO;
     }
 

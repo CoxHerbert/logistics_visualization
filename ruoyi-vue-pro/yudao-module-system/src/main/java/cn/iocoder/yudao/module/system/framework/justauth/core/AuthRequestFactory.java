@@ -202,10 +202,6 @@ public class AuthRequestFactory {
                 return new AuthAlipayRequest(config, authStateCache);
             case QQ:
                 return new AuthQqRequest(config, authStateCache);
-            case WECHAT_OPEN:
-                return new AuthWeChatOpenRequest(config, authStateCache);
-            case WECHAT_MP:
-                return new AuthWeChatMpRequest(config, authStateCache);
             case TAOBAO:
                 return new AuthTaobaoRequest(config, authStateCache);
             case GOOGLE:
@@ -237,14 +233,6 @@ public class AuthRequestFactory {
                 return new AuthHuaweiRequest(config, authStateCache);
             case HUAWEI_V3:
                 return new AuthHuaweiV3Request(config, authStateCache);
-            case WECHAT_ENTERPRISE:
-                return new AuthWeChatEnterpriseQrcodeRequest(config, authStateCache);
-            case WECHAT_ENTERPRISE_V2:
-                return new AuthWeChatEnterpriseQrcodeV2Request(config, authStateCache);
-            case WECHAT_ENTERPRISE_QRCODE_THIRD:
-                return new AuthWeChatEnterpriseThirdQrcodeRequest(config, authStateCache);
-            case WECHAT_ENTERPRISE_WEB:
-                return new AuthWeChatEnterpriseWebRequest(config, authStateCache);
             case KUJIALE:
                 return new AuthKujialeRequest(config, authStateCache);
             case GITLAB:
@@ -279,10 +267,6 @@ public class AuthRequestFactory {
                 return new AuthAppleRequest(config,authStateCache);
             case FIGMA:
                 return new AuthFigmaRequest(config,authStateCache);
-            case WECHAT_MINI_PROGRAM:
-                config.setIgnoreCheckRedirectUri(true);
-                config.setIgnoreCheckState(true);
-                return new AuthWechatMiniProgramRequest(config, authStateCache);
             case QQ_MINI_PROGRAM:
                 config.setIgnoreCheckRedirectUri(true);
                 config.setIgnoreCheckState(true);
