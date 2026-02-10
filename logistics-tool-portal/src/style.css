@@ -61,15 +61,25 @@ body {
   min-width: 0;
   border-bottom: none;
   background: transparent;
+  overflow-x: auto;
 }
 
-.top-menu :deep(.ant-menu-item) {
+
+.top-menu .ant-menu-overflow {
+  justify-content: flex-start;
+}
+
+.top-menu.ant-menu-horizontal {
+  line-height: 42px;
+}
+
+.top-menu .ant-menu-item {
   margin-inline: 2px !important;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
-.top-menu :deep(.ant-menu-item:hover) {
+.top-menu .ant-menu-item:hover {
   background: rgba(255, 255, 255, 0.12) !important;
 }
 
@@ -83,7 +93,7 @@ body {
   width: 100%;
 }
 
-.header-search :deep(.ant-input-affix-wrapper) {
+.header-search .ant-input-affix-wrapper {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.95);
