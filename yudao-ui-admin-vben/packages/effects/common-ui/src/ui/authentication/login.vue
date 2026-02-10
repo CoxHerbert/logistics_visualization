@@ -38,6 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
   showRegister: true,
   showRememberMe: true,
   showThirdPartyLogin: true,
+  showDocLink: true,
   submitButtonText: '',
   subTitle: '',
   title: '',
@@ -198,6 +199,6 @@ defineExpose({
     </slot>
 
     <!-- 萌新必读 -->
-    <DocLink />
+    <DocLink v-if="showDocLink" />
   </div>
 </template>

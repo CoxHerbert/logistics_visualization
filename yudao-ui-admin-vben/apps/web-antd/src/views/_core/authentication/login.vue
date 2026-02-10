@@ -180,6 +180,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       :show-register="false"
       :show-forget-password="false"
       :show-third-party-login="false"
+      :show-doc-link="false"
       @submit="handleLogin"
       @third-login="handleThirdLogin"
     />
