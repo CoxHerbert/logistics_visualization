@@ -48,7 +48,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 export const createFreightLead = async (payload: FreightLeadCreateReq): Promise<number> => {
-    const { data } = await http.post<CommonResult<number>>(`${WEB_API_BASE}/web-api/freight/lead/create`, payload);
+    const { data } = await http.post<CommonResult<number>>(`${WEB_API_BASE}/freight/lead/create`, payload);
     return unwrapResult(data);
 };
 
@@ -58,10 +58,7 @@ export const calcLclTool = async (payload: {
     volumeCbm: number;
     weightKg: number;
 }): Promise<ToolCalcResp> => {
-    const { data } = await http.post<CommonResult<ToolCalcResp>>(
-        `${WEB_API_BASE}/web-api/freight/tool/lcl/calc`,
-        payload,
-    );
+    const { data } = await http.post<CommonResult<ToolCalcResp>>(`${WEB_API_BASE}/freight/tool/lcl/calc`, payload);
     return unwrapResult(data);
 };
 
@@ -71,16 +68,13 @@ export const calcFclTool = async (payload: {
     containerType: string;
     containerCount: number;
 }): Promise<ToolCalcResp> => {
-    const { data } = await http.post<CommonResult<ToolCalcResp>>(
-        `${WEB_API_BASE}/web-api/freight/tool/fcl/calc`,
-        payload,
-    );
+    const { data } = await http.post<CommonResult<ToolCalcResp>>(`${WEB_API_BASE}/freight/tool/fcl/calc`, payload);
     return unwrapResult(data);
 };
 
 export const checkSensitiveTool = async (payload: { cargoDesc: string }): Promise<ToolCalcResp> => {
     const { data } = await http.post<CommonResult<ToolCalcResp>>(
-        `${WEB_API_BASE}/web-api/freight/tool/sensitive/check`,
+        `${WEB_API_BASE}/freight/tool/sensitive/check`,
         payload,
     );
     return unwrapResult(data);

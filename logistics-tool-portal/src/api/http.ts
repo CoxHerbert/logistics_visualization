@@ -1,21 +1,21 @@
-import axios from 'axios'
+import axios from 'axios';
 
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
-  timeout: 10000
-})
+    baseURL: import.meta.env.VITE_API_BASE_URL ?? '/admin-api',
+    timeout: 10000,
+});
 
 http.interceptors.request.use((config) => {
-  const token = localStorage.getItem('portal_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+    const token = localStorage.getItem('portal_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 http.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+    (response) => response,
+    (error) => {
+        return Promise.reject(error);
+    },
+);
