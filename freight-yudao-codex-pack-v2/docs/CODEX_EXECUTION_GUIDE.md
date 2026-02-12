@@ -4,7 +4,7 @@
 
 > 你当前工程：
 > - 后端：ruoyi-vue-pro（MySQL，单体）
-> - 门户：logistics-tool-portal（Vue3，走 /web-api）
+> - 门户：logistics-tool-portal（Vue3，走 /portal-api）
 > - PC 管理端：yudao-ui-admin-vben（走 /admin-api）
 > - 移动端：yudao-ui-admin-uniapp（走 /app-api）
 
@@ -98,11 +98,11 @@
 目标：实现门户留资接口 + 匿名放行 + 防刷
 范围：只允许改动 freight lead 模块相关目录 + 安全白名单配置
 约束：
-- Controller 路由前缀必须是 /web-api
+- Controller 路由前缀必须是 /portal-api
 - 返回结构必须使用项目统一响应体
 - 防刷命中返回错误码 42901（或项目已有约定），提示“提交过于频繁”
 验收：
-1) Swagger 调用 POST /web-api/freight/lead/create 成功返回 leadId
+1) Swagger 调用 POST /portal-api/freight/lead/create 成功返回 leadId
 2) 60 秒内重复提交同一 contactValue 会被拦截
 交付：
 - 改动文件列表

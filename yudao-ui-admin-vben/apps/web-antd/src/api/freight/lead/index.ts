@@ -1,6 +1,6 @@
 import type { PageParam, PageResult } from '@vben/request';
 
-import { requestClient } from '#/api/request';
+import { portalRequestClient } from '#/api/request';
 
 export namespace FreightLeadApi {
   export interface Lead {
@@ -26,14 +26,14 @@ export namespace FreightLeadApi {
 
 /** 分页查询线索 */
 export function getFreightLeadPage(params: FreightLeadApi.LeadPageReqVO) {
-  return requestClient.get<PageResult<FreightLeadApi.Lead>>('/freight/lead/page', {
+  return portalRequestClient.get<PageResult<FreightLeadApi.Lead>>('/leads/page', {
     params,
   });
 }
 
 /** 查询线索详情 */
 export function getFreightLead(id: number) {
-  return requestClient.get<FreightLeadApi.Lead>(`/freight/lead/get?id=${id}`);
+  return portalRequestClient.get<FreightLeadApi.Lead>(`/leads/get?id=${id}`);
 }
 
 /** 更新线索 */
@@ -42,7 +42,7 @@ export function updateFreightLead(data: {
   status: number;
   remark?: string;
 }) {
-  return requestClient.put('/freight/lead/update', data);
+  return portalRequestClient.put('/leads/update', data);
 }
 
 
@@ -66,8 +66,8 @@ export namespace FreightLeadActivityApi {
 
 /** 查询线索跟进记录 */
 export function getFreightLeadActivityList(leadId: number) {
-  return requestClient.get<FreightLeadActivityApi.Activity[]>(
-    `/freight/lead-activity/list?leadId=${leadId}`,
+  return portalRequestClient.get<FreightLeadActivityApi.Activity[]>(
+    `/leads/activity/list?leadId=${leadId}`,
   );
 }
 
@@ -75,5 +75,5 @@ export function getFreightLeadActivityList(leadId: number) {
 export function createFreightLeadActivity(
   data: FreightLeadActivityApi.ActivityCreateReqVO,
 ) {
-  return requestClient.post<number>('/freight/lead-activity/create', data);
+  return portalRequestClient.post<number>('/leads/activity/create', data);
 }
