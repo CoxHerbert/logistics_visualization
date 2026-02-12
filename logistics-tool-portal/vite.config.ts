@@ -4,9 +4,10 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
+    const basePath = (env.VITE_PUBLIC_BASE || '/portal/').replace(/\/?$/, '/');
 
     return {
-        base: '/portal/',
+        base: basePath,
         plugins: [vue()],
         resolve: {
             alias: {
