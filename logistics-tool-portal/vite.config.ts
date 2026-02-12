@@ -15,14 +15,10 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             proxy: {
-                '/admin-api': {
-                    target: env.VITE_PROXY_API_TARGET || 'http://118.178.56.162:48080/admin-api',
-                    changeOrigin: true,
-                    rewrite: (path) => path.replace(/^\/admin-api/, ''),
-                },
                 '/web-api': {
-                    target: env.VITE_PROXY_WEB_API_TARGET || 'http://118.178.56.162:48080/web-api',
+                    target: env.VITE_PROXY_API_TARGET || 'http://118.178.56.162:48080/web-api',
                     changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/web-api/, ''),
                 },
             },
         },

@@ -2,11 +2,11 @@
 import { RouterLink } from 'vue-router'
 
 const profile = {
-  name: 'Ava Chen',
+  name: 'Coxherbert',
   title: '中美线货运顾问',
-  phone: '+86 138-0000-8888',
-  wechat: 'Ava-USCN-Logistics',
-  email: 'ava.chen@example.com',
+  phone: '+86 158-2422-3890',
+  wechat: 'coxherbert',
+  email: 'coxherbert98@gmail.com',
   slogan: '为跨境卖家和外贸工厂提供中美海空运 + 清关 + 派送一站式方案。'
 }
 </script>

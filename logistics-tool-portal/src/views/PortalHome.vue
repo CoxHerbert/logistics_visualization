@@ -100,3 +100,226 @@ onMounted(async () => {
   await portalStore.refreshStats()
 })
 </script>
+<style scoped>
+/* ====== Layout spacing ====== */
+.hero-section,
+.overview-section,
+.tools-banner-wrapper,
+section {
+  /* max-width: 1160px; */
+  margin: 0 auto;
+}
+
+.hero-section {
+  margin-top: 8px;
+  padding: 40px 28px;
+  border-radius: 20px;
+  background:
+    radial-gradient(800px 400px at 20% 0%, rgba(22, 119, 255, 0.18), transparent 60%),
+    radial-gradient(700px 380px at 100% 30%, rgba(82, 196, 26, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.hero-section h1 {
+  margin: 0 0 12px 0;
+  font-size: 40px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.hero-section p {
+  margin: 0 0 22px 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(0, 0, 0, 0.62);
+  max-width: 640px;
+}
+
+/* Buttons: more premium */
+:deep(.ant-btn-lg) {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+}
+
+:deep(.ant-btn-primary) {
+  box-shadow: 0 10px 22px rgba(22, 119, 255, 0.28);
+}
+
+:deep(.ant-btn-primary:hover) {
+  transform: translateY(-1px);
+}
+
+:deep(.ant-btn:not(.ant-btn-primary):hover) {
+  transform: translateY(-1px);
+}
+
+/* Tags under hero */
+.hero-tags {
+  margin-top: 16px;
+}
+
+.hero-tags :deep(.ant-tag) {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 119, 255, 0.18);
+  background: rgba(22, 119, 255, 0.06);
+  color: rgba(0, 0, 0, 0.72);
+}
+
+/* Hero image */
+.hero-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.12));
+  transform: translateY(4px);
+}
+
+/* ====== Overview stats ====== */
+.overview-section {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+:deep(.ant-card) {
+  border-radius: 16px;
+}
+
+.overview-section :deep(.ant-card) {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.overview-section :deep(.ant-card-body) {
+  padding: 18px 18px 14px;
+}
+
+:deep(.ant-statistic-title) {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+:deep(.ant-statistic-content) {
+  font-weight: 800;
+}
+
+/* ====== Section title ====== */
+.section-title {
+  margin: 26px 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.88);
+  letter-spacing: -0.01em;
+}
+
+/* ====== Services cards ====== */
+.service-card {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.service-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(380px 120px at 20% 0%, rgba(22, 119, 255, 0.14), transparent 55%);
+  pointer-events: none;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.10);
+}
+
+.service-card :deep(.ant-card-head) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.service-card :deep(.ant-card-head-title) {
+  padding: 14px 0;
+  font-weight: 800;
+}
+
+.service-card p {
+  margin: 10px 0 0;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.62);
+}
+
+/* Icons a bit larger */
+.service-card :deep(.anticon) {
+  font-size: 18px;
+  color: rgba(22, 119, 255, 0.95);
+}
+
+/* ====== Tools banner ====== */
+.tools-banner-wrapper {
+  margin: 18px auto 10px;
+  padding: 0 2px;
+}
+
+.tools-banner {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.08);
+  display: block;
+}
+
+/* ====== Table ====== */
+:deep(.ant-table) {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:deep(.ant-table-thead > tr > th) {
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:deep(.ant-table-tbody > tr:hover > td) {
+  background: rgba(22, 119, 255, 0.05);
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 992px) {
+  .hero-section {
+    padding: 28px 18px;
+  }
+
+  .hero-section h1 {
+    font-size: 32px;
+  }
+
+  .hero-image {
+    margin-top: 18px;
+    max-height: 240px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-section {
+    border-radius: 16px;
+  }
+
+  .hero-section h1 {
+    font-size: 28px;
+  }
+
+  :deep(.ant-btn-lg) {
+    height: 42px;
+    border-radius: 12px;
+  }
+}
+</style>
