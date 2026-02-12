@@ -14,6 +14,12 @@ export default defineConfig(async () => {
             target: 'http://118.178.56.162:48080/admin-api',
             ws: true,
           },
+          '/portal-api': {
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/portal-api/, ''),
+            target: 'http://118.178.56.162:48090/portal-api',
+            ws: true,
+          },
         },
       },
     },

@@ -170,6 +170,13 @@ export const requestClient = createRequestClient(apiURL, {
   responseReturn: 'data',
 });
 
+export const portalRequestClient = createRequestClient(
+  import.meta.env.VITE_PORTAL_API_PREFIX ?? '/portal-api',
+  {
+    responseReturn: 'data',
+  },
+);
+
 export const baseRequestClient = new RequestClient({ baseURL: apiURL });
 baseRequestClient.addRequestInterceptor({
   fulfilled: (config) => {

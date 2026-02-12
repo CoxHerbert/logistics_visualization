@@ -5,7 +5,7 @@
 > 已确定前缀：
 > - 管理端：`/admin-api`
 > - 移动端：`/app-api`
-> - 门户：`/web-api`
+> - 门户：`/portal-api`
 
 ---
 
@@ -20,7 +20,7 @@
 
 ### 单体多前缀说明
 单体应用可以同时提供多个 API 前缀。推荐做法：
-- Controller 使用 `@RequestMapping("/admin-api/...")`、`@RequestMapping("/web-api/...")`、`@RequestMapping("/app-api/...")` 显式区分
+- Controller 使用 `@RequestMapping("/admin-api/...")`、`@RequestMapping("/portal-api/...")`、`@RequestMapping("/app-api/...")` 显式区分
 - 安全配置对不同前缀分别放行/鉴权
 - 前端各自配置 baseURL 指向自己的前缀
 
@@ -39,7 +39,7 @@
 - 工具页：`/tools/sea-lcl`、`/tools/sea-fcl`、`/tools/sensitive-check`
 - 留资：`/get-plan`
 - 个人入口：`/me`
-- API base：`/web-api`
+- API base：`/portal-api`
 
 ### C. yudao-ui-admin-vben（PC 管理端）
 - 线索列表/详情/状态流转
@@ -109,7 +109,7 @@
 - 实现一个 ApiConstants 常量类（或在现有常量类中扩展）：
   - ADMIN_API_PREFIX = "/admin-api"
   - APP_API_PREFIX   = "/app-api"
-  - WEB_API_PREFIX   = "/web-api"
+  - WEB_API_PREFIX   = "/portal-api"
 - 确保不影响现有 `/admin-api` 路由。
 
 **验收**
@@ -146,7 +146,7 @@
 **范围**：controller/web + security 白名单
 
 **Codex Prompt**
-- 实现 `POST /web-api/freight/lead/create`  
+- 实现 `POST /portal-api/freight/lead/create`  
 - 匿名可访问（加入白名单）
 - 最小防刷（二选一，优先简单可落地）：
   - A) IP + contactValue 60 秒重复拦截（内存缓存/redis）
@@ -268,9 +268,9 @@
 ### T4.1 后端：web-api 工具计算接口（rule_config 可覆盖）
 **仓库**：ruoyi-vue-pro  
 **接口**
-- `POST /web-api/freight/tool/lcl/calc`
-- `POST /web-api/freight/tool/fcl/calc`
-- `POST /web-api/freight/tool/sensitive/check`
+- `POST /portal-api/freight/tool/lcl/calc`
+- `POST /portal-api/freight/tool/fcl/calc`
+- `POST /portal-api/freight/tool/sensitive/check`
 
 **验收**
 - 匿名可调用
