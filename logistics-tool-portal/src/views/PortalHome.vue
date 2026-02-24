@@ -30,8 +30,10 @@
     <h2 class="section-title">中美专线服务</h2>
     <a-row :gutter="[16, 16]">
       <a-col v-for="item in serviceCards" :key="item.title" :xs="24" :sm="12" :lg="6">
-        <a-card class="service-card" :bodyStyle="{ padding: '0' }">
-          <img class="service-image" :src="resolvePublicImage(item.image)" :alt="item.title" />
+        <a-card class="service-card" :bodyStyle="{ padding: '12px' }">
+          <div class="service-image-wrap">
+            <img class="service-image" :src="resolvePublicImage(item.image)" :alt="item.title" />
+          </div>
           <div class="service-content">
             <h3>{{ item.title }}</h3>
             <p>{{ item.description }}</p>
@@ -292,35 +294,52 @@ section {
   overflow: hidden;
   background: #fff;
   border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+}
+
+.service-image-wrap {
+  height: 168px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: linear-gradient(180deg, #fafcff 0%, #f4f7fb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .service-image {
   width: 100%;
-  height: 180px;
+  height: 100%;
   object-fit: contain;
-  background: #f7f8fa;
-  padding: 8px;
   display: block;
 }
 
 .service-content {
-  padding: 14px 16px 16px;
+  padding: 12px 4px 2px;
 }
 
 .service-content h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: rgba(0, 0, 0, 0.88);
+  line-height: 1.4;
 }
 
 .service-content p {
-  margin: 8px 0 0;
-  font-size: 14px;
-  line-height: 1.7;
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.65;
   color: rgba(0, 0, 0, 0.62);
+  min-height: 44px;
 }
 
 /* ====== Hero ====== */
