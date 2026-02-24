@@ -31,7 +31,7 @@
     <a-row :gutter="[16, 16]">
       <a-col v-for="item in serviceCards" :key="item.title" :xs="24" :md="12">
         <a-card class="service-card" :bodyStyle="{ padding: '0' }">
-          <img class="service-image" :src="item.image" :alt="item.title" />
+          <img class="service-image" :src="resolvePublicImage(item.image)" :alt="item.title" />
           <div class="service-content">
             <h3>{{ item.title }}</h3>
             <p>{{ item.description }}</p>
@@ -124,26 +124,29 @@ const portalStore = usePortalStore()
 
 const strengths = ['中美固定舱位', '美国清关合规支持', '尾程卡派/快递派送', '7×24 异常响应']
 
+
+const resolvePublicImage = (path: string) => `${import.meta.env.BASE_URL}${path}`
+
 const serviceCards = [
   {
     title: '中美海运整箱/拼箱',
     description: '覆盖上海、宁波、深圳至美西/美东主力港口，稳定周班。',
-    image: '/images/home/china_us_ocean.jpg'
+    image: 'images/home/china_us_ocean.jpg'
   },
   {
     title: '中美空运专线',
     description: '上海/深圳/香港起飞，直飞 LAX/JFK/ORD，时效稳定。',
-    image: '/images/home/china_us_air.jpg'
+    image: 'images/home/china_us_air.jpg'
   },
   {
     title: '美国清关与保险',
     description: '支持 ISF、AMS、Bond 及货运险方案，降低目的港风险。',
-    image: '/images/home/customs_insurance.jpg'
+    image: 'images/home/customs_insurance.jpg'
   },
   {
     title: '全程可视化',
     description: '订舱到签收全链路节点追踪，异常自动预警与通知。',
-    image: '/images/home/tracking_visualization.jpg'
+    image: 'images/home/tracking_visualization.jpg'
   }
 ]
 
