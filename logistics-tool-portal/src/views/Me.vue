@@ -34,6 +34,24 @@ const profile = {
           </RouterLink>
           <a-button size="large">复制联系方式</a-button>
         </a-space>
+
+        <div class="qrcode-section">
+          <h3>扫码添加我</h3>
+          <a-row :gutter="16">
+            <a-col :xs="24" :sm="12">
+              <div class="qrcode-card">
+                <img src="/images/wechat-connect.jpg" alt="微信二维码" class="qrcode-image" />
+                <p>微信</p>
+              </div>
+            </a-col>
+            <a-col :xs="24" :sm="12">
+              <div class="qrcode-card">
+                <img src="/images/qq-connect.jpg" alt="QQ二维码" class="qrcode-image" />
+                <p>QQ</p>
+              </div>
+            </a-col>
+          </a-row>
+        </div>
       </a-col>
     </a-row>
   </a-card>
@@ -63,5 +81,26 @@ const profile = {
 .title {
   margin-top: 4px;
   color: #4f5d73;
+}
+
+.qrcode-section {
+  margin-top: 20px;
+}
+
+.qrcode-section h3 {
+  margin-bottom: 12px;
+}
+
+.qrcode-card {
+  text-align: center;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.qrcode-image {
+  width: 100%;
+  max-width: 180px;
+  border-radius: 6px;
 }
 </style>
