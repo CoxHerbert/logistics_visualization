@@ -26,6 +26,21 @@
     </a-row>
   </section>
 
+  <section class="service-section">
+    <h2 class="section-title">中美专线服务</h2>
+    <a-row :gutter="[16, 16]">
+      <a-col v-for="item in serviceCards" :key="item.title" :xs="24" :md="12">
+        <a-card class="service-card" :bodyStyle="{ padding: '0' }">
+          <img class="service-image" :src="item.image" :alt="item.title" />
+          <div class="service-content">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+          </div>
+        </a-card>
+      </a-col>
+    </a-row>
+  </section>
+
   <!-- ✅ 更简单：直接展示，不点也能看懂 -->
   <section class="flow-section">
     <div class="flow-header">
@@ -108,6 +123,29 @@ type FlowNode = {
 const portalStore = usePortalStore()
 
 const strengths = ['中美固定舱位', '美国清关合规支持', '尾程卡派/快递派送', '7×24 异常响应']
+
+const serviceCards = [
+  {
+    title: '中美海运整箱/拼箱',
+    description: '覆盖上海、宁波、深圳至美西/美东主力港口，稳定周班。',
+    image: '/images/home/china_us_ocean.jpg'
+  },
+  {
+    title: '中美空运专线',
+    description: '上海/深圳/香港起飞，直飞 LAX/JFK/ORD，时效稳定。',
+    image: '/images/home/china_us_air.jpg'
+  },
+  {
+    title: '美国清关与保险',
+    description: '支持 ISF、AMS、Bond 及货运险方案，降低目的港风险。',
+    image: '/images/home/customs_insurance.jpg'
+  },
+  {
+    title: '全程可视化',
+    description: '订舱到签收全链路节点追踪，异常自动预警与通知。',
+    image: '/images/home/tracking_visualization.jpg'
+  }
+]
 
 // ✅ 你的节点数据保留不变（只是展示方式改了）
 const flowNodes: FlowNode[] = [
@@ -238,8 +276,45 @@ onMounted(async () => {
 <style scoped>
 .hero-section,
 .flow-section,
+.service-section,
 section {
   margin: 0 auto;
+}
+
+.service-section {
+  margin-top: 22px;
+}
+
+.service-card {
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.service-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.service-content {
+  padding: 14px 16px 16px;
+}
+
+.service-content h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.service-content p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.62);
 }
 
 /* ====== Hero ====== */
