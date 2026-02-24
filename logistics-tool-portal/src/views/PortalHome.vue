@@ -21,7 +21,7 @@
         </a-row>
       </a-col>
       <a-col :xs="24" :lg="11">
-        <img class="hero-image" src="/images/hero-freight.svg" alt="中美线国际货运主视觉" />
+        <img class="hero-image" src="/images/home/pier.jpg" alt="中美线国际货运码头主视觉" />
       </a-col>
     </a-row>
   </section>
@@ -402,8 +402,8 @@ section {
 
 .hero-image {
   width: 100%;
-  max-height: 320px;
-  object-fit: contain;
+  height: 320px;
+  object-fit: cover;
   filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.12));
   transform: translateY(4px);
 }
