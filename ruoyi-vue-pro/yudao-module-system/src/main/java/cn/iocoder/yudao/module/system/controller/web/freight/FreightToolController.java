@@ -5,7 +5,6 @@ import cn.iocoder.yudao.framework.tenant.core.aop.TenantIgnore;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolCalcRespVO;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolFclCalcReqVO;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolLclCalcReqVO;
-import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolSensitiveCheckReqVO;
 import cn.iocoder.yudao.module.system.service.freight.tool.FreightToolCalcService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,12 +45,5 @@ public class FreightToolController {
         return success(freightToolCalcService.calcFcl(reqVO));
     }
 
-    @PostMapping("/sensitive/check")
-    @Operation(summary = "敏感品检测")
-    @PermitAll
-    @TenantIgnore
-    public CommonResult<WebFreightToolCalcRespVO> checkSensitive(@Valid @RequestBody WebFreightToolSensitiveCheckReqVO reqVO) {
-        return success(freightToolCalcService.checkSensitive(reqVO));
-    }
 
 }

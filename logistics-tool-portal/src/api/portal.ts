@@ -69,11 +69,3 @@ export const calcFclTool = async (payload: {
     const { data } = await http.post<CommonResult<ToolCalcResp>>(`/tools/fcl-pricing`, payload);
     return unwrapResult(data);
 };
-
-export const checkSensitiveTool = async (payload: { cargoDesc: string }): Promise<ToolCalcResp> => {
-    const { data } = await http.post<CommonResult<ToolCalcResp>>(
-        `/tools/sensitive-check`,
-        payload,
-    );
-    return unwrapResult(data);
-};
