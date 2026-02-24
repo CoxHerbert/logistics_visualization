@@ -26,80 +26,72 @@
     </a-row>
   </section>
 
-  <!-- ✅ 极简科普版：全流程服务节点（强调可控与保障，不堆“风险”） -->
+  <!-- ✅ 更简单：直接展示，不点也能看懂 -->
   <section class="flow-section">
     <div class="flow-header">
       <div>
         <h2 class="section-title" style="margin-bottom: 6px">中美海运全流程服务节点</h2>
-        <div class="flow-sub">点击节点查看：我们会做什么 & 您获得什么保障（简单、安心、可控）</div>
+        <div class="flow-sub">我们把复杂留在内部，您只需要看到：每一步我们做什么、您获得什么保障。</div>
       </div>
 
-      <div class="flow-legend">
-        <a-tag class="legend-tag" color="blue">常规节点</a-tag>
-        <a-tag class="legend-tag" color="green">重点保障</a-tag>
+      <div class="flow-actions">
+        <a-space>
+          <a-tag class="legend-tag" color="green">重点保障</a-tag>
+          <a-tag class="legend-tag" color="blue">常规节点</a-tag>
+          <a-button size="small" @click="toggleAll">
+            {{ showAll ? '收起（只看重点）' : '展开全部节点' }}
+          </a-button>
+        </a-space>
       </div>
     </div>
 
-    <a-card class="flow-card" :bodyStyle="{ padding: '14px 14px 10px' }">
-      <div class="flow-steps-scroll">
-        <a-steps size="small" :current="-1">
-          <a-step v-for="node in flowNodes" :key="node.key" :title="node.title" :description="node.short"
-            @click="openNode(node)">
-            <template #icon>
-              <span class="flow-dot" :data-focus="node.focus ? '1' : '0'"></span>
-            </template>
-          </a-step>
-        </a-steps>
-      </div>
+    <!-- 顶部轻提示 -->
+    <div class="flow-hint">
+      <a-space wrap>
+        <span class="hint-item">✅ 关键节点会主动提醒与确认</span>
+        <span class="hint-item">✅ 进度可追踪，异常会第一时间给出处理方案</span>
+      </a-space>
+    </div>
 
-      <div class="flow-hint">
-        <a-space wrap>
-          <span class="hint-item">✅ 每一步都有专人跟进，关键节点会主动提醒与确认</span>
-          <span class="hint-item">✅ 进度可追踪，异常会第一时间通知并给出处理方案</span>
-        </a-space>
-      </div>
-    </a-card>
+    <!-- 节点卡片（默认只展示重点保障） -->
+    <a-row :gutter="[14, 14]" class="flow-grid">
+      <a-col v-for="node in visibleNodes" :key="node.key" :xs="24" :md="12" :lg="8">
+        <a-card class="node-card" :bodyStyle="{ padding: '14px 14px 12px' }">
+          <div class="node-head">
+            <div class="node-title">
+              <span class="node-dot" :data-focus="node.focus ? '1' : '0'"></span>
+              <span class="node-name">{{ node.title }}</span>
+            </div>
+            <a-tag size="small" :color="node.focus ? 'green' : 'blue'">
+              {{ node.focus ? '重点保障' : '常规' }}
+            </a-tag>
+          </div>
 
-    <a-drawer v-model:open="drawerOpen" :title="selectedNode?.title || '节点说明'" placement="right" width="460">
-      <template v-if="selectedNode">
-        <div class="drawer-meta">
-          <a-tag :color="selectedNode.focus ? 'green' : 'blue'">
-            {{ selectedNode.focus ? '重点保障' : '常规节点' }}
-          </a-tag>
-          <span class="drawer-key">{{ selectedNode.key }}</span>
-        </div>
+          <div class="node-short">{{ node.short }}</div>
 
-        <div class="drawer-block">
-          <div class="drawer-title">我们会做什么</div>
-          <ul class="drawer-list">
-            <li v-for="a in selectedNode.actions" :key="a">{{ a }}</li>
-          </ul>
-        </div>
+          <div class="node-block">
+            <div class="node-label">我们会做什么</div>
+            <div class="node-text">• {{ firstAction(node) }}</div>
+          </div>
 
-        <div class="drawer-block">
-          <div class="drawer-title">您获得什么保障</div>
-          <ul class="drawer-list">
-            <li v-for="g in selectedNode.guarantees" :key="g">{{ g }}</li>
-          </ul>
-        </div>
+          <div class="node-block">
+            <div class="node-label">您获得什么保障</div>
+            <div class="node-text">• {{ firstGuarantee(node) }}</div>
+          </div>
 
-        <a-divider />
-
-        <a-space>
-          <RouterLink :to="selectedNode.cta || '/get-plan'">
-            <a-button type="primary">基于该节点获取方案</a-button>
-          </RouterLink>
-          <RouterLink to="/get-plan?remark=我想了解全流程服务与跟进方式">
-            <a-button>咨询服务细节</a-button>
-          </RouterLink>
-        </a-space>
-      </template>
-    </a-drawer>
+          <div class="node-footer">
+            <RouterLink :to="node.cta || '/get-plan'">
+              <a-button type="link" class="node-link">基于该节点获取方案 →</a-button>
+            </RouterLink>
+          </div>
+        </a-card>
+      </a-col>
+    </a-row>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { usePortalStore } from '@/stores/portal'
 
@@ -107,7 +99,6 @@ type FlowNode = {
   key: string
   title: string
   short: string
-  /** 重点保障：用更“安心”的表达替代“高风险” */
   focus?: boolean
   actions: string[]
   guarantees: string[]
@@ -118,12 +109,7 @@ const portalStore = usePortalStore()
 
 const strengths = ['中美固定舱位', '美国清关合规支持', '尾程卡派/快递派送', '7×24 异常响应']
 
-/**
- * ✅ 极简科普版节点：
- * - 不说“风险/后果”，只说“我们做什么 / 你得到什么保障”
- * - focus=true：对外表达为“重点保障节点”，而不是“高风险节点”
- * - 国内段也覆盖，但用服务表达（不制造压力）
- */
+// ✅ 你的节点数据保留不变（只是展示方式改了）
 const flowNodes: FlowNode[] = [
   {
     key: 'QUOTE',
@@ -230,13 +216,19 @@ const flowNodes: FlowNode[] = [
   }
 ]
 
-// Drawer 交互
-const drawerOpen = ref(false)
-const selectedNode = ref<FlowNode | null>(null)
-const openNode = (node: FlowNode) => {
-  selectedNode.value = node
-  drawerOpen.value = true
+// ✅ 默认只展示重点保障节点（更轻、不会吓人）
+const showAll = ref(false)
+const visibleNodes = computed(() => {
+  if (showAll.value) return flowNodes
+  return flowNodes.filter((n) => n.focus)
+})
+const toggleAll = () => {
+  showAll.value = !showAll.value
 }
+
+// 展示“第一条”即可（避免信息过载）
+const firstAction = (n: FlowNode) => n.actions?.[0] || '全程跟进与节点同步'
+const firstGuarantee = (n: FlowNode) => n.guarantees?.[0] || '进度透明，异常快速响应'
 
 onMounted(async () => {
   await portalStore.refreshStats()
@@ -343,56 +335,14 @@ section {
   color: rgba(0, 0, 0, 0.58);
 }
 
-.flow-legend {
+.flow-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
 .legend-tag {
   border-radius: 999px;
   padding: 2px 10px;
-}
-
-.flow-card {
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-}
-
-.flow-steps-scroll {
-  overflow-x: auto;
-  padding-bottom: 6px;
-}
-
-.flow-steps-scroll :deep(.ant-steps) {
-  min-width: 1120px;
-}
-
-.flow-steps-scroll :deep(.ant-steps-item) {
-  cursor: pointer;
-}
-
-.flow-steps-scroll :deep(.ant-steps-item-title) {
-  font-weight: 800;
-}
-
-.flow-steps-scroll :deep(.ant-steps-item-description) {
-  color: rgba(0, 0, 0, 0.55);
-}
-
-/* Dot: focus vs normal */
-.flow-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  display: inline-block;
-  border: 2px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
-  background: rgba(22, 119, 255, 0.95);
-}
-
-.flow-dot[data-focus='1'] {
-  background: rgba(82, 196, 26, 0.95);
 }
 
 .flow-hint {
@@ -408,35 +358,86 @@ section {
   color: rgba(0, 0, 0, 0.62);
 }
 
-/* Drawer */
-.drawer-meta {
+/* Grid */
+.flow-grid {
+  margin-top: 12px;
+}
+
+/* Card */
+.node-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.node-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.1);
+}
+
+.node-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
-.drawer-key {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
+.node-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.drawer-block {
-  margin: 12px 0 14px;
+.node-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: rgba(22, 119, 255, 0.95);
 }
 
-.drawer-title {
+.node-dot[data-focus='1'] {
+  background: rgba(82, 196, 26, 0.95);
+}
+
+.node-name {
   font-weight: 900;
-  margin-bottom: 8px;
-  color: rgba(0, 0, 0, 0.85);
+  color: rgba(0, 0, 0, 0.88);
 }
 
-.drawer-list {
-  margin: 0;
-  padding-left: 18px;
-  color: rgba(0, 0, 0, 0.65);
-  line-height: 1.75;
+.node-short {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.node-block {
+  margin-top: 10px;
+}
+
+.node-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.72);
+  margin-bottom: 4px;
+}
+
+.node-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.node-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.node-link {
+  padding: 0;
 }
 
 /* Responsive */
