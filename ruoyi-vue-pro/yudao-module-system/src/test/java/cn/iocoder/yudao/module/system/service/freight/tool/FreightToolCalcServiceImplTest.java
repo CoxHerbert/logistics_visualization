@@ -5,7 +5,6 @@ import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolCalcRespVO;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolFclCalcReqVO;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolLclCalcReqVO;
-import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolSensitiveCheckReqVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -15,7 +14,6 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @Import(FreightToolCalcServiceImpl.class)
@@ -59,20 +57,6 @@ public class FreightToolCalcServiceImplTest extends BaseDbUnitTest {
         WebFreightToolCalcRespVO respVO = freightToolCalcService.calcFcl(reqVO);
         assertEquals(2, respVO.getCostBreakdown().size());
         assertEquals(new BigDecimal("4700"), respVO.getTotal()); // 3 * 1500 + 200
-        assertFalse(respVO.getNotes().isEmpty());
-    }
-
-    @Test
-    public void testCheckSensitive_defaultWords() {
-        WebFreightToolSensitiveCheckReqVO reqVO = new WebFreightToolSensitiveCheckReqVO();
-        reqVO.setCargoDesc("Rechargeable battery pack and liquid cosmetic");
-
-        when(configApi.getConfigValueByKey("freight.tool.sensitive.words")).thenReturn(null);
-
-        WebFreightToolCalcRespVO respVO = freightToolCalcService.checkSensitive(reqVO);
-        assertEquals(1, respVO.getCostBreakdown().size());
-        assertEquals(BigDecimal.ZERO, respVO.getTotal());
-        assertTrue(respVO.getCostBreakdown().get(0).getAmount().compareTo(new BigDecimal("2")) >= 0);
         assertFalse(respVO.getNotes().isEmpty());
     }
 

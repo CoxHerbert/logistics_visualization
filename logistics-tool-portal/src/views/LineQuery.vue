@@ -9,6 +9,7 @@ type VesselProvider = {
   key: string
   label: string
   url: string
+  desc: string
 }
 
 const formState = reactive({
@@ -23,11 +24,9 @@ const toolResult = ref<ToolCalcResp>()
 const loading = ref(false)
 
 const vesselProviders: VesselProvider[] = [
-  { key: 'vesselfinder', label: 'VesselFinder 船名航次查询', url: 'https://www.vesselfinder.com/' },
-  { key: 'marinetraffic', label: 'MarineTraffic 船舶动态', url: 'https://www.marinetraffic.com/' }
+  { key: 'vesselfinder', label: 'VesselFinder 船名航次查询', url: 'https://www.vesselfinder.com/', desc: '全球船舶实时位置、历史轨迹与到港信息。' },
+  { key: 'marinetraffic', label: 'MarineTraffic 船舶动态', url: 'https://www.marinetraffic.com/', desc: '提供 AIS 数据、港口拥堵与船舶动态查询。' }
 ]
-
-const activeProvider = ref<VesselProvider>(vesselProviders[0])
 
 const queryRoutes = async () => {
   if (formState.containerCount <= 0) {
@@ -66,30 +65,22 @@ const leadQuery = computed(() => ({
       type="info"
       show-icon
       style="margin-bottom: 16px"
-      message="船名航次查询（站内 iframe）"
-      description="以下为第三方页面嵌入，若平台限制 iframe 显示，可点击“新窗口打开”。"
+      message="船名航次查询（外链）"
+      description="已移除站内 iframe 展示，请点击以下入口在新窗口打开第三方查询平台。"
     />
 
-    <a-space wrap style="margin-bottom: 12px">
-      <a-button
-        v-for="item in vesselProviders"
-        :key="item.key"
-        :type="activeProvider.key === item.key ? 'primary' : 'default'"
-        @click="activeProvider = item"
-      >
-        {{ item.label }}
-      </a-button>
-      <a-button type="link" :href="activeProvider.url" target="_blank" rel="noopener noreferrer">
-        新窗口打开
-      </a-button>
-    </a-space>
-
-    <iframe
-      :src="activeProvider.url"
-      title="船名航次查询"
-      class="vessel-iframe"
-      referrerpolicy="no-referrer"
-    />
+    <a-row :gutter="12" style="margin-bottom: 8px">
+      <a-col v-for="item in vesselProviders" :key="item.key" :xs="24" :md="12">
+        <a-card size="small" :title="item.label">
+          <a-typography-paragraph style="margin-bottom: 12px">
+            {{ item.desc }}
+          </a-typography-paragraph>
+          <a-button type="primary" :href="item.url" target="_blank" rel="noopener noreferrer">
+            打开 {{ item.label }}
+          </a-button>
+        </a-card>
+      </a-col>
+    </a-row>
 
     <a-form layout="inline" style="margin-top: 16px">
       <a-form-item label="中国起运港/城市">
@@ -146,13 +137,3 @@ const leadQuery = computed(() => ({
     </a-card>
   </a-card>
 </template>
-
-<style scoped>
-.vessel-iframe {
-  width: 100%;
-  height: 560px;
-  border: 1px solid #d9d9d9;
-  border-radius: 10px;
-  background: #fff;
-}
-</style>

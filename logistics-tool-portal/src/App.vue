@@ -17,16 +17,8 @@
               <RouterLink to="/">首页</RouterLink>
             </a-menu-item>
 
-            <a-menu-item key="line-query">
-              <RouterLink to="/line-query">航线查询</RouterLink>
-            </a-menu-item>
-
-            <a-menu-item key="volume-pricing">
-              <RouterLink to="/volume-pricing">体积计价</RouterLink>
-            </a-menu-item>
-
-            <a-menu-item key="hs-lookup">
-              <RouterLink to="/hs-lookup">HS 查询</RouterLink>
+            <a-menu-item key="tools">
+              <RouterLink to="/tools">工具</RouterLink>
             </a-menu-item>
 
             <a-menu-item key="me">
@@ -38,7 +30,6 @@
             </a-menu-item>
           </a-menu>
         </div>
-
       </div>
     </a-layout-header>
 
@@ -65,9 +56,7 @@ import { useRoute, RouterLink, RouterView } from 'vue-router'
 const route = useRoute()
 
 const activeKey = computed(() => {
-  if (route.path.startsWith('/line-query')) return 'line-query'
-  if (route.path.startsWith('/volume-pricing')) return 'volume-pricing'
-  if (route.path.startsWith('/hs-lookup')) return 'hs-lookup'
+  if (route.path.startsWith('/tools') || route.path.startsWith('/line-query') || route.path.startsWith('/volume-pricing')) return 'tools'
   if (route.path.startsWith('/me')) return 'me'
   if (route.path.startsWith('/get-plan')) return 'get-plan'
   return 'home'

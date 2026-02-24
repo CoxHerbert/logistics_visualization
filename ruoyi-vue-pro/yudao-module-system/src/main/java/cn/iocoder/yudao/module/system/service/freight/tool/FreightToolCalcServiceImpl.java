@@ -5,17 +5,13 @@ import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolCalcRespVO;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolFclCalcReqVO;
 import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolLclCalcReqVO;
-import cn.iocoder.yudao.module.system.controller.web.freight.vo.tool.WebFreightToolSensitiveCheckReqVO;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Service
 public class FreightToolCalcServiceImpl implements FreightToolCalcService {
@@ -26,7 +22,6 @@ public class FreightToolCalcServiceImpl implements FreightToolCalcService {
 
     private static final String KEY_FCL_RATE_PER_CONTAINER = "freight.tool.fcl.ratePerContainer";
     private static final String KEY_FCL_DOC_FEE = "freight.tool.fcl.docFee";
-    private static final String KEY_SENSITIVE_WORDS = "freight.tool.sensitive.words";
 
     @Resource
     private ConfigApi configApi;
@@ -75,28 +70,6 @@ public class FreightToolCalcServiceImpl implements FreightToolCalcService {
         return respVO;
     }
 
-    @Override
-    public WebFreightToolCalcRespVO checkSensitive(WebFreightToolSensitiveCheckReqVO reqVO) {
-        String configWords = configApi.getConfigValueByKey(KEY_SENSITIVE_WORDS);
-        List<String> words = StrUtil.isBlank(configWords)
-                ? Arrays.asList("battery", "powder", "liquid", "magnet")
-                : StrUtil.split(configWords, ',');
-
-        String cargo = reqVO.getCargoDesc().toLowerCase(Locale.ROOT);
-        List<String> matched = words.stream()
-                .map(String::trim)
-                .filter(StrUtil::isNotBlank)
-                .filter(word -> cargo.contains(word.toLowerCase(Locale.ROOT)))
-                .collect(Collectors.toList());
-
-        WebFreightToolCalcRespVO respVO = new WebFreightToolCalcRespVO();
-        respVO.setCostBreakdown(Collections.singletonList(cost("Matched Words", BigDecimal.valueOf(matched.size()))));
-        respVO.setTotal(BigDecimal.ZERO);
-        respVO.setNotes(matched.isEmpty()
-                ? Collections.singletonList("No obvious sensitive words detected")
-                : Collections.singletonList("Sensitive words detected: " + String.join(",", matched)));
-        return respVO;
-    }
 
     private WebFreightToolCalcRespVO.CostItem cost(String name, BigDecimal amount) {
         WebFreightToolCalcRespVO.CostItem item = new WebFreightToolCalcRespVO.CostItem();
