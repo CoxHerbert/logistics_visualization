@@ -105,11 +105,71 @@
       </a-col>
     </a-row>
   </section>
+
+  <section class="contact-section">
+    <h2 class="section-title">联系我们</h2>
+    <a-row :gutter="[20, 20]" align="top">
+      <a-col :xs="24" :lg="10">
+        <a-card class="contact-info-card" :bodyStyle="{ padding: '18px' }">
+          <h3>中美专线顾问 1 对 1 服务</h3>
+          <p>留下联系方式，我们将在 30 分钟内回电，提供航线建议、报价与清关风险提示。</p>
+          <ul>
+            <li>✅ 支持整箱 / 拼箱 / 空运</li>
+            <li>✅ 支持美国清关与保险方案咨询</li>
+            <li>✅ 支持订舱到签收节点追踪答疑</li>
+          </ul>
+        </a-card>
+      </a-col>
+      <a-col :xs="24" :lg="14">
+        <a-card class="contact-form-card" :bodyStyle="{ padding: '18px' }">
+          <a-form layout="vertical" @submit.prevent="submitContact">
+            <a-row :gutter="12">
+              <a-col :xs="24" :md="12">
+                <a-form-item label="联系人" required>
+                  <a-input v-model:value="contactForm.contactName" placeholder="请输入联系人姓名" />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="24" :md="12">
+                <a-form-item label="联系电话" required>
+                  <a-input v-model:value="contactForm.contactPhone" placeholder="请输入手机号/座机" />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="12">
+              <a-col :xs="24" :md="12">
+                <a-form-item label="公司名称">
+                  <a-input v-model:value="contactForm.companyName" placeholder="选填" />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="24" :md="12">
+                <a-form-item label="关注航线">
+                  <a-input v-model:value="contactForm.shippingRoute" placeholder="如：上海 - 洛杉矶" />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-form-item label="咨询内容">
+              <a-textarea
+                v-model:value="contactForm.remark"
+                :rows="4"
+                placeholder="请输入您的货物类型、时效要求或当前问题"
+              />
+            </a-form-item>
+            <a-space>
+              <a-button type="primary" html-type="submit" :loading="submittingContact">提交咨询</a-button>
+              <a-button @click="resetContactForm">重置</a-button>
+            </a-space>
+          </a-form>
+        </a-card>
+      </a-col>
+    </a-row>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { message } from 'ant-design-vue'
 import { RouterLink } from 'vue-router'
+import { createContactConsult } from '@/api/portal'
 import { usePortalStore } from '@/stores/portal'
 
 type FlowNode = {
@@ -273,6 +333,47 @@ const toggleAll = () => {
 const firstAction = (n: FlowNode) => n.actions?.[0] || '全程跟进与节点同步'
 const firstGuarantee = (n: FlowNode) => n.guarantees?.[0] || '进度透明，异常快速响应'
 
+const contactForm = reactive({
+  contactName: '',
+  contactPhone: '',
+  companyName: '',
+  shippingRoute: '',
+  remark: ''
+})
+const submittingContact = ref(false)
+
+const resetContactForm = () => {
+  contactForm.contactName = ''
+  contactForm.contactPhone = ''
+  contactForm.companyName = ''
+  contactForm.shippingRoute = ''
+  contactForm.remark = ''
+}
+
+const submitContact = async () => {
+  if (!contactForm.contactName.trim() || !contactForm.contactPhone.trim()) {
+    message.warning('请先填写联系人和联系电话')
+    return
+  }
+
+  submittingContact.value = true
+  try {
+    await createContactConsult({
+      contactName: contactForm.contactName.trim(),
+      contactPhone: contactForm.contactPhone.trim(),
+      companyName: contactForm.companyName.trim(),
+      shippingRoute: contactForm.shippingRoute.trim(),
+      remark: contactForm.remark.trim()
+    })
+    message.success('提交成功，我们会尽快联系您')
+    resetContactForm()
+  } catch {
+    message.error('提交失败，请稍后重试')
+  } finally {
+    submittingContact.value = false
+  }
+}
+
 onMounted(async () => {
   await portalStore.refreshStats()
 })
@@ -288,6 +389,37 @@ section {
 
 .service-section {
   margin-top: 22px;
+}
+
+.contact-section {
+  margin-top: 24px;
+}
+
+.contact-info-card,
+.contact-form-card {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.contact-info-card h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.contact-info-card p {
+  margin: 10px 0;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.contact-info-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(0, 0, 0, 0.68);
+  line-height: 1.9;
 }
 
 .service-card {

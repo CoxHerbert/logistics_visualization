@@ -69,3 +69,16 @@ export const calcFclTool = async (payload: {
     const { data } = await http.post<CommonResult<ToolCalcResp>>(`/tools/fcl-pricing`, payload);
     return unwrapResult(data);
 };
+
+export type ContactConsultCreateReq = {
+    contactName: string;
+    contactPhone: string;
+    companyName?: string;
+    shippingRoute?: string;
+    remark?: string;
+};
+
+export const createContactConsult = async (payload: ContactConsultCreateReq): Promise<number> => {
+    const { data } = await http.post<CommonResult<number>>(`/contact-consult/create`, payload);
+    return unwrapResult(data);
+};
