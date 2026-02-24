@@ -15,7 +15,9 @@
           </RouterLink>
         </a-space>
         <a-row :gutter="12" class="hero-tags">
-          <a-col v-for="tag in strengths" :key="tag"><a-tag color="blue">{{ tag }}</a-tag></a-col>
+          <a-col v-for="tag in strengths" :key="tag">
+            <a-tag color="blue">{{ tag }}</a-tag>
+          </a-col>
         </a-row>
       </a-col>
       <a-col :xs="24" :lg="11">
@@ -24,92 +26,231 @@
     </a-row>
   </section>
 
-  <section class="overview-section">
-    <a-row :gutter="16">
-      <a-col :xs="24" :md="8" v-for="item in portalStore.stats" :key="item.label">
-        <a-card>
-          <a-statistic :title="item.label" :value="item.value" :loading="portalStore.loading" />
-        </a-card>
-      </a-col>
-    </a-row>
-  </section>
+  <!-- ✅ 极简科普版：全流程服务节点（强调可控与保障，不堆“风险”） -->
+  <section class="flow-section">
+    <div class="flow-header">
+      <div>
+        <h2 class="section-title" style="margin-bottom: 6px">中美海运全流程服务节点</h2>
+        <div class="flow-sub">点击节点查看：我们会做什么 & 您获得什么保障（简单、安心、可控）</div>
+      </div>
 
-  <section>
-    <h2 class="section-title">中美线核心服务</h2>
-    <a-row :gutter="16">
-      <a-col v-for="service in services" :key="service.title" :xs="24" :sm="12" :lg="6">
-        <a-card hoverable class="service-card">
-          <template #title>
-            <a-space>
-              <component :is="service.icon" />
-              <span>{{ service.title }}</span>
-            </a-space>
-          </template>
-          <p>{{ service.desc }}</p>
-        </a-card>
-      </a-col>
-    </a-row>
-  </section>
+      <div class="flow-legend">
+        <a-tag class="legend-tag" color="blue">常规节点</a-tag>
+        <a-tag class="legend-tag" color="green">重点保障</a-tag>
+      </div>
+    </div>
 
-  <section class="tools-banner-wrapper">
-    <img src="/images/tools-banner.svg" alt="中美线货代工具功能横幅" class="tools-banner" />
-  </section>
+    <a-card class="flow-card" :bodyStyle="{ padding: '14px 14px 10px' }">
+      <div class="flow-steps-scroll">
+        <a-steps size="small" :current="-1">
+          <a-step v-for="node in flowNodes" :key="node.key" :title="node.title" :description="node.short"
+            @click="openNode(node)">
+            <template #icon>
+              <span class="flow-dot" :data-focus="node.focus ? '1' : '0'"></span>
+            </template>
+          </a-step>
+        </a-steps>
+      </div>
 
-  <section>
-    <h2 class="section-title">中美热门航线</h2>
-    <a-table :pagination="false" :data-source="hotRoutes" :columns="columns" row-key="route" />
+      <div class="flow-hint">
+        <a-space wrap>
+          <span class="hint-item">✅ 每一步都有专人跟进，关键节点会主动提醒与确认</span>
+          <span class="hint-item">✅ 进度可追踪，异常会第一时间通知并给出处理方案</span>
+        </a-space>
+      </div>
+    </a-card>
+
+    <a-drawer v-model:open="drawerOpen" :title="selectedNode?.title || '节点说明'" placement="right" width="460">
+      <template v-if="selectedNode">
+        <div class="drawer-meta">
+          <a-tag :color="selectedNode.focus ? 'green' : 'blue'">
+            {{ selectedNode.focus ? '重点保障' : '常规节点' }}
+          </a-tag>
+          <span class="drawer-key">{{ selectedNode.key }}</span>
+        </div>
+
+        <div class="drawer-block">
+          <div class="drawer-title">我们会做什么</div>
+          <ul class="drawer-list">
+            <li v-for="a in selectedNode.actions" :key="a">{{ a }}</li>
+          </ul>
+        </div>
+
+        <div class="drawer-block">
+          <div class="drawer-title">您获得什么保障</div>
+          <ul class="drawer-list">
+            <li v-for="g in selectedNode.guarantees" :key="g">{{ g }}</li>
+          </ul>
+        </div>
+
+        <a-divider />
+
+        <a-space>
+          <RouterLink :to="selectedNode.cta || '/get-plan'">
+            <a-button type="primary">基于该节点获取方案</a-button>
+          </RouterLink>
+          <RouterLink to="/get-plan?remark=我想了解全流程服务与跟进方式">
+            <a-button>咨询服务细节</a-button>
+          </RouterLink>
+        </a-space>
+      </template>
+    </a-drawer>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import {
-  GlobalOutlined,
-  RocketOutlined,
-  SafetyOutlined,
-  ReconciliationOutlined
-} from '@ant-design/icons-vue'
 import { usePortalStore } from '@/stores/portal'
+
+type FlowNode = {
+  key: string
+  title: string
+  short: string
+  /** 重点保障：用更“安心”的表达替代“高风险” */
+  focus?: boolean
+  actions: string[]
+  guarantees: string[]
+  cta?: string
+}
 
 const portalStore = usePortalStore()
 
 const strengths = ['中美固定舱位', '美国清关合规支持', '尾程卡派/快递派送', '7×24 异常响应']
 
-const services = [
-  { title: '中美海运整箱/拼箱', desc: '覆盖上海、宁波、深圳至美西/美东主力港口，稳定周班。', icon: GlobalOutlined },
-  { title: '中美空运专线', desc: '上海/深圳/香港起飞，直飞 LAX/JFK/ORD，时效稳定。', icon: RocketOutlined },
-  { title: '美国清关与保险', desc: '支持 ISF、AMS、Bond 及货运险方案，降低目的港风险。', icon: SafetyOutlined },
-  { title: '全程可视化', desc: '订舱到签收全链路节点追踪，异常自动预警与通知。', icon: ReconciliationOutlined }
+/**
+ * ✅ 极简科普版节点：
+ * - 不说“风险/后果”，只说“我们做什么 / 你得到什么保障”
+ * - focus=true：对外表达为“重点保障节点”，而不是“高风险节点”
+ * - 国内段也覆盖，但用服务表达（不制造压力）
+ */
+const flowNodes: FlowNode[] = [
+  {
+    key: 'QUOTE',
+    title: '方案确认',
+    short: '需求/报价口径',
+    focus: true,
+    actions: ['了解货物与交期需求', '给出清晰的运输方案（整柜/拼箱/快船等）', '确认费用口径与关键时间点'],
+    guarantees: ['报价项清晰，避免临时加价误会', '交期更可控，方案更匹配业务'],
+    cta: '/get-plan?remark=我想确认运输方案与报价口径'
+  },
+  {
+    key: 'CN_PICKUP',
+    title: '国内提货',
+    short: '门点/送仓',
+    actions: ['安排车辆上门提货或送仓', '核对地址、时间与装货信息', '出发与到达进度同步'],
+    guarantees: ['按计划衔接后续节点', '有人跟进，不用反复催进度'],
+    cta: '/get-plan?remark=我需要国内提货或送仓安排'
+  },
+  {
+    key: 'WAREHOUSE',
+    title: '集货/装前',
+    short: '集货/贴标/装前准备',
+    actions: ['确认箱唛/件数/外箱情况', '必要时协助贴标与加固建议', '装柜前再次核对货物信息'],
+    guarantees: ['装柜更顺利、单证更一致', '减少来回沟通成本'],
+    cta: '/get-plan?remark=我需要集货与装前准备建议'
+  },
+  {
+    key: 'BOOKING',
+    title: '订舱',
+    short: '航次/截关确认',
+    focus: true,
+    actions: ['提前锁舱并确认航次', '同步截港/截关时间', '关键变动第一时间告知'],
+    guarantees: ['尽量保障舱位与船期', '交期计划更稳定'],
+    cta: '/get-plan?remark=我想锁定船期与舱位'
+  },
+  {
+    key: 'PICKUP_EMPTY',
+    title: '提柜',
+    short: '提空柜/验柜',
+    actions: ['安排提空柜与验柜', '异常及时更换与记录', '按截关倒排时间'],
+    guarantees: ['减少临时返工与等待', '节奏更可控']
+  },
+  {
+    key: 'STUFFING',
+    title: '装柜',
+    short: '装箱/封条',
+    actions: ['按装载方案装柜与加固', '记录封条信息并留档', '装柜完成同步进度'],
+    guarantees: ['装柜过程更规范', '后续追溯更方便']
+  },
+  {
+    key: 'EXPORT_CUSTOMS',
+    title: '报关',
+    short: '资料审核/放行',
+    focus: true,
+    actions: ['提前审核单证资料', '协助补充必要信息', '放行进度主动同步'],
+    guarantees: ['减少来回补资料', '更大概率按计划赶上船期'],
+    cta: '/get-plan?remark=我想了解报关资料与流程'
+  },
+  {
+    key: 'ONBOARD',
+    title: '装船',
+    short: '确认装船',
+    actions: ['确认装船状态与关键回执', '同步装船结果与预计到港', '必要时提供替代安排建议'],
+    guarantees: ['节点清晰可追踪', '异常更快得到处理方案']
+  },
+  {
+    key: 'SAILING',
+    title: '海上运输',
+    short: 'ATD/ETA 跟踪',
+    actions: ['跟踪离港/到港时间', '定期同步节点进度', '到港前提醒准备事项'],
+    guarantees: ['进度透明', '到港衔接更顺畅']
+  },
+  {
+    key: 'ARRIVAL',
+    title: '到港',
+    short: '到港衔接',
+    focus: true,
+    actions: ['到港前提醒关键动作与时间点', '协助安排提货/派送资源', '异常第一时间同步'],
+    guarantees: ['减少临时手忙脚乱', '衔接更顺滑'],
+    cta: '/get-plan?remark=我想要到港后的派送安排建议'
+  },
+  {
+    key: 'IMPORT_CUSTOMS',
+    title: '清关',
+    short: '美国清关安排',
+    focus: true,
+    actions: ['对接美国清关支持', '跟进清关进度并同步结果', '必要时提供补充材料指引'],
+    guarantees: ['清关过程有人盯', '问题出现能快速给方向'],
+    cta: '/get-plan?remark=我想了解美国清关支持与资料'
+  },
+  {
+    key: 'DELIVERY',
+    title: '派送',
+    short: '卡派/快递',
+    actions: ['安排卡派或快递派送', '预约送仓或送门点', '同步派送进度与签收结果'],
+    guarantees: ['尾程不失联', '签收结果可追踪']
+  },
+  {
+    key: 'POD',
+    title: '签收',
+    short: '交付完成',
+    actions: ['回传签收信息与回单（如有）', '协助处理异常签收情况', '整理本票经验给下次更省心'],
+    guarantees: ['交付闭环', '下一票更顺畅']
+  }
 ]
 
-const hotRoutes = [
-  { route: '上海 → 洛杉矶 (LAX)', transit: '14-18 天', mode: '海运快船', frequency: '每周 3 班' },
-  { route: '宁波 → 长滩 (LGB)', transit: '15-20 天', mode: '海运普船', frequency: '每周 2 班' },
-  { route: '深圳 → 纽约 (JFK)', transit: '4-6 天', mode: '空运直飞', frequency: '每日舱位' }
-]
-
-const columns = [
-  { title: '热门航线', dataIndex: 'route', key: 'route' },
-  { title: '运输方式', dataIndex: 'mode', key: 'mode' },
-  { title: '参考时效', dataIndex: 'transit', key: 'transit' },
-  { title: '班次', dataIndex: 'frequency', key: 'frequency' }
-]
+// Drawer 交互
+const drawerOpen = ref(false)
+const selectedNode = ref<FlowNode | null>(null)
+const openNode = (node: FlowNode) => {
+  selectedNode.value = node
+  drawerOpen.value = true
+}
 
 onMounted(async () => {
   await portalStore.refreshStats()
 })
 </script>
+
 <style scoped>
-/* ====== Layout spacing ====== */
 .hero-section,
-.overview-section,
-.tools-banner-wrapper,
+.flow-section,
 section {
-  /* max-width: 1160px; */
   margin: 0 auto;
 }
 
+/* ====== Hero ====== */
 .hero-section {
   margin-top: 8px;
   padding: 40px 28px;
@@ -140,7 +281,6 @@ section {
   max-width: 640px;
 }
 
-/* Buttons: more premium */
 :deep(.ant-btn-lg) {
   height: 44px;
   padding: 0 18px;
@@ -151,15 +291,11 @@ section {
   box-shadow: 0 10px 22px rgba(22, 119, 255, 0.28);
 }
 
-:deep(.ant-btn-primary:hover) {
-  transform: translateY(-1px);
-}
-
+:deep(.ant-btn-primary:hover),
 :deep(.ant-btn:not(.ant-btn-primary):hover) {
   transform: translateY(-1px);
 }
 
-/* Tags under hero */
 .hero-tags {
   margin-top: 16px;
 }
@@ -172,7 +308,6 @@ section {
   color: rgba(0, 0, 0, 0.72);
 }
 
-/* Hero image */
 .hero-image {
   width: 100%;
   max-height: 320px;
@@ -181,35 +316,7 @@ section {
   transform: translateY(4px);
 }
 
-/* ====== Overview stats ====== */
-.overview-section {
-  margin-top: 18px;
-  margin-bottom: 8px;
-  padding: 0 2px;
-}
-
-:deep(.ant-card) {
-  border-radius: 16px;
-}
-
-.overview-section :deep(.ant-card) {
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-}
-
-.overview-section :deep(.ant-card-body) {
-  padding: 18px 18px 14px;
-}
-
-:deep(.ant-statistic-title) {
-  color: rgba(0, 0, 0, 0.55);
-}
-
-:deep(.ant-statistic-content) {
-  font-weight: 800;
-}
-
-/* ====== Section title ====== */
+/* ====== Titles ====== */
 .section-title {
   margin: 26px 0 14px;
   font-size: 20px;
@@ -218,81 +325,121 @@ section {
   letter-spacing: -0.01em;
 }
 
-/* ====== Services cards ====== */
-.service-card {
+/* ====== Flow section ====== */
+.flow-section {
+  margin-top: 10px;
+}
+
+.flow-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.flow-sub {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.58);
+}
+
+.flow-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-tag {
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.flow-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-  overflow: hidden;
-  position: relative;
 }
 
-.service-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(380px 120px at 20% 0%, rgba(22, 119, 255, 0.14), transparent 55%);
-  pointer-events: none;
+.flow-steps-scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
 }
 
-.service-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.10);
+.flow-steps-scroll :deep(.ant-steps) {
+  min-width: 1120px;
 }
 
-.service-card :deep(.ant-card-head) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+.flow-steps-scroll :deep(.ant-steps-item) {
+  cursor: pointer;
 }
 
-.service-card :deep(.ant-card-head-title) {
-  padding: 14px 0;
+.flow-steps-scroll :deep(.ant-steps-item-title) {
   font-weight: 800;
 }
 
-.service-card p {
-  margin: 10px 0 0;
-  line-height: 1.7;
+.flow-steps-scroll :deep(.ant-steps-item-description) {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* Dot: focus vs normal */
+.flow-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+  background: rgba(22, 119, 255, 0.95);
+}
+
+.flow-dot[data-focus='1'] {
+  background: rgba(82, 196, 26, 0.95);
+}
+
+.flow-hint {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.hint-item {
+  font-size: 13px;
   color: rgba(0, 0, 0, 0.62);
 }
 
-/* Icons a bit larger */
-.service-card :deep(.anticon) {
-  font-size: 18px;
-  color: rgba(22, 119, 255, 0.95);
+/* Drawer */
+.drawer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-/* ====== Tools banner ====== */
-.tools-banner-wrapper {
-  margin: 18px auto 10px;
-  padding: 0 2px;
+.drawer-key {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
 }
 
-.tools-banner {
-  width: 100%;
-  border-radius: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.08);
-  display: block;
+.drawer-block {
+  margin: 12px 0 14px;
 }
 
-/* ====== Table ====== */
-:deep(.ant-table) {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+.drawer-title {
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.85);
 }
 
-:deep(.ant-table-thead > tr > th) {
-  font-weight: 800;
-  color: rgba(0, 0, 0, 0.75);
-  background: rgba(0, 0, 0, 0.02);
+.drawer-list {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.75;
 }
 
-:deep(.ant-table-tbody > tr:hover > td) {
-  background: rgba(22, 119, 255, 0.05);
-}
-
-/* ====== Responsive ====== */
+/* Responsive */
 @media (max-width: 992px) {
   .hero-section {
     padding: 28px 18px;
@@ -305,6 +452,11 @@ section {
   .hero-image {
     margin-top: 18px;
     max-height: 240px;
+  }
+
+  .flow-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
