@@ -29,7 +29,7 @@
   <section class="service-section">
     <h2 class="section-title">中美专线服务</h2>
     <a-row :gutter="[16, 16]">
-      <a-col v-for="item in serviceCards" :key="item.title" :xs="24" :md="12">
+      <a-col v-for="item in serviceCards" :key="item.title" :xs="24" :sm="12" :lg="6">
         <a-card class="service-card" :bodyStyle="{ padding: '0' }">
           <img class="service-image" :src="resolvePublicImage(item.image)" :alt="item.title" />
           <div class="service-content">
@@ -297,7 +297,7 @@ section {
 
 .service-image {
   width: 100%;
-  height: 200px;
+  height: 170px;
   object-fit: cover;
   display: block;
 }
