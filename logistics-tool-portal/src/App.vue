@@ -12,19 +12,13 @@
           </div>
 
           <!-- Menu -->
-          <a-menu mode="horizontal" theme="dark" :selected-keys="[activeKey]" :open-keys="openKeys" class="top-menu">
+          <a-menu mode="horizontal" theme="dark" :selected-keys="[activeKey]" class="top-menu">
             <a-menu-item key="home">
               <RouterLink to="/">首页</RouterLink>
             </a-menu-item>
 
-            <a-sub-menu key="tools" title="工具">
-              <a-menu-item key="line-query">
-                <RouterLink to="/line-query">航线查询</RouterLink>
-              </a-menu-item>
-            </a-sub-menu>
-
-            <a-menu-item key="volume-pricing">
-              <RouterLink to="/volume-pricing">体积计价</RouterLink>
+            <a-menu-item key="tools">
+              <RouterLink to="/tools">工具</RouterLink>
             </a-menu-item>
 
             <a-menu-item key="me">
@@ -62,12 +56,9 @@ import { useRoute, RouterLink, RouterView } from 'vue-router'
 const route = useRoute()
 
 const activeKey = computed(() => {
-  if (route.path.startsWith('/line-query')) return 'line-query'
-  if (route.path.startsWith('/volume-pricing')) return 'volume-pricing'
+  if (route.path.startsWith('/tools') || route.path.startsWith('/line-query') || route.path.startsWith('/volume-pricing')) return 'tools'
   if (route.path.startsWith('/me')) return 'me'
   if (route.path.startsWith('/get-plan')) return 'get-plan'
   return 'home'
 })
-
-const openKeys = computed(() => (route.path.startsWith('/line-query') ? ['tools'] : []))
 </script>
