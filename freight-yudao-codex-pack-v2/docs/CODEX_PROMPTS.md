@@ -2,14 +2,14 @@
 
 > 你的仓库结构（同一 Git 仓库内多个工程）：
 > - `ruoyi-vue-pro/`（后端，MySQL，单体）
-> - `logistics-tool-portal/`（门户，Vue3，走 /web-api）
+> - `logistics-tool-portal/`（门户，Vue3，走 /portal-api）
 > - `yudao-ui-admin-vben/`（PC 管理端，走 /admin-api）
 > - `yudao-ui-admin-uniapp/`（移动端，走 /app-api）
 >
 > 约定前缀：
 > - 管理端：`/admin-api`
 > - 移动端：`/app-api`
-> - 门户：`/web-api`
+> - 门户：`/portal-api`
 
 ---
 
@@ -45,7 +45,7 @@
 
 # Sprint 1 — 线索闭环（门户留资 → 管理端可见）
 
-## T1.1（后端）ApiConstants：支持 /admin-api /web-api /app-api
+## T1.1（后端）ApiConstants：支持 /admin-api /portal-api /app-api
 **TASK_SCOPE**：`ruoyi-vue-pro/**`
 
 ```text
@@ -53,7 +53,7 @@
 
 目标：新增（或复用）一个 API 前缀常量类，统一管理：
 - ADMIN_API_PREFIX = "/admin-api"
-- WEB_API_PREFIX   = "/web-api"
+- WEB_API_PREFIX   = "/portal-api"
 - APP_API_PREFIX   = "/app-api"
 
 约束：
@@ -124,12 +124,12 @@
 目标：实现门户留资接口（web-api）+ 安全放行 + 最小防刷。
 
 接口：
-- POST /web-api/freight/lead/create
+- POST /portal-api/freight/lead/create
 入参：WebFreightLeadCreateReqVO（包含 contactType/contactValue/shipMode/cargoType/weightKg/volumeCbm/cartons/originPort/destination/incoterms/fba/amazonWarehouseCode/expectation/remark）
 出参：leadId（使用项目统一响应体包装）
 
 安全：
-1) /web-api/freight/lead/create 必须允许匿名访问（加入白名单）
+1) /portal-api/freight/lead/create 必须允许匿名访问（加入白名单）
 2) 实现最小防刷（优先简单可落地）：
    - A) IP + contactValue 60 秒内重复提交拦截
    或
@@ -142,7 +142,7 @@
 - 若项目已有 redis/缓存工具，优先复用；否则可用本地缓存（说明局限）
 
 验收：
-- Swagger 调用 POST /web-api/freight/lead/create 成功返回 leadId
+- Swagger 调用 POST /portal-api/freight/lead/create 成功返回 leadId
 - 60 秒内重复提交同一 contactValue 会被拦截（提供命中示例）
 
 交付：
@@ -225,13 +225,13 @@
 
 ---
 
-## T1.6（门户）/get-plan 留资页（联调 /web-api）
+## T1.6（门户）/get-plan 留资页（联调 /portal-api）
 **TASK_SCOPE**：`logistics-tool-portal/**`
 
 ```text
 你在一个 mono-repo 中工作（只允许改 logistics-tool-portal/**）。
 
-目标：新增门户留资页 /get-plan，调用 POST /web-api/freight/lead/create。
+目标：新增门户留资页 /get-plan，调用 POST /portal-api/freight/lead/create。
 
 页面：
 - /get-plan
@@ -254,7 +254,7 @@
 - 提供个人入口：跳转 /me 或复制微信号（先写死占位）
 
 约束：
-- API base 使用 /web-api（开发期可走代理）
+- API base 使用 /portal-api（开发期可走代理）
 - 使用项目现有 UI/表单方案（不要引入新库）
 - 错误提示友好
 
@@ -438,9 +438,9 @@
 目标：实现门户三工具接口（匿名），并支持从 freight_rule_config 覆盖默认规则。
 
 接口：
-- POST /web-api/freight/tool/lcl/calc
-- POST /web-api/freight/tool/fcl/calc
-- POST /web-api/freight/tool/sensitive/check
+- POST /portal-api/freight/tool/lcl/calc
+- POST /portal-api/freight/tool/fcl/calc
+- POST /portal-api/freight/tool/sensitive/check
 
 返回结构统一：
 - costBreakdown[]：{name, unit, qty, unitPrice, amount, note}
@@ -474,9 +474,9 @@
 目标：新增门户工具页并联调后端 web-api。
 
 页面：
-- /tools/sea-lcl  调用 POST /web-api/freight/tool/lcl/calc
-- /tools/sea-fcl  调用 POST /web-api/freight/tool/fcl/calc
-- /tools/sensitive-check 调用 POST /web-api/freight/tool/sensitive/check
+- /tools/sea-lcl  调用 POST /portal-api/freight/tool/lcl/calc
+- /tools/sea-fcl  调用 POST /portal-api/freight/tool/fcl/calc
+- /tools/sensitive-check 调用 POST /portal-api/freight/tool/sensitive/check
 
 要求：
 - 输入表单 + 结果展示（费用拆解/total/notes）

@@ -3,7 +3,7 @@
 ## 1) 前缀与客户端
 - PC 管理端（yudao-ui-admin-vben）：`/admin-api`
 - 移动端（yudao-ui-admin-uniapp）：`/app-api`
-- 门户（logistics-tool-portal）：`/web-api`
+- 门户（logistics-tool-portal）：`/portal-api`
 
 ---
 
@@ -40,10 +40,10 @@
 
 ---
 
-# 4) 门户 Web API（/web-api）
+# 4) 门户 Web API（/portal-api）
 
 ## 4.1 留资：创建线索
-`POST /web-api/freight/lead/create`
+`POST /portal-api/freight/lead/create`
 
 ### Request
 ```json
@@ -94,7 +94,7 @@
 ---
 
 ## 4.2 工具：LCL 计算
-`POST /web-api/freight/tool/lcl/calc`
+`POST /portal-api/freight/tool/lcl/calc`
 
 ### Request
 ```json
@@ -136,7 +136,7 @@
 ---
 
 ## 4.3 工具：FCL 计算
-`POST /web-api/freight/tool/fcl/calc`
+`POST /portal-api/freight/tool/fcl/calc`
 
 ### Request
 ```json
@@ -173,7 +173,7 @@
 ---
 
 ## 4.4 工具：敏感品判断
-`POST /web-api/freight/tool/sensitive/check`
+`POST /portal-api/freight/tool/sensitive/check`
 
 ### Request
 ```json

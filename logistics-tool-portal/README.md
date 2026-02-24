@@ -33,15 +33,12 @@ npm run preview
 示例：
 
 ```bash
-VITE_API_BASE_URL=/api
-VITE_WEB_API_BASE_URL=
-VITE_PROXY_API_TARGET=http://localhost:48080/admin-api
-VITE_PROXY_WEB_API_TARGET=http://localhost:48080
+VITE_PORTAL_API_PREFIX=/portal-api
+VITE_PROXY_API_TARGET=http://localhost:48080/portal-api
 ```
 
 ## 本地代理
 
 开发环境默认代理：
 
-- `/api/*` -> `VITE_PROXY_API_TARGET`（默认 `http://localhost:48080/admin-api`）
-- `/web-api/*` -> `VITE_PROXY_WEB_API_TARGET`（默认 `http://localhost:48080`）
+- `/portal-api/*` -> `VITE_PROXY_API_TARGET`（默认 `http://localhost:48080/portal-api`）

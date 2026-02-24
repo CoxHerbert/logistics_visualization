@@ -33,8 +33,6 @@ type CommonResult<T> = {
     msg: string;
 };
 
-const WEB_API_BASE = import.meta.env.VITE_WEB_API_BASE_URL ?? '';
-
 function unwrapResult<T>(result: CommonResult<T>): T {
     if (typeof result?.code === 'number' && result.code !== 0) {
         throw new Error(result.msg || '请求失败');
@@ -48,7 +46,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 export const createFreightLead = async (payload: FreightLeadCreateReq): Promise<number> => {
-    const { data } = await http.post<CommonResult<number>>(`${WEB_API_BASE}/freight/lead/create`, payload);
+    const { data } = await http.post<CommonResult<number>>(`/leads/create`, payload);
     return unwrapResult(data);
 };
 
@@ -58,7 +56,7 @@ export const calcLclTool = async (payload: {
     volumeCbm: number;
     weightKg: number;
 }): Promise<ToolCalcResp> => {
-    const { data } = await http.post<CommonResult<ToolCalcResp>>(`${WEB_API_BASE}/freight/tool/lcl/calc`, payload);
+    const { data } = await http.post<CommonResult<ToolCalcResp>>(`/tools/lcl-pricing`, payload);
     return unwrapResult(data);
 };
 
@@ -68,13 +66,13 @@ export const calcFclTool = async (payload: {
     containerType: string;
     containerCount: number;
 }): Promise<ToolCalcResp> => {
-    const { data } = await http.post<CommonResult<ToolCalcResp>>(`${WEB_API_BASE}/freight/tool/fcl/calc`, payload);
+    const { data } = await http.post<CommonResult<ToolCalcResp>>(`/tools/fcl-pricing`, payload);
     return unwrapResult(data);
 };
 
 export const checkSensitiveTool = async (payload: { cargoDesc: string }): Promise<ToolCalcResp> => {
     const { data } = await http.post<CommonResult<ToolCalcResp>>(
-        `${WEB_API_BASE}/freight/tool/sensitive/check`,
+        `/tools/sensitive-check`,
         payload,
     );
     return unwrapResult(data);
