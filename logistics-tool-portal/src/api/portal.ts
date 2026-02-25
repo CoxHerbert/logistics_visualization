@@ -1,4 +1,4 @@
-import { http } from './http';
+import { http, httpPublic } from './http';
 
 export type DashboardStats = {
     inquiriesToday: number;
@@ -79,6 +79,6 @@ export type ContactConsultCreateReq = {
 };
 
 export const createContactConsult = async (payload: ContactConsultCreateReq): Promise<number> => {
-    const { data } = await http.post<CommonResult<number>>(`/contact-consult/create`, payload);
+    const { data } = await httpPublic.post<CommonResult<number>>(`/contact-consult/create`, payload);
     return unwrapResult(data);
 };
