@@ -6,13 +6,15 @@ import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.lead.AdminFre
 import cn.iocoder.yudao.module.freight.controller.web.freight.vo.lead.WebFreightLeadCreateReqVO;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightLeadDO;
 
+import javax.validation.Valid;
+
 public interface FreightLeadService {
 
-    Long createLead(WebFreightLeadCreateReqVO createReqVO);
+    Long createLead(@Valid WebFreightLeadCreateReqVO createReqVO);
 
     PageResult<FreightLeadDO> getLeadPage(AdminFreightLeadPageReqVO pageReqVO);
 
-    void updateLead(AdminFreightLeadUpdateReqVO updateReqVO);
+    void updateLead(@Valid AdminFreightLeadUpdateReqVO updateReqVO);
 
     FreightLeadDO getLead(Long id);
 
