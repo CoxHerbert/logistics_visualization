@@ -19,3 +19,8 @@ http.interceptors.response.use(
         return Promise.reject(error);
     },
 );
+
+export const httpPublic = axios.create({
+    baseURL: import.meta.env.VITE_PORTAL_API_PREFIX ?? '/portal-api',
+    timeout: 10000,
+});

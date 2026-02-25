@@ -1,4 +1,4 @@
-import { http } from './http';
+import { http, httpPublic } from './http';
 
 export type DashboardStats = {
     inquiriesToday: number;
@@ -46,7 +46,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 export const createFreightLead = async (payload: FreightLeadCreateReq): Promise<number> => {
-    const { data } = await http.post<CommonResult<number>>(`/leads/create`, payload);
+    const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, payload);
     return unwrapResult(data);
 };
 
@@ -67,5 +67,26 @@ export const calcFclTool = async (payload: {
     containerCount: number;
 }): Promise<ToolCalcResp> => {
     const { data } = await http.post<CommonResult<ToolCalcResp>>(`/tools/fcl-pricing`, payload);
+    return unwrapResult(data);
+};
+
+export type ContactConsultCreateReq = {
+    contactName: string;
+    contactPhone: string;
+    companyName?: string;
+    shippingRoute?: string;
+    remark?: string;
+};
+
+export const createContactConsult = async (payload: ContactConsultCreateReq): Promise<number> => {
+    const leadPayload: FreightLeadCreateReq = {
+        contactName: payload.contactName,
+        contactPhone: payload.contactPhone,
+        departureCity: payload.shippingRoute,
+        shipMode: 10,
+        cargoType: 10,
+        remark: [payload.companyName, payload.remark].filter(Boolean).join(' | ') || undefined,
+    };
+    const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, leadPayload);
     return unwrapResult(data);
 };
