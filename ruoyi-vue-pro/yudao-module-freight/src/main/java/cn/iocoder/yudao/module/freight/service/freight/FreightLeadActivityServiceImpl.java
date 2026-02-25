@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.freight.service.freight;
 
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.activity.AdminFreightLeadActivityCreateReqVO;
-import cn.iocoder.yudao.module.freight.controller.app.freight.vo.activity.AppFreightLeadActivityCreateReqVO;
 import cn.iocoder.yudao.module.freight.convert.freight.FreightLeadActivityConvert;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightLeadActivityDO;
 import cn.iocoder.yudao.module.freight.dal.mysql.freight.FreightLeadActivityMapper;
@@ -21,7 +20,6 @@ import static cn.iocoder.yudao.module.freight.enums.ErrorCodeConstants.FREIGHT_L
 public class FreightLeadActivityServiceImpl implements FreightLeadActivityService {
 
     private static final Integer CREATOR_TYPE_ADMIN = 1;
-    private static final Integer CREATOR_TYPE_APP = 2;
 
     @Resource
     private FreightLeadMapper freightLeadMapper;
@@ -34,11 +32,6 @@ public class FreightLeadActivityServiceImpl implements FreightLeadActivityServic
         return createLeadActivity(activity, CREATOR_TYPE_ADMIN);
     }
 
-    @Override
-    public Long createLeadActivityByApp(@Valid AppFreightLeadActivityCreateReqVO createReqVO) {
-        FreightLeadActivityDO activity = FreightLeadActivityConvert.INSTANCE.convert(createReqVO);
-        return createLeadActivity(activity, CREATOR_TYPE_APP);
-    }
 
     @Override
     public List<FreightLeadActivityDO> getLeadActivityList(Long leadId) {
