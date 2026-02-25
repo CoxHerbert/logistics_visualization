@@ -16,6 +16,32 @@ export type FreightLeadCreateReq = {
     remark?: string;
 };
 
+function normalizeLeadPayload(payload: FreightLeadCreateReq): FreightLeadCreateReq {
+    const normalized: FreightLeadCreateReq = {
+        contactName: payload.contactName.trim(),
+        contactPhone: payload.contactPhone.trim(),
+        shipMode: payload.shipMode,
+        cargoType: payload.cargoType,
+    };
+
+    const departureCity = payload.departureCity?.trim();
+    if (departureCity) {
+        normalized.departureCity = departureCity;
+    }
+
+    const destinationCity = payload.destinationCity?.trim();
+    if (destinationCity) {
+        normalized.destinationCity = destinationCity;
+    }
+
+    const remark = payload.remark?.trim();
+    if (remark) {
+        normalized.remark = remark;
+    }
+
+    return normalized;
+}
+
 export type ToolCostItem = {
     name: string;
     amount: number;
@@ -46,7 +72,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 export const createFreightLead = async (payload: FreightLeadCreateReq): Promise<number> => {
-    const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, payload);
+    const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, normalizeLeadPayload(payload));
     return unwrapResult(data);
 };
 
@@ -79,14 +105,14 @@ export type ContactConsultCreateReq = {
 };
 
 export const createContactConsult = async (payload: ContactConsultCreateReq): Promise<number> => {
-    const leadPayload: FreightLeadCreateReq = {
+    const leadPayload = normalizeLeadPayload({
         contactName: payload.contactName,
         contactPhone: payload.contactPhone,
         departureCity: payload.shippingRoute,
         shipMode: 10,
         cargoType: 10,
         remark: [payload.companyName, payload.remark].filter(Boolean).join(' | ') || undefined,
-    };
+    });
     const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, leadPayload);
     return unwrapResult(data);
 };
