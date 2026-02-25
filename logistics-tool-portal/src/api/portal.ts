@@ -46,7 +46,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 export const createFreightLead = async (payload: FreightLeadCreateReq): Promise<number> => {
-    const { data } = await httpPublic.post<CommonResult<number>>(`/leads/create`, payload);
+    const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, payload);
     return unwrapResult(data);
 };
 
@@ -87,6 +87,6 @@ export const createContactConsult = async (payload: ContactConsultCreateReq): Pr
         cargoType: 10,
         remark: [payload.companyName, payload.remark].filter(Boolean).join(' | ') || undefined,
     };
-    const { data } = await httpPublic.post<CommonResult<number>>(`/leads/create`, leadPayload);
+    const { data } = await httpPublic.post<CommonResult<number>>(`/freight/lead/create`, leadPayload);
     return unwrapResult(data);
 };
