@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.freight.enums.freight.LeadSourceEnum;
 import cn.iocoder.yudao.module.freight.enums.freight.LeadStatusEnum;
 import cn.iocoder.yudao.module.freight.enums.freight.ShipModeEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,12 +23,16 @@ public class FreightLeadDO extends TenantBaseDO {
     private Long id;
 
     /** 联系人 */
+    @TableField("name")
     private String contactName;
     /** 联系电话 */
+    @TableField("contact_value")
     private String contactPhone;
     /** 出发地 */
+    @TableField("origin_port")
     private String departureCity;
     /** 目的地 */
+    @TableField("destination")
     private String destinationCity;
 
     /** 枚举 {@link ShipModeEnum} */
