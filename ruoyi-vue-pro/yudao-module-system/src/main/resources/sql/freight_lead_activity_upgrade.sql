@@ -41,6 +41,17 @@ PREPARE stmt FROM @creator_type_migration_sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- 旧表如存在 type 字段，补齐默认值，避免插入时报“Field type doesn't have a default value”
+SET @type_col_default_sql := IF(
+  @has_type_col > 0,
+  'ALTER TABLE `freight_lead_activity` MODIFY COLUMN `type` varchar(16) NOT NULL DEFAULT ''admin'' COMMENT ''创建来源（兼容旧字段）''',
+  'SELECT 1'
+);
+
+PREPARE stmt_type_default FROM @type_col_default_sql;
+EXECUTE stmt_type_default;
+DEALLOCATE PREPARE stmt_type_default;
+
 -- 统一历史数据租户编号为 1
 UPDATE `freight_lead_activity`
 SET `tenant_id` = 1

@@ -17,6 +17,10 @@ public class FreightLeadActivityDO extends BaseDO {
     private Long id;
     private Long leadId;
     private String content;
+    /**
+     * 兼容旧表结构：创建来源字符串字段（例如 admin/app）
+     */
+    private String type;
     private LocalDateTime nextContactTime;
     private Integer creatorType;
 
