@@ -12,9 +12,6 @@ public interface FreightLeadActivityMapper extends BaseMapperX<FreightLeadActivi
 
     default List<FreightLeadActivityDO> selectListByLeadId(Long leadId) {
         return selectList(new LambdaQueryWrapperX<FreightLeadActivityDO>()
-                .select(FreightLeadActivityDO::getId,
-                        FreightLeadActivityDO::getLeadId,
-                        FreightLeadActivityDO::getContent)
                 .eq(FreightLeadActivityDO::getLeadId, leadId)
                 .orderByDesc(FreightLeadActivityDO::getId));
     }

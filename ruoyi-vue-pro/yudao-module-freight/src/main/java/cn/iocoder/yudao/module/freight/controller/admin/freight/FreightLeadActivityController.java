@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.freight.controller.admin.freight;
 
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
-import cn.iocoder.yudao.framework.tenant.core.aop.TenantIgnore;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.activity.AdminFreightLeadActivityCreateReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.activity.AdminFreightLeadActivityRespVO;
 import cn.iocoder.yudao.module.freight.convert.freight.FreightLeadActivityConvert;
@@ -31,7 +30,6 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping({"/freight/lead-activity", "/leads/activity"})
 @Validated
-@TenantIgnore
 public class FreightLeadActivityController {
 
     @Resource
