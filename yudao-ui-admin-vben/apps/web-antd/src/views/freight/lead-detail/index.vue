@@ -8,6 +8,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
+import { formatDateTime } from '@vben/utils';
 
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
 import {
@@ -56,6 +57,13 @@ const activityForm = reactive<FreightLeadActivityApi.ActivityCreateReqVO>({
   leadId: 0,
   content: '',
 });
+
+function formatDisplayDateTime(value?: string) {
+  if (!value) {
+    return '-';
+  }
+  return formatDateTime(value);
+}
 
 async function loadLeadDetail() {
   if (Number.isNaN(leadId.value)) {
@@ -140,7 +148,7 @@ onMounted(loadLeadDetail);
       <Descriptions :column="2" bordered size="small">
         <Descriptions.Item label="线索编号">{{ lead?.id }}</Descriptions.Item>
         <Descriptions.Item label="创建时间">
-          {{ lead?.createTime || '-' }}
+          {{ formatDisplayDateTime(lead?.createTime) }}
         </Descriptions.Item>
         <Descriptions.Item label="联系人">
           {{ lead?.contactName || '-' }}
@@ -222,7 +230,8 @@ onMounted(loadLeadDetail);
         <Timeline.Item v-for="item in activityList" :key="item.id">
           <div class="text-[14px]">{{ item.content }}</div>
           <div class="mt-1 text-[12px] text-gray-500">
-            {{ item.createTime || '-' }} · {{ item.creator || '-' }}
+            {{ formatDisplayDateTime(item.createTime) }} ·
+            {{ item.creator || '-' }}
             <span v-if="item.nextContactTime"> · 下次联系：</span>
             <span v-if="item.nextContactTime">{{ item.nextContactTime }}</span>
           </div>

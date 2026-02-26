@@ -31,10 +31,10 @@ export function useGridFormSchema(): VbenFormSchema[] {
   return [
     {
       fieldName: 'contactPhone',
-      label: '联系电话',
+      label: '联系方式',
       component: 'Input',
       componentProps: {
-        placeholder: '请输入联系电话',
+        placeholder: '请输入手机号 / 微信 / 邮箱',
         allowClear: true,
       },
     },
@@ -79,7 +79,7 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
     },
     {
       field: 'contactPhone',
-      title: '联系电话',
+      title: '联系方式',
       minWidth: 140,
     },
     {
@@ -96,27 +96,44 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       field: 'shipMode',
       title: '运输方式',
       minWidth: 100,
-      formatter: ({ cellValue }) => shipModeMap[cellValue] ?? `未知(${cellValue})`,
+      formatter: ({ cellValue }) => {
+        if (cellValue === null || cellValue === undefined) {
+          return '-';
+        }
+        return shipModeMap[cellValue] ?? `未知(${cellValue})`;
+      },
     },
     {
       field: 'cargoType',
       title: '货物类型',
       minWidth: 100,
-      formatter: ({ cellValue }) => cargoTypeMap[cellValue] ?? `未知(${cellValue})`,
+      formatter: ({ cellValue }) => {
+        if (cellValue === null || cellValue === undefined) {
+          return '-';
+        }
+        return cargoTypeMap[cellValue] ?? `未知(${cellValue})`;
+      },
     },
     {
       field: 'status',
       title: '状态',
       minWidth: 100,
       formatter: ({ cellValue }) =>
-        leadStatusOptions.find((item) => item.value === cellValue)?.label ??
-        `未知(${cellValue})`,
+        cellValue === null || cellValue === undefined
+          ? '-'
+          : (leadStatusOptions.find((item) => item.value === cellValue)
+              ?.label ?? `未知(${cellValue})`),
     },
     {
       field: 'source',
       title: '来源',
       minWidth: 100,
-      formatter: ({ cellValue }) => sourceMap[cellValue] ?? `未知(${cellValue})`,
+      formatter: ({ cellValue }) => {
+        if (cellValue === null || cellValue === undefined) {
+          return '-';
+        }
+        return sourceMap[cellValue] ?? `未知(${cellValue})`;
+      },
     },
     {
       field: 'remark',
@@ -127,7 +144,8 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
     {
       field: 'createTime',
       title: '创建时间',
-      minWidth: 170,
+      minWidth: 180,
+      formatter: 'formatDateTime',
     },
   ];
 }

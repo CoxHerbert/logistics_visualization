@@ -1,0 +1,52 @@
+package cn.iocoder.yudao.module.freight.dal.dataobject.freight;
+
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.module.freight.enums.freight.CargoTypeEnum;
+import cn.iocoder.yudao.module.freight.enums.freight.LeadSourceEnum;
+import cn.iocoder.yudao.module.freight.enums.freight.LeadStatusEnum;
+import cn.iocoder.yudao.module.freight.enums.freight.ShipModeEnum;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * 货运线索 DO
+ */
+@TableName("freight_lead")
+@KeySequence("freight_lead_seq")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class FreightLeadDO extends BaseDO {
+
+    private Long id;
+
+    /** 联系人 */
+    @TableField("name")
+    private String contactName;
+    /** 联系电话 */
+    @TableField("contact_value")
+    private String contactPhone;
+    /** 联系方式类型 */
+    @TableField("contact_type")
+    private String contactType;
+    /** 出发地 */
+    @TableField("origin_port")
+    private String departureCity;
+    /** 目的地 */
+    @TableField("destination")
+    private String destinationCity;
+
+    /** 枚举 {@link ShipModeEnum} */
+    private Integer shipMode;
+    /** 枚举 {@link CargoTypeEnum} */
+    private Integer cargoType;
+    /** 枚举 {@link LeadStatusEnum} */
+    private Integer status;
+    /** 枚举 {@link LeadSourceEnum} */
+    private Integer source;
+
+    private String remark;
+
+}
