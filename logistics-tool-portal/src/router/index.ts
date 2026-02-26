@@ -9,21 +9,6 @@ const router = createRouter({
       component: () => import('@/views/PortalHome.vue')
     },
     {
-      path: '/tools',
-      name: 'tools',
-      component: () => import('@/views/ToolCenter.vue')
-    },
-    {
-      path: '/line-query',
-      name: 'line-query',
-      component: () => import('@/views/LineQuery.vue')
-    },
-    {
-      path: '/volume-pricing',
-      name: 'volume-pricing',
-      component: () => import('@/views/VolumePricing.vue')
-    },
-    {
       path: '/get-plan',
       name: 'get-plan',
       component: () => import('@/views/GetPlan.vue')
