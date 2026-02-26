@@ -14,7 +14,7 @@ ALTER TABLE `freight_lead_activity`
   ADD COLUMN `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间' AFTER `updater`;
 
 ALTER TABLE `freight_lead_activity`
-  ADD COLUMN `tenant_id` bigint NOT NULL DEFAULT '0' COMMENT '租户编号' AFTER `deleted`;
+  ADD COLUMN `tenant_id` bigint NOT NULL DEFAULT '1' COMMENT '租户编号' AFTER `deleted`;
 
 -- 旧表如存在 type 字段，可按需要迁移到 creator_type（可选）
 UPDATE `freight_lead_activity`
@@ -23,3 +23,9 @@ SET `creator_type` = CASE
     ELSE 1
 END
 WHERE `creator_type` IS NULL OR `creator_type` NOT IN (1, 2);
+
+
+-- 统一历史数据租户编号为 1
+UPDATE `freight_lead_activity`
+SET `tenant_id` = 1
+WHERE `tenant_id` IS NULL OR `tenant_id` = 0;
