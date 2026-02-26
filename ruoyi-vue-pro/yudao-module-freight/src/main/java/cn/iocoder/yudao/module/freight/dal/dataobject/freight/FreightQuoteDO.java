@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.freight.dal.dataobject.freight;
 
-import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @KeySequence("freight_quote_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FreightQuoteDO extends TenantBaseDO {
+public class FreightQuoteDO extends BaseDO {
 
     private Long id;
 

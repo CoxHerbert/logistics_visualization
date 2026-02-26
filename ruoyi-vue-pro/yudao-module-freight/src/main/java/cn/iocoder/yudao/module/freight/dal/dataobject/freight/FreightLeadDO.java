@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.freight.dal.dataobject.freight;
 
-import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import cn.iocoder.yudao.module.freight.enums.freight.CargoTypeEnum;
 import cn.iocoder.yudao.module.freight.enums.freight.LeadSourceEnum;
 import cn.iocoder.yudao.module.freight.enums.freight.LeadStatusEnum;
@@ -18,7 +18,7 @@ import lombok.EqualsAndHashCode;
 @KeySequence("freight_lead_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FreightLeadDO extends TenantBaseDO {
+public class FreightLeadDO extends BaseDO {
 
     private Long id;
 
