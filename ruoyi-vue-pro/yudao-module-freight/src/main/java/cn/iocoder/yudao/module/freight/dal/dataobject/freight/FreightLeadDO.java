@@ -28,6 +28,9 @@ public class FreightLeadDO extends TenantBaseDO {
     /** 联系电话 */
     @TableField("contact_value")
     private String contactPhone;
+    /** 联系方式类型 */
+    @TableField("contact_type")
+    private String contactType;
     /** 出发地 */
     @TableField("origin_port")
     private String departureCity;

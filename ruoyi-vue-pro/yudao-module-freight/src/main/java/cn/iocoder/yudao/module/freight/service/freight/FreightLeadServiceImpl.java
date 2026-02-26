@@ -28,6 +28,7 @@ public class FreightLeadServiceImpl implements FreightLeadService {
     @Override
     public Long createLead(@Valid WebFreightLeadCreateReqVO createReqVO) {
         FreightLeadDO lead = FreightLeadConvert.INSTANCE.convert(createReqVO);
+        lead.setContactType("PHONE");
         lead.setStatus(LeadStatusEnum.NEW.getStatus());
         lead.setSource(LeadSourceEnum.WEB.getSource());
         freightLeadMapper.insert(lead);
