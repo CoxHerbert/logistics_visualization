@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
+import { formatDateTime } from '@vben/utils';
 
 import { Button, Card, Descriptions, Table } from 'ant-design-vue';
 
@@ -22,6 +23,13 @@ const feeItems = ref<FeeItem[]>([]);
 const extraRemark = ref('');
 
 const quoteId = computed(() => Number(route.params.id));
+
+function formatDisplayDateTime(value?: string) {
+  if (!value) {
+    return '-';
+  }
+  return formatDateTime(value);
+}
 
 const columns = [
   { title: '费用项', dataIndex: 'name', key: 'name' },
@@ -87,7 +95,7 @@ onMounted(loadData);
           {{ quote?.currency }}
         </Descriptions.Item>
         <Descriptions.Item label="创建时间">
-          {{ quote?.createTime || '-' }}
+          {{ formatDisplayDateTime(quote?.createTime) }}
         </Descriptions.Item>
       </Descriptions>
 

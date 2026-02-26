@@ -121,9 +121,8 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       formatter: ({ cellValue }) =>
         cellValue === null || cellValue === undefined
           ? '-'
-          :
-              leadStatusOptions.find((item) => item.value === cellValue)
-                ?.label ?? `未知(${cellValue})`,
+          : (leadStatusOptions.find((item) => item.value === cellValue)
+              ?.label ?? `未知(${cellValue})`),
     },
     {
       field: 'source',
@@ -145,7 +144,8 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
     {
       field: 'createTime',
       title: '创建时间',
-      minWidth: 170,
+      minWidth: 180,
+      formatter: 'formatDateTime',
     },
   ];
 }
