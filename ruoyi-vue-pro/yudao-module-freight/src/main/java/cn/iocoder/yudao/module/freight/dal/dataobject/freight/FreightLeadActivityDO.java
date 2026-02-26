@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.freight.dal.dataobject.freight;
 
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +18,7 @@ public class FreightLeadActivityDO extends BaseDO {
     private Long id;
     private Long leadId;
     private String content;
+    @TableField(exist = false)
     private LocalDateTime nextContactTime;
     private Integer creatorType;
 
