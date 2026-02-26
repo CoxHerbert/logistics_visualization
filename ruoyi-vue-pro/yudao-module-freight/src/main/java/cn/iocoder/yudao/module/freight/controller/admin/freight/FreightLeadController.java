@@ -27,7 +27,7 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 货运线索")
 @RestController("adminFreightLeadController")
-@RequestMapping("/freight/lead")
+@RequestMapping({"/freight/lead", "/leads"})
 @Validated
 public class FreightLeadController {
 

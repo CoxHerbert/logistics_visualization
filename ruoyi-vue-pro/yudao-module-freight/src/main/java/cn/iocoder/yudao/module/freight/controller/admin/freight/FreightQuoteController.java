@@ -26,7 +26,7 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 货运报价")
 @RestController
-@RequestMapping("/freight/quote")
+@RequestMapping({"/freight/quote", "/leads/quote"})
 @Validated
 public class FreightQuoteController {
 
