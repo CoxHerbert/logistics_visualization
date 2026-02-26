@@ -20,6 +20,7 @@ public class FreightLeadActivityDO extends BaseDO {
     private String content;
     @TableField(exist = false)
     private LocalDateTime nextContactTime;
+    @TableField(exist = false)
     private Integer creatorType;
 
 }
