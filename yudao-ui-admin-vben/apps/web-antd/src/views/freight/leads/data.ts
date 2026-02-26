@@ -130,7 +130,7 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       minWidth: 100,
       formatter: ({ cellValue }) => {
         if (cellValue === null || cellValue === undefined) {
-          return '-';
+          return '-'; 
         }
         return sourceMap[cellValue] ?? `未知(${cellValue})`;
       },
