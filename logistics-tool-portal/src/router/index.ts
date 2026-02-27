@@ -13,6 +13,16 @@ const router = createRouter({
       name: 'get-plan',
       component: () => import('@/views/GetPlan.vue')
     },
+    {
+      path: '/tool-center',
+      name: 'tool-center',
+      component: () => import('@/views/ToolCenter.vue')
+    },
+    {
+      path: '/tool-center/fba-first-leg-calculator',
+      name: 'fba-first-leg-calculator',
+      component: () => import('@/views/FbaFirstLegCalculator.vue')
+    },
 
     {
       path: '/me',
