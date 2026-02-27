@@ -41,14 +41,15 @@ spring:
         max-evictable-idle-time-millis: 1800000 # 配置一个连接在池中最大生存的时间，单位：毫秒（30 分钟）
         validation-query: SELECT 1 FROM DUAL # 配置检测连接是否有效
         test-while-idle: true
-        test-on-borrow: false
+        test-on-borrow: true
         test-on-return: false
+        keep-alive: true # 保持连接活性，降低连接被服务端断开导致的 connection reset
         pool-prepared-statements: true # 是否开启 PreparedStatement 缓存
         max-pool-prepared-statement-per-connection-size: 20 # 每个连接缓存的 PreparedStatement 数量
       primary: master
       datasource:
         master:
-          url: jdbc:mysql://118.178.56.162:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true # MySQL Connector/J 8.X 连接的示例
+          url: jdbc:mysql://118.178.56.162:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true&connectTimeout=5000&socketTimeout=60000&tcpKeepAlive=true # MySQL Connector/J 8.X 连接的示例
           #          url: jdbc:mysql://127.0.0.1:3306/ruoyi-vue-pro?useSSL=true&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true # MySQL Connector/J 5.X 连接的示例
           #          url: jdbc:postgresql://127.0.0.1:5432/ruoyi-vue-pro # PostgreSQL 连接的示例
           #          url: jdbc:oracle:thin:@127.0.0.1:1521:xe # Oracle 连接的示例
