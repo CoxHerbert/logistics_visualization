@@ -20,6 +20,9 @@
               <RouterLink to="/">首页</RouterLink>
             </a-menu-item>
 
+            <a-menu-item key="tool-center">
+              <RouterLink to="/tool-center">工具中心</RouterLink>
+            </a-menu-item>
 
             <a-menu-item key="me">
               <RouterLink to="/me">我的名片</RouterLink>
@@ -56,6 +59,7 @@ import { useRoute, RouterLink, RouterView } from 'vue-router'
 const route = useRoute()
 
 const activeKey = computed(() => {
+  if (route.path.startsWith('/tool-center')) return 'tool-center'
   if (route.path.startsWith('/me')) return 'me'
   if (route.path.startsWith('/get-plan')) return 'get-plan'
   return 'home'
