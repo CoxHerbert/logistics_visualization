@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.freight.controller.portal.price.vo;
+package cn.iocoder.yudao.module.freight.controller.web.price.vo;
 
 import lombok.Data;
 
