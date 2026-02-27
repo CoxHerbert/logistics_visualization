@@ -7,7 +7,10 @@
         <div class="header-main">
           <!-- Brand -->
           <div class="brand">
-            <div class="brand-title">中美线国际货运代理</div>
+            <div class="brand-title">
+              <img class="brand-logo" src="/images/logo.png" alt="logo" />
+              <span>中美线国际货运代理</span>
+            </div>
             <div class="brand-sub">China-US Freight Forwarding Portal</div>
           </div>
 
