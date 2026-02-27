@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import cn.hutool.core.util.NumberUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -35,11 +37,25 @@ public class FreightLeadActivityController {
 
     @GetMapping("/list")
     @Operation(summary = "获得线索跟进记录列表")
-    @Parameter(name = "leadId", description = "线索编号", required = true, example = "1")
+    @Parameter(name = "leadId", description = "线索编号（兼容 id 参数）", required = false, example = "1")
     @PreAuthorize("@ss.hasPermission('freight:lead-activity:query')")
-    public CommonResult<List<AdminFreightLeadActivityRespVO>> getLeadActivityList(@RequestParam("leadId") Long leadId) {
-        List<FreightLeadActivityDO> list = freightLeadActivityService.getLeadActivityList(leadId);
+    public CommonResult<List<AdminFreightLeadActivityRespVO>> getLeadActivityList(
+            @RequestParam(value = "leadId", required = false) String leadId,
+            @RequestParam(value = "id", required = false) String id) {
+        Long parsedLeadId = parseLeadId(leadId, id);
+        if (parsedLeadId == null) {
+            return success(Collections.emptyList());
+        }
+        List<FreightLeadActivityDO> list = freightLeadActivityService.getLeadActivityList(parsedLeadId);
         return success(FreightLeadActivityConvert.INSTANCE.convertList(list));
+    }
+
+    private Long parseLeadId(String leadId, String id) {
+        String candidate = leadId != null && !leadId.trim().isEmpty() ? leadId.trim() : (id == null ? "" : id.trim());
+        if (!NumberUtil.isLong(candidate)) {
+            return null;
+        }
+        return Long.parseLong(candidate);
     }
 
     @PostMapping("/create")

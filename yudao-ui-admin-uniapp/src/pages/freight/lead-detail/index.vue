@@ -14,8 +14,8 @@
           </wd-button>
         </template>
       </wd-cell>
-      <wd-cell title="shipMode" :value="displayValue(leadDetail?.shipMode)" />
-      <wd-cell title="cargoType" :value="displayValue(leadDetail?.cargoType)" />
+      <wd-cell title="shipMode" :value="formatShipMode(leadDetail?.shipMode)" />
+      <wd-cell title="cargoType" :value="formatCargoType(leadDetail?.cargoType)" />
       <wd-cell title="volumeCbm" :value="displayValue(leadDetail?.volumeCbm)" />
       <wd-cell title="weightKg" :value="displayValue(leadDetail?.weightKg)" />
       <wd-cell title="cartons" :value="displayValue(leadDetail?.cartons)" />
@@ -118,6 +118,34 @@ const originPortValue = computed(() => {
 const destinationValue = computed(() => {
   return displayValue(leadDetail.value?.destination || leadDetail.value?.destinationCity)
 })
+
+const shipModeMap: Record<number, string> = {
+  10: '快递',
+  20: '零担',
+  30: '整车',
+}
+
+const cargoTypeMap: Record<number, string> = {
+  10: '普货',
+  20: '易碎',
+  30: '冷链',
+}
+
+function formatShipMode(val: any) {
+  const num = Number(val)
+  if (Number.isNaN(num)) {
+    return displayValue(val)
+  }
+  return shipModeMap[num] || `未知(${num})`
+}
+
+function formatCargoType(val: any) {
+  const num = Number(val)
+  if (Number.isNaN(num)) {
+    return displayValue(val)
+  }
+  return cargoTypeMap[num] || `未知(${num})`
+}
 
 function displayValue(val: any) {
   return val === null || val === undefined || val === '' ? '-' : String(val)

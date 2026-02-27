@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 
 import { createFreightLead, type FreightLeadCreateReq } from '@/api/portal'
 
 const route = useRoute()
+const submitting = ref(false)
 
 const formState = reactive<FreightLeadCreateReq>({
   contactName: (route.query.contactName as string) || '',
@@ -29,13 +30,35 @@ const cargoTypeOptions = [
   { label: '冷链', value: 30 }
 ]
 
+const formRules = {
+  contactName: [
+    { required: true, message: '请输入联系人', trigger: 'blur' },
+    { min: 2, max: 20, message: '联系人长度需在 2-20 个字符之间', trigger: 'blur' }
+  ],
+  contactPhone: [
+    { required: true, message: '请输入联系电话', trigger: 'blur' },
+    { pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ],
+  shipMode: [{ required: true, message: '请选择运输方式', trigger: 'change' }],
+  cargoType: [{ required: true, message: '请选择货物类型', trigger: 'change' }]
+}
+
+const extractErrorMessage = (error: any) => {
+  return error?.response?.data?.msg || error?.message || '提交失败，请稍后重试'
+}
+
 const handleSubmit = async () => {
-  console.log('formState')
+  if (submitting.value) {
+    return
+  }
+  submitting.value = true
   try {
     const leadId = await createFreightLead(formState)
     message.success(`提交成功，线索编号：${leadId}`)
   } catch (error: any) {
-    message.error(error?.message || '提交失败，请稍后重试')
+    message.error(extractErrorMessage(error))
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -44,7 +67,7 @@ const handleSubmit = async () => {
   <a-card title="获取运输方案 / 留资" class="get-plan-card">
     <a-alert type="info" show-icon style="margin-bottom: 16px" message="提交后将由顾问回访，提供中美线运输与清关方案。" />
 
-    <a-form layout="vertical" @finish="handleSubmit">
+    <a-form layout="vertical" :model="formState" :rules="formRules" @finish="handleSubmit">
       <a-row :gutter="16">
         <a-col :xs="24" :md="12">
           <a-form-item label="联系人" name="contactName">
@@ -73,12 +96,12 @@ const handleSubmit = async () => {
 
       <a-row :gutter="16">
         <a-col :xs="24" :md="12">
-          <a-form-item label="运输方式">
+          <a-form-item label="运输方式" name="shipMode">
             <a-select v-model:value="formState.shipMode" :options="shipModeOptions" />
           </a-form-item>
         </a-col>
         <a-col :xs="24" :md="12">
-          <a-form-item label="货物类型">
+          <a-form-item label="货物类型" name="cargoType">
             <a-select v-model:value="formState.cargoType" :options="cargoTypeOptions" />
           </a-form-item>
         </a-col>
@@ -89,7 +112,9 @@ const handleSubmit = async () => {
       </a-form-item>
 
       <a-form-item>
-        <a-button type="primary" html-type="submit">提交并获取方案</a-button>
+        <a-button type="primary" html-type="submit" :loading="submitting" :disabled="submitting">
+          提交并获取方案
+        </a-button>
       </a-form-item>
     </a-form>
   </a-card>

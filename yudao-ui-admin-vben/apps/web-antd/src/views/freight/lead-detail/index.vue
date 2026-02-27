@@ -41,6 +41,33 @@ const activityList = ref<FreightLeadActivityApi.Activity[]>([]);
 
 const leadId = computed(() => Number(route.params.id));
 
+
+const shipModeMap: Record<number, string> = {
+  10: '快递',
+  20: '零担',
+  30: '整车',
+};
+
+const cargoTypeMap: Record<number, string> = {
+  10: '普货',
+  20: '易碎',
+  30: '冷链',
+};
+
+function formatShipMode(value?: number) {
+  if (value === undefined || value === null) {
+    return '-';
+  }
+  return shipModeMap[value] ?? `未知(${value})`;
+}
+
+function formatCargoType(value?: number) {
+  if (value === undefined || value === null) {
+    return '-';
+  }
+  return cargoTypeMap[value] ?? `未知(${value})`;
+}
+
 const statusOptions = [
   { label: '新建', value: 10 },
   { label: '跟进中', value: 20 },
@@ -163,10 +190,10 @@ onMounted(loadLeadDetail);
           {{ lead?.destinationCity || '-' }}
         </Descriptions.Item>
         <Descriptions.Item label="运输方式">
-          {{ lead?.shipMode }}
+          {{ formatShipMode(lead?.shipMode) }}
         </Descriptions.Item>
         <Descriptions.Item label="货物类型">
-          {{ lead?.cargoType }}
+          {{ formatCargoType(lead?.cargoType) }}
         </Descriptions.Item>
       </Descriptions>
     </Card>

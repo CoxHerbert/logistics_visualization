@@ -20,6 +20,7 @@ import static cn.iocoder.yudao.module.freight.enums.ErrorCodeConstants.FREIGHT_L
 public class FreightLeadActivityServiceImpl implements FreightLeadActivityService {
 
     private static final Integer CREATOR_TYPE_ADMIN = 1;
+    private static final String CREATOR_TYPE_ADMIN_LEGACY = "admin";
 
     @Resource
     private FreightLeadMapper freightLeadMapper;
@@ -41,6 +42,7 @@ public class FreightLeadActivityServiceImpl implements FreightLeadActivityServic
     private Long createLeadActivity(FreightLeadActivityDO activity, Integer creatorType) {
         validateLeadExists(activity.getLeadId());
         activity.setCreatorType(creatorType);
+        activity.setType(CREATOR_TYPE_ADMIN_LEGACY);
         freightLeadActivityMapper.insert(activity);
         return activity.getId();
     }

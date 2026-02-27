@@ -7,8 +7,11 @@
         <div class="header-main">
           <!-- Brand -->
           <div class="brand">
-            <div class="brand-title">中美线国际货运代理</div>
-            <div class="brand-sub">China-US Freight Forwarding Portal</div>
+            <img class="brand-logo" src="/images/logo.png" alt="logo" />
+            <div class="brand-text">
+              <div class="brand-title">中美线国际货运代理</div>
+              <div class="brand-sub">China-US Freight Forwarding Portal</div>
+            </div>
           </div>
 
           <!-- Menu -->
@@ -17,9 +20,6 @@
               <RouterLink to="/">首页</RouterLink>
             </a-menu-item>
 
-            <a-menu-item key="tools">
-              <RouterLink to="/tools">工具</RouterLink>
-            </a-menu-item>
 
             <a-menu-item key="me">
               <RouterLink to="/me">我的名片</RouterLink>
@@ -56,7 +56,6 @@ import { useRoute, RouterLink, RouterView } from 'vue-router'
 const route = useRoute()
 
 const activeKey = computed(() => {
-  if (route.path.startsWith('/tools') || route.path.startsWith('/line-query') || route.path.startsWith('/volume-pricing')) return 'tools'
   if (route.path.startsWith('/me')) return 'me'
   if (route.path.startsWith('/get-plan')) return 'get-plan'
   return 'home'

@@ -1,28 +1,26 @@
 package cn.iocoder.yudao.module.freight.service.freight.tool;
 
-import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
+import cn.iocoder.yudao.framework.test.core.ut.BaseMockitoUnitTest;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.freight.controller.web.freight.vo.tool.WebFreightToolCalcRespVO;
 import cn.iocoder.yudao.module.freight.controller.web.freight.vo.tool.WebFreightToolFclCalcReqVO;
 import cn.iocoder.yudao.module.freight.controller.web.freight.vo.tool.WebFreightToolLclCalcReqVO;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
-@Import(FreightToolCalcServiceImpl.class)
-public class FreightToolCalcServiceImplTest extends BaseDbUnitTest {
+public class FreightToolCalcServiceImplTest extends BaseMockitoUnitTest {
 
-    @Resource
-    private FreightToolCalcService freightToolCalcService;
+    @InjectMocks
+    private FreightToolCalcServiceImpl freightToolCalcService;
 
-    @MockBean
+    @Mock
     private ConfigApi configApi;
 
     @Test
