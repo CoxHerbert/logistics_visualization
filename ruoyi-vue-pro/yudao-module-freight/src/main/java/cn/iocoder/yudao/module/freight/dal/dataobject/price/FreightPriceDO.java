@@ -19,10 +19,9 @@ public class FreightPriceDO extends BaseDO {
     private Long id;
 
     /**
-     * ✅ 多租户字段 tenantId 处理说明：
-     * - 如果 BaseDO（或 TenantBaseDO）已包含 tenantId 字段：请不要在此重复声明
-     * - 如果 BaseDO 没有 tenantId：请在此处新增：private Long tenantId;
+     * 租户编号
      */
+    private Long tenantId;
 
     /** 运输类型：1海派 2海卡 3整柜 4美森 */
     private Integer transportType;
@@ -49,7 +48,4 @@ public class FreightPriceDO extends BaseDO {
     private Integer status;
 
     private String remark;
-
-    @TableLogic
-    private Boolean deleted;
 }
