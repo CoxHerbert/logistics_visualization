@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
@@ -67,7 +68,7 @@ public class FreightPriceController {
     public CommonResult<PageResult<FreightPriceRespVO>> page(@Valid FreightPricePageReqVO reqVO) {
         PageResult<FreightPriceDO> page = freightPriceService.getPage(reqVO);
         return success(new PageResult<>(
-                page.getList().stream().map(this::toResp).toList(),
+                page.getList().stream().map(this::toResp).collect(Collectors.toList()),
                 page.getTotal()
         ));
     }
