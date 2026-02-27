@@ -1,4 +1,6 @@
-import { defHttp } from '@/utils/http/axios';
+import type { PageParam, PageResult } from '@vben/request';
+
+import { requestClient } from '#/api/request';
 
 export interface FreightPriceVO {
   id: number;
@@ -16,9 +18,7 @@ export interface FreightPriceVO {
   createTime?: string;
 }
 
-export interface FreightPricePageReq {
-  pageNo: number;
-  pageSize: number;
+export interface FreightPricePageReq extends PageParam {
   transportType?: number;
   origin?: string;
   destination?: string;
@@ -26,16 +26,16 @@ export interface FreightPricePageReq {
 }
 
 export const getFreightPricePage = (params: FreightPricePageReq) =>
-  defHttp.get({ url: '/admin-api/freight/price/page', params });
+  requestClient.get<PageResult<FreightPriceVO>>('/freight/price/page', { params });
 
 export const getFreightPrice = (id: number) =>
-  defHttp.get({ url: '/admin-api/freight/price/get', params: { id } });
+  requestClient.get<FreightPriceVO>(`/freight/price/get?id=${id}`);
 
 export const createFreightPrice = (data: any) =>
-  defHttp.post({ url: '/admin-api/freight/price/create', data });
+  requestClient.post('/freight/price/create', data);
 
 export const updateFreightPrice = (data: any) =>
-  defHttp.put({ url: '/admin-api/freight/price/update', data });
+  requestClient.put('/freight/price/update', data);
 
 export const updateFreightPriceStatus = (id: number, status: number) =>
-  defHttp.put({ url: '/admin-api/freight/price/update-status', params: { id, status } });
+  requestClient.put(`/freight/price/update-status?id=${id}&status=${status}`);
