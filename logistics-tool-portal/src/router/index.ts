@@ -13,6 +13,11 @@ const router = createRouter({
       name: 'get-plan',
       component: () => import('@/views/GetPlan.vue')
     },
+    {
+      path: '/tool-center',
+      name: 'tool-center',
+      component: () => import('@/views/ToolCenter.vue')
+    },
 
     {
       path: '/me',
