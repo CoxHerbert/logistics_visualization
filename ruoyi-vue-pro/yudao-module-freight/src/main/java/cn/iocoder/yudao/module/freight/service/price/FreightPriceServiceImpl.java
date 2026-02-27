@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.freight.service.price;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import cn.iocoder.yudao.module.freight.controller.admin.price.vo.FreightPricePageReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.price.vo.FreightPriceSaveReqVO;
 import cn.iocoder.yudao.module.freight.dal.dataobject.price.FreightPriceDO;
@@ -63,7 +64,7 @@ public class FreightPriceServiceImpl implements FreightPriceService {
 
     @Override
     public FreightPriceDO matchPrice(Integer transportType, String origin, String destination, LocalDate onDate) {
-        LambdaQueryWrapperX<FreightPriceDO> qw = new LambdaQueryWrapperX<FreightPriceDO>()
+        LambdaQueryWrapper<FreightPriceDO> qw = new LambdaQueryWrapperX<FreightPriceDO>()
                 .eq(FreightPriceDO::getTransportType, transportType)
                 .eq(FreightPriceDO::getOrigin, origin)
                 .eq(FreightPriceDO::getDestination, destination)

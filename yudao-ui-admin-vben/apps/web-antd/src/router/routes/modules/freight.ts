@@ -41,6 +41,16 @@ const routes: RouteRecordRaw[] = [
           authority: ['freight:quote:create'],
         },
       },
+
+      {
+        path: 'price',
+        name: 'FreightPrice',
+        component: () => import('#/views/freight/price/index.vue'),
+        meta: {
+          title: '运价管理',
+          authority: ['freight:price:query'],
+        },
+      },
       {
         path: 'quote-preview/:id',
         name: 'FreightQuotePreview',

@@ -129,7 +129,7 @@ import {
   getFreightPricePage, getFreightPrice,
   createFreightPrice, updateFreightPrice,
   updateFreightPriceStatus
-} from '@/api/freight/price';
+} from '#/api/freight/price';
 
 const query = reactive({
   transportType: undefined as number | undefined,
