@@ -76,20 +76,23 @@ export function createInteractions(opts: {
     const cfg = opts.getConfig();
     const container = opts.getContainer();
     const placed = opts.getPlacedData();
-    const pos = applySnapping(hit.x, hit.z, { l: spawn.l, w: spawn.w }, placed, container, layerY, cfg);
+    const placeL = spawn.rotated ? spawn.w : spawn.l;
+    const placeW = spawn.rotated ? spawn.l : spawn.w;
+    const pos = applySnapping(hit.x, hit.z, { l: placeL, w: placeW }, placed, container, layerY, cfg);
 
-    if (!canPlaceAtLayer(pos.x, pos.z, layerY, spawn, placed, container, null, cfg.supportRatio)) return;
+    if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: placeL, w: placeW, h: spawn.h }, placed, container, null, cfg.supportRatio, cfg.boxGap)) return;
 
     opts.addPlaced({
       cargoId: spawn.cargoId,
       name: spawn.name,
-      l: spawn.l,
-      w: spawn.w,
+      l: placeL,
+      w: placeW,
       h: spawn.h,
       weight: spawn.weight,
       x: pos.x,
       y: layerY,
       z: pos.z,
+      rotated: spawn.rotated,
     });
     spawn.remain -= 1;
   }
@@ -133,7 +136,7 @@ export function createInteractions(opts: {
     const baseZ = desired.z - data.w / 2;
     const pos = applySnapping(baseX, baseZ, { l: data.l, w: data.w }, placed, container, data.y, cfg);
 
-    if (!canPlaceAtLayer(pos.x, pos.z, data.y, data, placed, container, idx, cfg.supportRatio)) return;
+    if (!canPlaceAtLayer(pos.x, pos.z, data.y, data, placed, container, idx, cfg.supportRatio, cfg.boxGap)) return;
 
     dragTarget.position.x = pos.x + data.l / 2;
     dragTarget.position.z = pos.z + data.w / 2;
@@ -150,6 +153,11 @@ export function createInteractions(opts: {
   }
 
   function onKeyDown(e: KeyboardEvent) {
+    if (e.key.toLowerCase() === 'r') {
+      const spawn = opts.getActiveSpawn();
+      if (spawn?.rotatable) spawn.rotated = !spawn.rotated;
+      return;
+    }
     if ((e.key !== 'Delete' && e.key !== 'Backspace') || !selectedMesh) return;
     const idx = meshIndex(selectedMesh);
     if (idx < 0) return;

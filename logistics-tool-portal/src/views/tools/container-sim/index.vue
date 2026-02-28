@@ -1,6 +1,6 @@
 <template>
   <a-layout style="height: calc(100vh - 64px); background: #fff;">
-    <a-layout-sider width="350" style="background:#fff; border-right:1px solid #f0f0f0; padding:16px; overflow:auto;">
+    <a-layout-sider width="360" style="background:#fff; border-right:1px solid #f0f0f0; padding:16px; overflow:auto;">
       <a-typography-title :level="4" style="margin:0 0 12px;">整柜/拼箱 3D 装柜模拟</a-typography-title>
 
       <a-card size="small" title="柜型">
@@ -10,10 +10,8 @@
           </a-select-option>
         </a-select>
         <a-divider style="margin:12px 0;" />
-        <a-space direction="vertical" style="width:100%">
-          <div>最大载重：{{ currentContainer.maxWeight }} kg</div>
-          <div>可用体积：{{ containerCBM.toFixed(2) }} CBM</div>
-        </a-space>
+        <div>最大载重：{{ currentContainer.maxWeight }} kg</div>
+        <div>可用体积：{{ containerCBM.toFixed(2) }} CBM</div>
       </a-card>
 
       <a-card size="small" title="新增货物" style="margin-top:12px;">
@@ -30,6 +28,9 @@
             <a-col :span="12"><a-form-item label="重量(kg)"><a-input-number v-model:value="cargoForm.weight" :min="0" style="width:100%" /></a-form-item></a-col>
             <a-col :span="12"><a-form-item label="件数"><a-input-number v-model:value="cargoForm.qty" :min="1" style="width:100%" /></a-form-item></a-col>
           </a-row>
+          <a-form-item label="可旋转摆放（L/W 互换）">
+            <a-switch v-model:checked="cargoForm.rotatable" checked-children="是" un-checked-children="否" />
+          </a-form-item>
           <a-space>
             <a-button type="primary" @click="addCargo">加入列表</a-button>
             <a-button @click="resetForm">重置</a-button>
@@ -40,7 +41,10 @@
       <a-card size="small" title="货物列表" style="margin-top:12px;">
         <a-table size="small" :columns="columns" :data-source="cargoList" :pagination="false" row-key="id">
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'actions'">
+            <template v-if="column.key === 'rotatable'">
+              <a-tag :color="record.rotatable ? 'green' : 'default'">{{ record.rotatable ? '可旋转' : '不可旋转' }}</a-tag>
+            </template>
+            <template v-else-if="column.key === 'actions'">
               <a-space>
                 <a-button size="small" @click="spawnBoxes(record)">摆放</a-button>
                 <a-popconfirm title="删除该货物？" @confirm="removeCargo(record.id)">
@@ -57,50 +61,78 @@
       <a-layout-content style="display:flex; gap:12px; padding:12px;">
         <div style="flex:1; border:1px solid #f0f0f0; border-radius:8px; overflow:hidden; position:relative;">
           <div ref="canvasWrap" style="width:100%; height:100%;"></div>
-          <div style="position:absolute; left:12px; top:12px;">
+          <div style="position:absolute; left:12px; top:12px; display:flex; flex-wrap:wrap; gap:4px;">
             <a-tag color="blue">点击空白：按当前层放置</a-tag>
-            <a-tag color="gold">点击箱子：选中；拖拽移动；Delete 删除</a-tag>
-            <a-tag>左键旋转 / 右键平移 / 滚轮缩放</a-tag>
+            <a-tag color="gold">点击箱子：选中/拖拽/Delete 删除</a-tag>
+            <a-tag color="purple">R 键旋转待放货物</a-tag>
           </div>
         </div>
 
-        <div style="width:340px;">
+        <div style="width:360px; overflow:auto;">
           <a-card size="small" title="统计 / 操作">
+            <a-form layout="vertical">
+              <a-form-item label="当前层（叠放）">
+                <a-input-number v-model:value="activeLayer" :min="0" :max="50" style="width:100%" />
+              </a-form-item>
+              <a-form-item label="吸附开关">
+                <a-switch v-model:checked="config.snapEnabled" checked-children="开" un-checked-children="关" />
+              </a-form-item>
+              <a-form-item label="网格大小 (cm)">
+                <a-input-number v-model:value="config.snapGrid" :min="1" :max="50" style="width:100%" />
+              </a-form-item>
+              <a-form-item label="吸附容差 (cm)">
+                <a-input-number v-model:value="config.snapTolerance" :min="0" :max="50" style="width:100%" />
+              </a-form-item>
+              <a-form-item label="货物间距/形变量 (cm)">
+                <a-input-number v-model:value="config.boxGap" :min="0" :max="30" :step="0.5" style="width:100%" />
+              </a-form-item>
+              <a-form-item label="支撑比例 (0~1)">
+                <a-input-number v-model:value="config.supportRatio" :min="0" :max="1" :step="0.05" style="width:100%" />
+              </a-form-item>
+              <a-form-item label="自动步长 (cm)">
+                <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
+              </a-form-item>
+            </a-form>
+
+            <div>已放置件数：{{ placedCount }}</div>
+            <div>已占用体积：{{ usedCBM.toFixed(2) }} CBM</div>
+            <div>体积利用率：{{ (usedCBM / containerCBM * 100).toFixed(1) }}%</div>
+            <div>已占用重量：{{ usedWeight.toFixed(1) }} kg</div>
+            <div>重量利用率：{{ (usedWeight / currentContainer.maxWeight * 100).toFixed(1) }}%</div>
+
+            <a-divider style="margin:8px 0;" />
             <a-space direction="vertical" style="width:100%">
-              <a-form layout="vertical">
-                <a-form-item label="当前层（叠放）">
-                  <a-input-number v-model:value="activeLayer" :min="0" :max="50" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="吸附开关">
-                  <a-switch v-model:checked="config.snapEnabled" checked-children="开" un-checked-children="关" />
-                </a-form-item>
-                <a-form-item label="网格大小 (cm)">
-                  <a-input-number v-model:value="config.snapGrid" :min="1" :max="50" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="吸附容差 (cm)">
-                  <a-input-number v-model:value="config.snapTolerance" :min="0" :max="50" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="支撑比例 (0~1)">
-                  <a-input-number v-model:value="config.supportRatio" :min="0" :max="1" :step="0.05" style="width:100%" />
-                </a-form-item>
-                <a-form-item label="自动步长 (cm)">
-                  <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
-                </a-form-item>
-              </a-form>
-
-              <div>已放置件数：{{ placedCount }}</div>
-              <div>已占用体积：{{ usedCBM.toFixed(2) }} CBM</div>
-              <div>体积利用率：{{ (usedCBM / containerCBM * 100).toFixed(1) }}%</div>
-              <div>已占用重量：{{ usedWeight.toFixed(1) }} kg</div>
-              <div>重量利用率：{{ (usedWeight / currentContainer.maxWeight * 100).toFixed(1) }}%</div>
-
-              <a-divider style="margin:8px 0;" />
-
               <a-button type="primary" block @click="handleAutoPackOne">单货自动摆放</a-button>
               <a-button block @click="handleAutoPackAll">混装一键装柜</a-button>
               <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
             </a-space>
+          </a-card>
+
+          <a-card size="small" title="多柜可行性评估（整柜+拼箱）" style="margin-top:12px;">
+            <a-form layout="vertical">
+              <a-form-item label="最多柜数">
+                <a-input-number v-model:value="maxContainerCount" :min="1" :max="20" style="width:100%" />
+              </a-form-item>
+              <a-form-item label="可用柜型（可多选）">
+                <a-select v-model:value="multiContainerOptionIds" mode="multiple" style="width:100%">
+                  <a-select-option v-for="c in containerTypes" :key="c.id" :value="c.id">{{ c.name }}</a-select-option>
+                </a-select>
+              </a-form-item>
+              <a-space direction="vertical" style="width:100%">
+                <a-button block @click="runFeasibility">评估方案</a-button>
+                <a-button block @click="exportFeasibility" :disabled="!feasibilityResult">导出评估 JSON</a-button>
+              </a-space>
+            </a-form>
+
+            <div v-if="feasibilityResult" style="margin-top:10px;">
+              <div>可装入总件数：{{ feasibilityResult.placedCount }}</div>
+              <div>拼箱剩余件数：{{ feasibilityResult.unplacedCount }}</div>
+              <a-divider style="margin:8px 0;" />
+              <div v-for="plan in feasibilityResult.plans" :key="`${plan.container.id}-${plan.serial}`" style="margin-bottom:8px;">
+                柜{{ plan.serial }}：{{ plan.container.name }}，装入 {{ plan.placed.length }} 件
+              </div>
+            </div>
           </a-card>
         </div>
       </a-layout-content>
@@ -113,9 +145,9 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
-import { autoPackAll, autoPackOne, calcCBM } from './three/packing';
+import { autoPackAll, autoPackOne, calcCBM, planMultiContainerFeasibility } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
-import type { CargoItem, ContainerType, EngineConfig, PlacedBox, SpawnState } from './three/types';
+import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PlacedBox, SpawnState } from './three/types';
 
 function uid() {
   return Math.random().toString(16).slice(2);
@@ -137,14 +169,16 @@ const config = reactive<EngineConfig>({
   snapTolerance: 6,
   supportRatio: 0.6,
   autoStep: 5,
+  boxGap: 0,
 });
 
-const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10 });
+const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10, rotatable: true });
 const cargoList = ref<CargoItem[]>([]);
 const columns = [
   { title: '名称', dataIndex: 'name', key: 'name' },
   { title: '尺寸', key: 'size', customRender: ({ record }: { record: CargoItem }) => `${record.l}×${record.w}×${record.h}` },
   { title: '件数', dataIndex: 'qty', key: 'qty' },
+  { title: '旋转', key: 'rotatable' },
   { title: '操作', key: 'actions' },
 ];
 
@@ -155,6 +189,10 @@ const placedData = ref<PlacedBox[]>([]);
 const placedCount = computed(() => placedData.value.length);
 const usedCBM = computed(() => placedData.value.reduce((s, b) => s + calcCBM(b.l, b.w, b.h), 0));
 const usedWeight = computed(() => placedData.value.reduce((s, b) => s + b.weight, 0));
+
+const maxContainerCount = ref(3);
+const multiContainerOptionIds = ref<string[]>(containerTypes.map((x) => x.id));
+const feasibilityResult = ref<MultiContainerFeasibility | null>(null);
 
 function addCargo() {
   if (!cargoForm.name) return message.warning('请填写名称');
@@ -167,12 +205,13 @@ function addCargo() {
     h: cargoForm.h,
     weight: cargoForm.weight || 0,
     qty: cargoForm.qty || 1,
+    rotatable: cargoForm.rotatable,
   });
   message.success('已加入货物列表');
 }
 
 function resetForm() {
-  Object.assign(cargoForm, { name: '', l: 60, w: 40, h: 35, weight: 0, qty: 1 });
+  Object.assign(cargoForm, { name: '', l: 60, w: 40, h: 35, weight: 0, qty: 1, rotatable: true });
 }
 
 function removeCargo(id: string) {
@@ -181,8 +220,18 @@ function removeCargo(id: string) {
 }
 
 function spawnBoxes(item: CargoItem) {
-  activeSpawn.value = { cargoId: item.id, name: item.name, l: item.l, w: item.w, h: item.h, weight: item.weight, remain: item.qty };
-  message.info('现在可在 3D 视窗点击空白放置；点击箱子可拖拽移动');
+  activeSpawn.value = {
+    cargoId: item.id,
+    name: item.name,
+    l: item.l,
+    w: item.w,
+    h: item.h,
+    weight: item.weight,
+    remain: item.qty,
+    rotatable: item.rotatable,
+    rotated: false,
+  };
+  message.info('现在可在 3D 视窗点击空白放置；按 R 键可旋转待放货物');
 }
 
 const canvasWrap = ref<HTMLDivElement>();
@@ -246,8 +295,40 @@ function handleAutoPackAll() {
   message.success(`混装完成：放置 ${result.placed.length} 件，未放入 ${result.unplaced} 件`);
 }
 
+function runFeasibility() {
+  if (!cargoList.value.length) return message.warning('请先添加货物');
+  const options = containerTypes.filter((c) => multiContainerOptionIds.value.includes(c.id));
+  if (!options.length) return message.warning('请至少选择一种柜型');
+
+  feasibilityResult.value = planMultiContainerFeasibility({
+    cargoList: cargoList.value,
+    containerOptions: options,
+    cfg: config,
+    maxContainers: maxContainerCount.value,
+  });
+
+  message.success(`评估完成：整柜装入 ${feasibilityResult.value.placedCount} 件，拼箱剩余 ${feasibilityResult.value.unplacedCount} 件`);
+}
+
 function exportPlan() {
   exportPlanAsJson({ container: currentContainer.value, placed: placedData.value });
+}
+
+function exportFeasibility() {
+  if (!feasibilityResult.value) return;
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    options: multiContainerOptionIds.value,
+    maxContainers: maxContainerCount.value,
+    ...feasibilityResult.value,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'multi-container-feasibility.json';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 onMounted(() => {

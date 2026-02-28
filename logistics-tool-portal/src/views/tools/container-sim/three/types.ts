@@ -15,6 +15,7 @@ export type CargoItem = {
   h: number; // cm
   weight: number; // kg
   qty: number;
+  rotatable: boolean;
 };
 
 export type SpawnState = {
@@ -25,6 +26,8 @@ export type SpawnState = {
   h: number; // cm
   weight: number; // kg
   remain: number;
+  rotatable: boolean;
+  rotated: boolean;
 };
 
 export type PlacedBox = {
@@ -37,6 +40,7 @@ export type PlacedBox = {
   x: number; // left-front-bottom x (cm)
   y: number; // layer base y (cm)
   z: number; // left-front-bottom z (cm)
+  rotated?: boolean;
 };
 
 export type EngineConfig = {
@@ -45,4 +49,18 @@ export type EngineConfig = {
   snapTolerance: number;
   supportRatio: number;
   autoStep: number;
+  boxGap: number;
+};
+
+export type MultiContainerPlan = {
+  container: ContainerType;
+  serial: number;
+  placed: PlacedBox[];
+};
+
+export type MultiContainerFeasibility = {
+  plans: MultiContainerPlan[];
+  lclRemaining: Array<{ cargoId: string; name: string; qty: number }>;
+  placedCount: number;
+  unplacedCount: number;
 };
