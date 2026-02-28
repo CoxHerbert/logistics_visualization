@@ -72,8 +72,9 @@
         <template v-if="activeSpawn">
           <div>{{ activeSpawn.name }}（{{ activeSpawn.l }}×{{ activeSpawn.w }}×{{ activeSpawn.h }}）</div>
           <div style="margin-top:6px;">剩余件数：{{ activeSpawn.remain }}</div>
+          <div style="margin-top:4px;">当前方向：{{ currentSpawnOrientationLabel }}</div>
           <a-space style="margin-top:8px;">
-            <a-button size="small" :disabled="!activeSpawn.rotatable" @click="toggleSpawnRotation">切换方向</a-button>
+            <a-button size="small" :disabled="!activeSpawn.rotatable" @click="toggleSpawnRotation">切换方向（多角度）</a-button>
             <a-button size="small" @click="activeSpawn = null">取消待放</a-button>
           </a-space>
         </template>
@@ -90,7 +91,7 @@
           <div style="position:absolute; left:12px; top:12px; display:flex; flex-wrap:wrap; gap:4px;">
             <a-tag color="blue">点击空白：按当前层放置</a-tag>
             <a-tag color="gold">点击箱子：选中/拖拽/Delete 删除</a-tag>
-            <a-tag color="purple">R 键旋转待放货物（智能尝试可旋转方向）</a-tag>
+            <a-tag color="purple">R 键可循环切换多角度方向（L/W/H）</a-tag>
           </div>
         </div>
 
@@ -155,7 +156,7 @@
               <a-button type="primary" block @click="handleSmartPack">智能装箱（推荐）</a-button>
               <a-button block :loading="isAutoPacking" :disabled="isAutoPacking" @click="handleAutoPackAll">混装一键装柜</a-button>
               <a-button block @click="handleAutoPackOne">单货自动摆放</a-button>
-              <a-button block :disabled="!activeSpawn" @click="toggleSpawnRotation">切换待放货物方向</a-button>
+              <a-button block :disabled="!activeSpawn" @click="toggleSpawnRotation">切换待放货物方向（多角度）</a-button>
               <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
             </a-space>
@@ -197,7 +198,7 @@
                     ({{ record.x.toFixed(0) }}, {{ record.y.toFixed(0) }}, {{ record.z.toFixed(0) }})
                   </template>
                   <template v-else-if="column.key === 'rotated'">
-                    <a-tag :color="record.rotated ? 'purple' : 'default'">{{ record.rotated ? '已旋转' : '原方向' }}</a-tag>
+                    <a-tag :color="record.rotated ? 'purple' : 'default'">{{ record.rotationLabel || (record.rotated ? '已旋转' : '原方向') }}</a-tag>
                   </template>
                   <template v-else-if="column.key === 'actions'">
                     <a-button danger size="small" @click="removePlacedAt(index)">删</a-button>
@@ -242,7 +243,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
-import { autoPackOne, calcBalanceMetrics, calcCBM, diagnoseUnplacedItem, expandAllItems, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
+import { autoPackOne, calcBalanceMetrics, calcCBM, diagnoseUnplacedItem, expandAllItems, getOrientationList, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
 import type { ExportUnplacedSummary } from './three/exporter';
 import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PackStrategy, PlacedBox, SpawnState } from './three/types';
@@ -340,6 +341,13 @@ const failReasonText: Record<PlacementFailReason, string> = {
 
 const activeSpawn = ref<SpawnState | null>(null);
 const activeLayer = ref(0);
+const currentSpawnOrientationLabel = computed(() => {
+  if (!activeSpawn.value) return '-';
+  const list = getOrientationList(activeSpawn.value);
+  if (!list.length) return 'L×W×H';
+  const idx = Math.min(activeSpawn.value.rotationIndex || 0, list.length - 1);
+  return list[idx].rotationLabel;
+});
 
 const placedData = ref<PlacedBox[]>([]);
 const placedCount = computed(() => placedData.value.length);
@@ -397,9 +405,10 @@ function spawnBoxes(item: CargoItem) {
     remain: item.qty,
     rotatable: item.rotatable,
     rotated: false,
+    rotationIndex: 0,
     maxStackWeightKg: item.maxStackWeightKg,
   };
-  message.info('现在可在 3D 视窗点击空白放置；按 R 键或右侧按钮可切换方向，系统会智能尝试可放方向');
+  message.info('现在可在 3D 视窗点击空白放置；按 R 键或右侧按钮可循环切换多角度方向（L/W/H）');
 }
 
 const canvasWrap = ref<HTMLDivElement>();
@@ -433,8 +442,12 @@ function clearPlacedAll(silent = false) {
 
 function toggleSpawnRotation() {
   if (!activeSpawn.value?.rotatable) return message.warning('当前待放货物不可旋转');
-  activeSpawn.value.rotated = !activeSpawn.value.rotated;
-  message.info(`待放货物方向已切换为：${activeSpawn.value.rotated ? 'W×L' : 'L×W'}`);
+  const list = getOrientationList(activeSpawn.value);
+  if (!list.length) return;
+  activeSpawn.value.rotationIndex = ((activeSpawn.value.rotationIndex || 0) + 1) % list.length;
+  const next = list[activeSpawn.value.rotationIndex];
+  activeSpawn.value.rotated = next.rotated;
+  message.info(`待放货物方向已切换为：${next.rotationLabel}`);
 }
 
 function applyPreset(preset: 'light' | 'heavy' | 'deformable') {

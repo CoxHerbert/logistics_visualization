@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { applySnapping, canPlaceAtLayer } from './packing';
+import { applySnapping, canPlaceAtLayer, getOrientationList } from './packing';
 import type { ContainerType, EngineConfig, PlacedBox, SpawnState } from './types';
 
 export function createInteractions(opts: {
@@ -68,8 +68,12 @@ export function createInteractions(opts: {
     const spawn = opts.getActiveSpawn();
     if (!spawn || spawn.remain <= 0) return;
 
-    const layerY = opts.getActiveLayerY(spawn.h);
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -layerY);
+    const orientList = getOrientationList(spawn);
+    const preferredIndex = Math.min(spawn.rotationIndex || 0, orientList.length - 1);
+    const ordered = orientList.map((_, idx) => orientList[(preferredIndex + idx) % orientList.length]);
+
+    const planeY = opts.getActiveLayerY(spawn.h);
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -planeY);
     const hit = rayToPlane(ev, plane);
     if (!hit) return;
 
@@ -77,31 +81,29 @@ export function createInteractions(opts: {
     const container = opts.getContainer();
     const placed = opts.getPlacedData();
 
-    const candidates = spawn.rotatable
-      ? [{ rotated: spawn.rotated }, { rotated: !spawn.rotated }]
-      : [{ rotated: false }];
+    for (const orient of ordered) {
+      const layerY = Math.round(planeY / Math.max(1, spawn.h)) * orient.h;
+      const pos = applySnapping(hit.x, hit.z, { l: orient.l, w: orient.w }, placed, container, layerY, cfg);
 
-    for (const candidate of candidates) {
-      const placeL = candidate.rotated ? spawn.w : spawn.l;
-      const placeW = candidate.rotated ? spawn.l : spawn.w;
-      const pos = applySnapping(hit.x, hit.z, { l: placeL, w: placeW }, placed, container, layerY, cfg);
-
-      if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: placeL, w: placeW, h: spawn.h, weight: spawn.weight }, placed, container, null, cfg.supportRatio, cfg.boxGap, cfg.doorAccessDepth)) {
+      if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: orient.l, w: orient.w, h: orient.h, weight: spawn.weight }, placed, container, null, cfg.supportRatio, cfg.boxGap, cfg.doorAccessDepth)) {
         continue;
       }
 
-      spawn.rotated = candidate.rotated;
+      spawn.rotated = orient.rotated;
+      const index = orientList.findIndex((item) => item.rotationLabel === orient.rotationLabel);
+      spawn.rotationIndex = index >= 0 ? index : 0;
       opts.addPlaced({
         cargoId: spawn.cargoId,
         name: spawn.name,
-        l: placeL,
-        w: placeW,
-        h: spawn.h,
+        l: orient.l,
+        w: orient.w,
+        h: orient.h,
         weight: spawn.weight,
         x: pos.x,
         y: layerY,
         z: pos.z,
-        rotated: candidate.rotated,
+        rotated: orient.rotated,
+        rotationLabel: orient.rotationLabel,
         maxStackWeightKg: spawn.maxStackWeightKg,
       });
       spawn.remain -= 1;
@@ -167,7 +169,14 @@ export function createInteractions(opts: {
   function onKeyDown(e: KeyboardEvent) {
     if (e.key.toLowerCase() === 'r') {
       const spawn = opts.getActiveSpawn();
-      if (spawn?.rotatable) spawn.rotated = !spawn.rotated;
+      if (spawn?.rotatable) {
+        const list = getOrientationList(spawn);
+        if (list.length > 0) {
+          spawn.rotationIndex = ((spawn.rotationIndex || 0) + 1) % list.length;
+          const next = list[spawn.rotationIndex];
+          spawn.rotated = next.rotated;
+        }
+      }
       return;
     }
     if ((e.key !== 'Delete' && e.key !== 'Backspace') || !selectedMesh) return;

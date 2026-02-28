@@ -29,6 +29,7 @@ export type SpawnState = {
   remain: number;
   rotatable: boolean;
   rotated: boolean;
+  rotationIndex: number;
   maxStackWeightKg: number;
 };
 
@@ -43,6 +44,7 @@ export type PlacedBox = {
   y: number; // layer base y (cm)
   z: number; // left-front-bottom z (cm)
   rotated?: boolean;
+  rotationLabel?: string;
   maxStackWeightKg?: number;
 };
 

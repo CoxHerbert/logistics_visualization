@@ -14,7 +14,7 @@ export function calcCBM(l: number, w: number, h: number) {
   return (l * w * h) / 1_000_000;
 }
 
-type Orientation = { l: number; w: number; rotated: boolean };
+export type Orientation = { l: number; w: number; h: number; rotated: boolean; rotationLabel: string };
 
 function strategyComparator(strategy: Exclude<PackStrategy, 'best'>) {
   if (strategy === 'weight') {
@@ -33,11 +33,36 @@ function strategyComparator(strategy: Exclude<PackStrategy, 'best'>) {
     b.l * b.w * b.h - a.l * a.w * a.h || b.weight - a.weight || b.h - a.h;
 }
 
-function orientationList(input: { l: number; w: number; rotatable?: boolean }): Orientation[] {
-  const list: Orientation[] = [{ l: input.l, w: input.w, rotated: false }];
-  if (input.rotatable && !almostEqual(input.l, input.w)) {
-    list.push({ l: input.w, w: input.l, rotated: true });
-  }
+export function getOrientationList(input: { l: number; w: number; h: number; rotatable?: boolean }): Orientation[] {
+  const base = { l: input.l, w: input.w, h: input.h };
+  const permutations: Array<[number, number, number]> = input.rotatable
+    ? [
+      [base.l, base.w, base.h],
+      [base.l, base.h, base.w],
+      [base.w, base.l, base.h],
+      [base.w, base.h, base.l],
+      [base.h, base.l, base.w],
+      [base.h, base.w, base.l],
+    ]
+    : [[base.l, base.w, base.h]];
+
+  const labels = ['L×W×H', 'L×H×W', 'W×L×H', 'W×H×L', 'H×L×W', 'H×W×L'];
+  const dedup = new Set<string>();
+  const list: Orientation[] = [];
+
+  permutations.forEach(([l, w, h], idx) => {
+    const key = `${l}|${w}|${h}`;
+    if (dedup.has(key)) return;
+    dedup.add(key);
+    list.push({
+      l,
+      w,
+      h,
+      rotated: !almostEqual(l, base.l) || !almostEqual(w, base.w) || !almostEqual(h, base.h),
+      rotationLabel: labels[idx],
+    });
+  });
+
   return list;
 }
 
@@ -318,7 +343,7 @@ export function diagnoseUnplacedItem(params: {
   const { item, placed, container, cfg } = params;
   const step = Math.max(1, cfg.autoStep);
 
-  const orientations = orientationList(item);
+  const orientations = getOrientationList(item);
   if (!orientations.some((o) => o.l <= container.innerLength && o.w <= container.innerWidth)) {
     return 'OUT_OF_BOUNDS' as PlacementFailReason;
   }
@@ -328,12 +353,12 @@ export function diagnoseUnplacedItem(params: {
   let supportHit = false;
 
   for (const orient of orientations) {
-    const maxLayer = Math.floor((container.innerHeight - item.h) / item.h);
+    const maxLayer = Math.floor((container.innerHeight - orient.h) / orient.h);
     if (maxLayer < 0) continue;
     hasLayer = true;
 
     for (let layer = 0; layer <= maxLayer; layer++) {
-      const yLayer = layer * item.h;
+      const yLayer = layer * orient.h;
       for (let z = 0; z <= container.innerWidth - orient.w; z += step) {
         for (let x = 0; x <= container.innerLength - orient.l; x += step) {
           const snapped = applySnapping(x, z, { l: orient.l, w: orient.w }, placed, container, yLayer, cfg);
@@ -341,7 +366,7 @@ export function diagnoseUnplacedItem(params: {
             x: snapped.x,
             z: snapped.z,
             yLayer,
-            box: { l: orient.l, w: orient.w, h: item.h, weight: item.weight },
+            box: { l: orient.l, w: orient.w, h: orient.h, weight: item.weight },
             placed,
             container,
             cfg,
@@ -370,11 +395,11 @@ function findPlacementForItem(params: {
   const { item, placed, container, cfg } = params;
   const step = Math.max(1, cfg.autoStep);
 
-  for (const orient of orientationList(item)) {
-    const maxLayer = Math.max(0, Math.floor((container.innerHeight - item.h) / item.h));
+  for (const orient of getOrientationList(item)) {
+    const maxLayer = Math.max(0, Math.floor((container.innerHeight - orient.h) / orient.h));
 
     for (let layer = 0; layer <= maxLayer; layer++) {
-      const yLayer = layer * item.h;
+      const yLayer = layer * orient.h;
       for (let z = 0; z <= container.innerWidth - orient.w; z += step) {
         for (let x = 0; x <= container.innerLength - orient.l; x += step) {
           const snapped = applySnapping(x, z, { l: orient.l, w: orient.w }, placed, container, yLayer, cfg);
@@ -383,7 +408,7 @@ function findPlacementForItem(params: {
               snapped.x,
               snapped.z,
               yLayer,
-              { l: orient.l, w: orient.w, h: item.h, weight: item.weight },
+              { l: orient.l, w: orient.w, h: orient.h, weight: item.weight },
               placed,
               container,
               null,
@@ -400,7 +425,9 @@ function findPlacementForItem(params: {
             z: snapped.z,
             l: orient.l,
             w: orient.w,
+            h: orient.h,
             rotated: orient.rotated,
+            rotationLabel: orient.rotationLabel,
           };
         }
       }
@@ -430,17 +457,18 @@ export function autoPackOne(params: {
   const result: PlacedBox[] = [];
   const step = Math.max(1, cfg.autoStep);
 
-  for (const orient of orientationList(spawn)) {
+  for (const orient of getOrientationList(spawn)) {
     for (let z = 0; z <= container.innerWidth - orient.w && spawn.remain > 0; z += step) {
       for (let x = 0; x <= container.innerLength - orient.l && spawn.remain > 0; x += step) {
         const merged = [...placed, ...result];
-        const snapped = applySnapping(x, z, { l: orient.l, w: orient.w }, merged, container, yLayer, cfg);
+        const orientLayerY = Math.round(yLayer / Math.max(1, spawn.h)) * orient.h;
+        const snapped = applySnapping(x, z, { l: orient.l, w: orient.w }, merged, container, orientLayerY, cfg);
         if (
           !canPlaceAtLayer(
             snapped.x,
             snapped.z,
-            yLayer,
-            { l: orient.l, w: orient.w, h: spawn.h, weight: spawn.weight },
+            orientLayerY,
+            { l: orient.l, w: orient.w, h: orient.h, weight: spawn.weight },
             merged,
             container,
             null,
@@ -456,12 +484,13 @@ export function autoPackOne(params: {
           name: spawn.name,
           l: orient.l,
           w: orient.w,
-          h: spawn.h,
+          h: orient.h,
           weight: spawn.weight,
           x: snapped.x,
-          y: yLayer,
+          y: orientLayerY,
           z: snapped.z,
           rotated: orient.rotated,
+          rotationLabel: orient.rotationLabel,
           maxStackWeightKg: spawn.maxStackWeightKg,
         });
         spawn.remain -= 1;
