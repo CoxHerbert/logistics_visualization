@@ -145,6 +145,7 @@ export function createInteractions(opts: {
         if (idx < 0) return;
 
         const data = opts.placedData[idx];
+        if (!data) return;
         const desired = p.add(dragOffset);
 
         // center -> left-front
