@@ -10,6 +10,15 @@ const routes: RouteRecordRaw[] = [
       order: 90,
     },
     children: [
+       {
+        path: '/tools/fba-flex',
+        name: 'FbaFlexCost',
+        component: () => import('#/views/freight/tools/fba-flex/index.vue'),
+        meta: {
+          title: 'FBA 成本计算器',
+          icon: 'mdi:calculator'
+        },
+      },
       {
         path: 'leads',
         name: 'FreightLeads',
