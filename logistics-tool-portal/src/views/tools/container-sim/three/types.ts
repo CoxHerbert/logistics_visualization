@@ -16,6 +16,7 @@ export type CargoItem = {
   weight: number; // kg
   qty: number;
   rotatable: boolean;
+  maxStackWeightKg: number;
 };
 
 export type SpawnState = {
@@ -28,6 +29,7 @@ export type SpawnState = {
   remain: number;
   rotatable: boolean;
   rotated: boolean;
+  maxStackWeightKg: number;
 };
 
 export type PlacedBox = {
@@ -41,6 +43,7 @@ export type PlacedBox = {
   y: number; // layer base y (cm)
   z: number; // left-front-bottom z (cm)
   rotated?: boolean;
+  maxStackWeightKg?: number;
 };
 
 export type EngineConfig = {
@@ -50,6 +53,7 @@ export type EngineConfig = {
   supportRatio: number;
   autoStep: number;
   boxGap: number;
+  balanceToleranceRatio: number;
 };
 
 export type MultiContainerPlan = {

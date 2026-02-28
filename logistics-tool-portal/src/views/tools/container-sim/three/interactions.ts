@@ -93,6 +93,7 @@ export function createInteractions(opts: {
       y: layerY,
       z: pos.z,
       rotated: spawn.rotated,
+      maxStackWeightKg: spawn.maxStackWeightKg,
     });
     spawn.remain -= 1;
   }

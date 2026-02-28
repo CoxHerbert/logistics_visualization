@@ -22,9 +22,20 @@ export function exportPlanAsJson(input: {
   container: ContainerType;
   placed: PlacedBox[];
   unplacedSummary?: ExportUnplacedSummary;
-  failureSummary?: Array<{ reason: string; count: number }>;
+  failureSummary?: Array<{ reason: string; count: number }> ;
+  balanceSummary?: {
+    centroidX: number;
+    centroidZ: number;
+    offsetX: number;
+    offsetZ: number;
+    ratioX: number;
+    ratioZ: number;
+    toleranceRatio: number;
+    isUnbalanced: boolean;
+  };
+
 }) {
-  const { container, placed, unplacedSummary = [], failureSummary = [] } = input;
+  const { container, placed, unplacedSummary = [], failureSummary = [], balanceSummary = null } = input;
 
   const withSequence = placed.map((box, idx) => ({ ...box, sequence: idx + 1 }));
   const layersMap = new Map<number, ExportLayerItem[]>();
@@ -51,6 +62,7 @@ export function exportPlanAsJson(input: {
     layers,
     unplacedSummary,
     failureSummary,
+    balanceSummary,
     summary: {
       placedCount: placed.length,
       usedCBM: placed.reduce((sum, b) => sum + calcCBM(b.l, b.w, b.h), 0),

@@ -36,6 +36,7 @@ export function expandAllItems(cargoList: CargoItem[]) {
         h: c.h,
         weight: c.weight,
         rotatable: c.rotatable,
+        maxStackWeightKg: c.maxStackWeightKg,
         rotated: false,
       });
     }
@@ -49,6 +50,100 @@ function inflatedDimensions(box: { l: number; w: number }, boxGap: number) {
   return {
     l: box.l + gap,
     w: box.w + gap,
+  };
+}
+
+function currentSupportedLoad(params: { support: PlacedBox; placed: PlacedBox[]; boxGap: number }) {
+  const { support, placed, boxGap } = params;
+  const supportInflated = inflatedDimensions(support, boxGap);
+  let load = 0;
+
+  for (const upper of placed) {
+    if (upper.y <= support.y) continue;
+    const upperInflated = inflatedDimensions(upper, boxGap);
+    const overlap = overlapArea2D(
+      support.x,
+      support.z,
+      supportInflated.l,
+      supportInflated.w,
+      upper.x,
+      upper.z,
+      upperInflated.l,
+      upperInflated.w,
+    );
+    if (overlap <= 0) continue;
+    const upperFootprint = Math.max(1e-6, upperInflated.l * upperInflated.w);
+    load += upper.weight * (overlap / upperFootprint);
+  }
+
+  return load;
+}
+
+function canSupportAdditionalLoad(params: {
+  x: number;
+  z: number;
+  box: { l: number; w: number; h?: number; weight?: number };
+  yLayer: number;
+  placed: PlacedBox[];
+  exceptIndex: number | null;
+  boxGap: number;
+}) {
+  const { x, z, box, yLayer, placed, exceptIndex, boxGap } = params;
+  if (almostEqual(yLayer, 0)) return true;
+
+  const inflated = inflatedDimensions(box, boxGap);
+  const footprint = Math.max(1e-6, inflated.l * inflated.w);
+  const weight = box.weight || 0;
+
+  for (let i = 0; i < placed.length; i++) {
+    if (exceptIndex != null && i == exceptIndex) continue;
+    const support = placed[i];
+    if (!almostEqual(support.y + support.h, yLayer)) continue;
+    const limit = support.maxStackWeightKg;
+    if (limit == null || limit <= 0) continue;
+
+    const supportInflated = inflatedDimensions(support, boxGap);
+    const overlap = overlapArea2D(x, z, inflated.l, inflated.w, support.x, support.z, supportInflated.l, supportInflated.w);
+    if (overlap <= 0) continue;
+
+    const addedLoad = weight * (overlap / footprint);
+    const existingLoad = currentSupportedLoad({ support, placed, boxGap });
+    if (existingLoad + addedLoad > limit) return false;
+  }
+
+  return true;
+}
+
+export function calcBalanceMetrics(placed: PlacedBox[], container: ContainerType) {
+  const totalWeight = placed.reduce((sum, b) => sum + b.weight, 0);
+  const centerX = container.innerLength / 2;
+  const centerZ = container.innerWidth / 2;
+
+  if (totalWeight <= 0) {
+    return {
+      totalWeight,
+      centroidX: centerX,
+      centroidZ: centerZ,
+      offsetX: 0,
+      offsetZ: 0,
+      ratioX: 0,
+      ratioZ: 0,
+    };
+  }
+
+  const centroidX = placed.reduce((sum, b) => sum + (b.x + b.l / 2) * b.weight, 0) / totalWeight;
+  const centroidZ = placed.reduce((sum, b) => sum + (b.z + b.w / 2) * b.weight, 0) / totalWeight;
+  const offsetX = centroidX - centerX;
+  const offsetZ = centroidZ - centerZ;
+
+  return {
+    totalWeight,
+    centroidX,
+    centroidZ,
+    offsetX,
+    offsetZ,
+    ratioX: container.innerLength > 0 ? Math.abs(offsetX) / container.innerLength : 0,
+    ratioZ: container.innerWidth > 0 ? Math.abs(offsetZ) / container.innerWidth : 0,
   };
 }
 
@@ -105,7 +200,7 @@ export function canPlaceAtLayer(
   x: number,
   z: number,
   yLayer: number,
-  box: { l: number; w: number; h?: number },
+  box: { l: number; w: number; h?: number; weight?: number },
   placed: PlacedBox[],
   container: ContainerType,
   exceptIndex: number | null = null,
@@ -130,6 +225,8 @@ export function canPlaceAtLayer(
   const footprint = inflated.l * inflated.w;
   if (footprint <= 0) return false;
 
+  if (!canSupportAdditionalLoad({ x, z, box, yLayer, placed, exceptIndex, boxGap })) return false;
+
   let supportArea = 0;
   for (let i = 0; i < placed.length; i++) {
     if (exceptIndex != null && i === exceptIndex) continue;
@@ -142,13 +239,13 @@ export function canPlaceAtLayer(
 }
 
 
-export type PlacementFailReason = 'OUT_OF_BOUNDS' | 'COLLISION' | 'INSUFFICIENT_SUPPORT' | 'NO_LAYER_AVAILABLE' | 'UNKNOWN';
+export type PlacementFailReason = 'OUT_OF_BOUNDS' | 'COLLISION' | 'INSUFFICIENT_SUPPORT' | 'OVER_STACK_LIMIT' | 'NO_LAYER_AVAILABLE' | 'UNKNOWN';
 
 function placementViolationAt(params: {
   x: number;
   z: number;
   yLayer: number;
-  box: { l: number; w: number; h: number };
+  box: { l: number; w: number; h: number; weight?: number };
   placed: PlacedBox[];
   container: ContainerType;
   cfg: EngineConfig;
@@ -169,9 +266,14 @@ function placementViolationAt(params: {
     if (aabbOverlap2D(x, z, l, w, p.x, p.z, pl, pw)) return 'COLLISION' as PlacementFailReason;
   }
 
+  if (!canSupportAdditionalLoad({ x, z, box, yLayer, placed, exceptIndex: null, boxGap: cfg.boxGap })) {
+    return 'OVER_STACK_LIMIT' as PlacementFailReason;
+  }
+
   if (almostEqual(yLayer, 0)) return null;
 
   const footprint = l * w;
+
   let supportArea = 0;
   for (const p of placed) {
     if (!almostEqual(p.y + p.h, yLayer)) continue;
@@ -185,7 +287,7 @@ function placementViolationAt(params: {
 }
 
 export function diagnoseUnplacedItem(params: {
-  item: { l: number; w: number; h: number; rotatable?: boolean };
+  item: { l: number; w: number; h: number; weight: number; rotatable?: boolean; maxStackWeightKg?: number };
   placed: PlacedBox[];
   container: ContainerType;
   cfg: EngineConfig;
@@ -216,7 +318,7 @@ export function diagnoseUnplacedItem(params: {
             x: snapped.x,
             z: snapped.z,
             yLayer,
-            box: { l: orient.l, w: orient.w, h: item.h },
+            box: { l: orient.l, w: orient.w, h: item.h, weight: item.weight },
             placed,
             container,
             cfg,
@@ -224,6 +326,7 @@ export function diagnoseUnplacedItem(params: {
           if (!violation) return 'UNKNOWN' as PlacementFailReason;
           if (violation === 'COLLISION') collisionHit = true;
           if (violation === 'INSUFFICIENT_SUPPORT') supportHit = true;
+          if (violation === 'OVER_STACK_LIMIT') return 'OVER_STACK_LIMIT' as PlacementFailReason;
         }
       }
     }
@@ -236,7 +339,7 @@ export function diagnoseUnplacedItem(params: {
 }
 
 function findPlacementForItem(params: {
-  item: { l: number; w: number; h: number; rotatable?: boolean };
+  item: { l: number; w: number; h: number; weight: number; rotatable?: boolean; maxStackWeightKg?: number };
   placed: PlacedBox[];
   container: ContainerType;
   cfg: EngineConfig;
@@ -257,7 +360,7 @@ function findPlacementForItem(params: {
               snapped.x,
               snapped.z,
               yLayer,
-              { l: orient.l, w: orient.w, h: item.h },
+              { l: orient.l, w: orient.w, h: item.h, weight: item.weight },
               placed,
               container,
               null,
@@ -284,7 +387,7 @@ function findPlacementForItem(params: {
 }
 
 export function tryPlaceItem(params: {
-  item: { l: number; w: number; h: number; rotatable?: boolean };
+  item: { l: number; w: number; h: number; weight: number; rotatable?: boolean; maxStackWeightKg?: number };
   placed: PlacedBox[];
   container: ContainerType;
   cfg: EngineConfig;
@@ -313,7 +416,7 @@ export function autoPackOne(params: {
             snapped.x,
             snapped.z,
             yLayer,
-            { l: orient.l, w: orient.w, h: spawn.h },
+            { l: orient.l, w: orient.w, h: spawn.h, weight: spawn.weight },
             merged,
             container,
             null,
@@ -334,6 +437,7 @@ export function autoPackOne(params: {
           y: yLayer,
           z: snapped.z,
           rotated: orient.rotated,
+          maxStackWeightKg: spawn.maxStackWeightKg,
         });
         spawn.remain -= 1;
       }

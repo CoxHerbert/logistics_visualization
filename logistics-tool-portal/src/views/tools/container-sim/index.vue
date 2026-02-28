@@ -28,6 +28,9 @@
             <a-col :span="12"><a-form-item label="重量(kg)"><a-input-number v-model:value="cargoForm.weight" :min="0" style="width:100%" /></a-form-item></a-col>
             <a-col :span="12"><a-form-item label="件数"><a-input-number v-model:value="cargoForm.qty" :min="1" style="width:100%" /></a-form-item></a-col>
           </a-row>
+          <a-form-item label="可承受堆码重量上限(kg)">
+            <a-input-number v-model:value="cargoForm.maxStackWeightKg" :min="0" style="width:100%" />
+          </a-form-item>
           <a-form-item label="可旋转摆放（L/W 互换）">
             <a-switch v-model:checked="cargoForm.rotatable" checked-children="是" un-checked-children="否" />
           </a-form-item>
@@ -92,6 +95,9 @@
               <a-form-item label="自动步长 (cm)">
                 <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
               </a-form-item>
+              <a-form-item label="偏载容差比例">
+                <a-input-number v-model:value="config.balanceToleranceRatio" :min="0" :max="0.5" :step="0.01" style="width:100%" />
+              </a-form-item>
               <a-form-item label="场景模板">
                 <a-space wrap>
                   <a-button size="small" @click="applyPreset('light')">轻抛货</a-button>
@@ -106,6 +112,8 @@
             <div>体积利用率：{{ (usedCBM / containerCBM * 100).toFixed(1) }}%</div>
             <div>已占用重量：{{ usedWeight.toFixed(1) }} kg</div>
             <div>重量利用率：{{ (usedWeight / currentContainer.maxWeight * 100).toFixed(1) }}%</div>
+            <div>重心偏移：X {{ balanceMetrics.offsetX.toFixed(1) }} cm / Z {{ balanceMetrics.offsetZ.toFixed(1) }} cm</div>
+            <a-tag :color="balanceWarning ? 'red' : 'green'">{{ balanceWarning ? '偏载风险' : '偏载正常' }}</a-tag>
 
             <a-divider style="margin:8px 0;" />
             <a-space direction="vertical" style="width:100%">
@@ -161,7 +169,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
-import { autoPackOne, calcCBM, diagnoseUnplacedItem, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
+import { autoPackOne, calcBalanceMetrics, calcCBM, diagnoseUnplacedItem, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
 import type { ExportUnplacedSummary } from './three/exporter';
 import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PlacedBox, SpawnState } from './three/types';
@@ -188,9 +196,10 @@ const config = reactive<EngineConfig>({
   supportRatio: 0.6,
   autoStep: 5,
   boxGap: 0,
+  balanceToleranceRatio: 0.18,
 });
 
-const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10, rotatable: true });
+const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10, rotatable: true, maxStackWeightKg: 120 });
 const cargoList = ref<CargoItem[]>([]);
 const columns = [
   { title: '名称', dataIndex: 'name', key: 'name' },
@@ -204,6 +213,7 @@ const failReasonText: Record<PlacementFailReason, string> = {
   OUT_OF_BOUNDS: '尺寸超出柜内可用范围',
   COLLISION: '空间冲突（碰撞）',
   INSUFFICIENT_SUPPORT: '支撑不足（悬空风险）',
+  OVER_STACK_LIMIT: '堆码承压超限',
   NO_LAYER_AVAILABLE: '高度不足，无法进入可用层',
   UNKNOWN: '无可行摆位',
 };
@@ -215,6 +225,8 @@ const placedData = ref<PlacedBox[]>([]);
 const placedCount = computed(() => placedData.value.length);
 const usedCBM = computed(() => placedData.value.reduce((s, b) => s + calcCBM(b.l, b.w, b.h), 0));
 const usedWeight = computed(() => placedData.value.reduce((s, b) => s + b.weight, 0));
+const balanceMetrics = computed(() => calcBalanceMetrics(placedData.value, currentContainer.value));
+const balanceWarning = computed(() => balanceMetrics.value.ratioX > config.balanceToleranceRatio || balanceMetrics.value.ratioZ > config.balanceToleranceRatio);
 
 const maxContainerCount = ref(3);
 const multiContainerOptionIds = ref<string[]>(containerTypes.map((x) => x.id));
@@ -235,12 +247,13 @@ function addCargo() {
     weight: cargoForm.weight || 0,
     qty: cargoForm.qty || 1,
     rotatable: cargoForm.rotatable,
+    maxStackWeightKg: cargoForm.maxStackWeightKg || 0,
   });
   message.success('已加入货物列表');
 }
 
 function resetForm() {
-  Object.assign(cargoForm, { name: '', l: 60, w: 40, h: 35, weight: 0, qty: 1, rotatable: true });
+  Object.assign(cargoForm, { name: '', l: 60, w: 40, h: 35, weight: 0, qty: 1, rotatable: true, maxStackWeightKg: 120 });
 }
 
 function removeCargo(id: string) {
@@ -259,6 +272,7 @@ function spawnBoxes(item: CargoItem) {
     remain: item.qty,
     rotatable: item.rotatable,
     rotated: false,
+    maxStackWeightKg: item.maxStackWeightKg,
   };
   message.info('现在可在 3D 视窗点击空白放置；按 R 键可旋转待放货物');
 }
@@ -294,16 +308,16 @@ function clearPlacedAll() {
 
 function applyPreset(preset: 'light' | 'heavy' | 'deformable') {
   if (preset === 'light') {
-    Object.assign(config, { snapGrid: 5, snapTolerance: 8, supportRatio: 0.55, autoStep: 10, boxGap: 0.5 });
+    Object.assign(config, { snapGrid: 5, snapTolerance: 8, supportRatio: 0.55, autoStep: 10, boxGap: 0.5, balanceToleranceRatio: 0.22 });
     message.success('已应用轻抛货模板');
     return;
   }
   if (preset === 'heavy') {
-    Object.assign(config, { snapGrid: 5, snapTolerance: 4, supportRatio: 0.85, autoStep: 5, boxGap: 0 });
+    Object.assign(config, { snapGrid: 5, snapTolerance: 4, supportRatio: 0.85, autoStep: 5, boxGap: 0, balanceToleranceRatio: 0.12 });
     message.success('已应用重货模板');
     return;
   }
-  Object.assign(config, { snapGrid: 5, snapTolerance: 6, supportRatio: 0.7, autoStep: 5, boxGap: 2 });
+  Object.assign(config, { snapGrid: 5, snapTolerance: 6, supportRatio: 0.7, autoStep: 5, boxGap: 2, balanceToleranceRatio: 0.18 });
   message.success('已应用易变形货模板');
 }
 
@@ -346,6 +360,7 @@ async function handleAutoPackAll() {
         weight: cargo.weight,
         rotatable: cargo.rotatable,
         rotated: false,
+        maxStackWeightKg: cargo.maxStackWeightKg,
       })),
     )
     .sort((a, b) => b.l * b.w - a.l * a.w || b.weight - a.weight || b.h - a.h);
@@ -420,6 +435,16 @@ function exportPlan() {
     placed: placedData.value,
     unplacedSummary: autoPackUnplacedSummary.value,
     failureSummary: autoPackFailureSummary.value,
+    balanceSummary: {
+      centroidX: balanceMetrics.value.centroidX,
+      centroidZ: balanceMetrics.value.centroidZ,
+      offsetX: balanceMetrics.value.offsetX,
+      offsetZ: balanceMetrics.value.offsetZ,
+      ratioX: balanceMetrics.value.ratioX,
+      ratioZ: balanceMetrics.value.ratioZ,
+      toleranceRatio: config.balanceToleranceRatio,
+      isUnbalanced: balanceWarning.value,
+    },
   });
 }
 
