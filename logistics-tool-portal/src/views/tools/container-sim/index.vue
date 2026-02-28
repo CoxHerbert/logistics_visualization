@@ -103,7 +103,7 @@
             <a-divider style="margin:8px 0;" />
             <a-space direction="vertical" style="width:100%">
               <a-button type="primary" block @click="handleAutoPackOne">单货自动摆放</a-button>
-              <a-button block @click="handleAutoPackAll">混装一键装柜</a-button>
+              <a-button block :loading="isAutoPacking" :disabled="isAutoPacking" @click="handleAutoPackAll">混装一键装柜</a-button>
               <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
             </a-space>
@@ -145,7 +145,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
-import { autoPackAll, autoPackOne, calcCBM, planMultiContainerFeasibility } from './three/packing';
+import { autoPackOne, calcCBM, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
 import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PlacedBox, SpawnState } from './three/types';
 
@@ -193,6 +193,7 @@ const usedWeight = computed(() => placedData.value.reduce((s, b) => s + b.weight
 const maxContainerCount = ref(3);
 const multiContainerOptionIds = ref<string[]>(containerTypes.map((x) => x.id));
 const feasibilityResult = ref<MultiContainerFeasibility | null>(null);
+const isAutoPacking = ref(false);
 
 function addCargo() {
   if (!cargoForm.name) return message.warning('请填写名称');
@@ -282,17 +283,61 @@ function handleAutoPackOne() {
   message.success(`单货自动摆放完成：放置 ${placed.length} 件（层=${activeLayer.value}）`);
 }
 
-function handleAutoPackAll() {
+async function handleAutoPackAll() {
+  if (isAutoPacking.value) return;
   if (!cargoList.value.length) return message.warning('请先添加货物');
+
+  isAutoPacking.value = true;
   clearPlacedAll();
-  const result = autoPackAll({
-    cargoList: cargoList.value,
-    placed: placedData.value,
-    container: currentContainer.value,
-    cfg: config,
-  });
-  result.placed.forEach(addPlaced);
-  message.success(`混装完成：放置 ${result.placed.length} 件，未放入 ${result.unplaced} 件`);
+
+  const queue = cargoList.value
+    .flatMap((cargo) =>
+      Array.from({ length: Math.max(0, Math.floor(cargo.qty || 0)) }, () => ({
+        cargoId: cargo.id,
+        name: cargo.name,
+        l: cargo.l,
+        w: cargo.w,
+        h: cargo.h,
+        weight: cargo.weight,
+        rotatable: cargo.rotatable,
+        rotated: false,
+      })),
+    )
+    .sort((a, b) => b.l * b.w - a.l * a.w || b.weight - a.weight || b.h - a.h);
+
+  const computedPlaced: PlacedBox[] = [];
+  let unplaced = 0;
+
+  const BATCH = 30;
+  for (let i = 0; i < queue.length; i++) {
+    const item = queue[i];
+    const fitted = tryPlaceItem({
+      item,
+      placed: computedPlaced,
+      container: currentContainer.value,
+      cfg: config,
+    });
+
+    if (fitted) {
+      computedPlaced.push({ ...item, ...fitted });
+    } else {
+      unplaced += 1;
+    }
+
+    if (i % BATCH === 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    }
+  }
+
+  const RENDER_BATCH = 100;
+  for (let i = 0; i < computedPlaced.length; i += RENDER_BATCH) {
+    const batch = computedPlaced.slice(i, i + RENDER_BATCH);
+    batch.forEach(addPlaced);
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+  }
+
+  isAutoPacking.value = false;
+  message.success(`混装完成：放置 ${computedPlaced.length} 件，未放入 ${unplaced} 件`);
 }
 
 function runFeasibility() {

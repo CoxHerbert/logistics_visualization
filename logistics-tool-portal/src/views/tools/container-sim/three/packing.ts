@@ -189,6 +189,15 @@ function findPlacementForItem(params: {
   return null;
 }
 
+export function tryPlaceItem(params: {
+  item: { l: number; w: number; h: number; rotatable?: boolean };
+  placed: PlacedBox[];
+  container: ContainerType;
+  cfg: EngineConfig;
+}) {
+  return findPlacementForItem(params);
+}
+
 export function autoPackOne(params: {
   spawn: SpawnState;
   yLayer: number;
