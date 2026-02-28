@@ -145,6 +145,17 @@
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
             </a-space>
 
+            <a-form layout="vertical" style="margin-top:8px;">
+              <a-form-item label="混装过程动画">
+                <a-switch v-model:checked="enablePackAnimation" checked-children="开" un-checked-children="关" />
+              </a-form-item>
+            </a-form>
+
+            <div v-if="showPackingProgress" style="margin-top:8px;">
+              <div style="font-size:12px; color:#666; margin-bottom:4px;">{{ packingStatus }}</div>
+              <a-progress :percent="packingProgress" size="small" />
+            </div>
+
             <a-divider v-if="autoPackFailureSummary.length" style="margin:10px 0;" />
             <div v-if="autoPackFailureSummary.length">
               <div style="margin-bottom:6px; font-weight:600;">未装入原因</div>
@@ -322,6 +333,10 @@ const feasibilityResult = ref<MultiContainerFeasibility | null>(null);
 const isAutoPacking = ref(false);
 const autoPackFailureSummary = ref<Array<{ reason: PlacementFailReason; count: number }>>([]);
 const autoPackUnplacedSummary = ref<ExportUnplacedSummary>([]);
+const enablePackAnimation = ref(true);
+const showPackingProgress = ref(false);
+const packingProgress = ref(0);
+const packingStatus = ref('');
 
 function addCargo() {
   if (!cargoForm.name) return message.warning('请填写名称');
@@ -384,14 +399,14 @@ function removePlacedAt(index: number) {
   placedData.value.splice(index, 1);
 }
 
-function clearPlacedAll() {
+function clearPlacedAll(silent = false) {
   if (!stage) return;
   stage.clearPlaced();
   placedData.value.length = 0;
   autoPackFailureSummary.value = [];
   autoPackUnplacedSummary.value = [];
   interactions?.notifyMeshesChanged();
-  message.success('已清空摆放');
+  if (!silent) message.success('已清空摆放');
 }
 
 function toggleSpawnRotation() {
@@ -417,7 +432,7 @@ function applyPreset(preset: 'light' | 'heavy' | 'deformable') {
 
 function onContainerChange() {
   if (!stage) return;
-  clearPlacedAll();
+  clearPlacedAll(true);
   stage.buildContainerBox(currentContainer.value);
   stage.controls.target.set(currentContainer.value.innerLength / 2, currentContainer.value.innerHeight / 3, currentContainer.value.innerWidth / 2);
   stage.controls.update();
@@ -441,9 +456,12 @@ async function handleAutoPackAll() {
   if (!cargoList.value.length) return message.warning('请先添加货物');
 
   isAutoPacking.value = true;
-  clearPlacedAll();
+  showPackingProgress.value = true;
+  packingProgress.value = 0;
+  packingStatus.value = '初始化混装流程...';
+  clearPlacedAll(true);
 
-  const runByStrategy = async (strategy: Exclude<PackStrategy, 'best'>) => {
+  const runByStrategy = async (strategy: Exclude<PackStrategy, 'best'>, strategyIndex: number, strategyTotal: number) => {
     const queue = expandAllItems(cargoList.value, strategy);
     const computedPlaced: PlacedBox[] = [];
     let unplaced = 0;
@@ -451,6 +469,7 @@ async function handleAutoPackAll() {
     const unplacedByCargo = new Map<string, { cargoId: string; name: string; qty: number }>();
 
     const BATCH = 30;
+    packingStatus.value = `正在评估策略：${strategy}`;
     for (let i = 0; i < queue.length; i++) {
       const item = queue[i];
       const fitted = tryPlaceItem({
@@ -477,7 +496,10 @@ async function handleAutoPackAll() {
       }
 
       if (i % BATCH === 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        const strategyBase = (strategyIndex / strategyTotal) * 70;
+        const strategySpan = 70 / strategyTotal;
+        packingProgress.value = Math.min(70, Math.floor(strategyBase + ((i + 1) / Math.max(1, queue.length)) * strategySpan));
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
       }
     }
 
@@ -494,9 +516,9 @@ async function handleAutoPackAll() {
     ? ['footprint', 'volume', 'weight', 'height']
     : [config.strategy];
 
-  let best = await runByStrategy(candidates[0]);
+  let best = await runByStrategy(candidates[0], 0, candidates.length);
   for (let i = 1; i < candidates.length; i++) {
-    const attempt = await runByStrategy(candidates[i]);
+    const attempt = await runByStrategy(candidates[i], i, candidates.length);
     if (attempt.computedPlaced.length > best.computedPlaced.length) {
       best = attempt;
       continue;
@@ -508,16 +530,27 @@ async function handleAutoPackAll() {
     }
   }
 
-  const RENDER_BATCH = 100;
+  packingStatus.value = `回放装箱动画（策略=${best.strategy}）...`;
+  const RENDER_BATCH = enablePackAnimation.value ? 1 : 100;
   for (let i = 0; i < best.computedPlaced.length; i += RENDER_BATCH) {
     const batch = best.computedPlaced.slice(i, i + RENDER_BATCH);
     batch.forEach(addPlaced);
-    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    packingProgress.value = 70 + Math.floor(((i + batch.length) / Math.max(1, best.computedPlaced.length)) * 30);
+    if (enablePackAnimation.value) {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    } else {
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    }
   }
 
   autoPackFailureSummary.value = best.failSummary;
   autoPackUnplacedSummary.value = best.unplacedSummary;
+  packingProgress.value = 100;
+  packingStatus.value = '混装完成';
   isAutoPacking.value = false;
+  setTimeout(() => {
+    showPackingProgress.value = false;
+  }, 500);
   message.success(`混装完成：放置 ${best.computedPlaced.length} 件，未放入 ${best.unplaced} 件（策略=${best.strategy}）`);
 }
 
