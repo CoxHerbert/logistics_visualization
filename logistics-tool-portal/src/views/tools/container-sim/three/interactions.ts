@@ -76,26 +76,37 @@ export function createInteractions(opts: {
     const cfg = opts.getConfig();
     const container = opts.getContainer();
     const placed = opts.getPlacedData();
-    const placeL = spawn.rotated ? spawn.w : spawn.l;
-    const placeW = spawn.rotated ? spawn.l : spawn.w;
-    const pos = applySnapping(hit.x, hit.z, { l: placeL, w: placeW }, placed, container, layerY, cfg);
 
-    if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: placeL, w: placeW, h: spawn.h, weight: spawn.weight }, placed, container, null, cfg.supportRatio, cfg.boxGap, cfg.doorAccessDepth)) return;
+    const candidates = spawn.rotatable
+      ? [{ rotated: spawn.rotated }, { rotated: !spawn.rotated }]
+      : [{ rotated: false }];
 
-    opts.addPlaced({
-      cargoId: spawn.cargoId,
-      name: spawn.name,
-      l: placeL,
-      w: placeW,
-      h: spawn.h,
-      weight: spawn.weight,
-      x: pos.x,
-      y: layerY,
-      z: pos.z,
-      rotated: spawn.rotated,
-      maxStackWeightKg: spawn.maxStackWeightKg,
-    });
-    spawn.remain -= 1;
+    for (const candidate of candidates) {
+      const placeL = candidate.rotated ? spawn.w : spawn.l;
+      const placeW = candidate.rotated ? spawn.l : spawn.w;
+      const pos = applySnapping(hit.x, hit.z, { l: placeL, w: placeW }, placed, container, layerY, cfg);
+
+      if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: placeL, w: placeW, h: spawn.h, weight: spawn.weight }, placed, container, null, cfg.supportRatio, cfg.boxGap, cfg.doorAccessDepth)) {
+        continue;
+      }
+
+      spawn.rotated = candidate.rotated;
+      opts.addPlaced({
+        cargoId: spawn.cargoId,
+        name: spawn.name,
+        l: placeL,
+        w: placeW,
+        h: spawn.h,
+        weight: spawn.weight,
+        x: pos.x,
+        y: layerY,
+        z: pos.z,
+        rotated: candidate.rotated,
+        maxStackWeightKg: spawn.maxStackWeightKg,
+      });
+      spawn.remain -= 1;
+      return;
+    }
   }
 
   function onPointerDown(ev: PointerEvent) {

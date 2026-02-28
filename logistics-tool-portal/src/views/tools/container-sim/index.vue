@@ -12,6 +12,15 @@
         <a-divider style="margin:12px 0;" />
         <div>最大载重：{{ currentContainer.maxWeight }} kg</div>
         <div>可用体积：{{ containerCBM.toFixed(2) }} CBM</div>
+        <a-divider style="margin:12px 0;" />
+        <a-form layout="vertical">
+          <a-form-item label="业务场景">
+            <a-select v-model:value="activeScenario" style="width:100%" @change="applyScenario">
+              <a-select-option value="sales">销售场景（快速报价演示）</a-select-option>
+              <a-select-option value="customer">客户模拟装箱（精细约束）</a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-form>
       </a-card>
 
       <a-card size="small" title="新增货物" style="margin-top:12px;">
@@ -67,7 +76,7 @@
           <div style="position:absolute; left:12px; top:12px; display:flex; flex-wrap:wrap; gap:4px;">
             <a-tag color="blue">点击空白：按当前层放置</a-tag>
             <a-tag color="gold">点击箱子：选中/拖拽/Delete 删除</a-tag>
-            <a-tag color="purple">R 键旋转待放货物</a-tag>
+            <a-tag color="purple">R 键旋转待放货物（智能尝试可旋转方向）</a-tag>
           </div>
         </div>
 
@@ -131,6 +140,7 @@
             <a-space direction="vertical" style="width:100%">
               <a-button type="primary" block @click="handleAutoPackOne">单货自动摆放</a-button>
               <a-button block :loading="isAutoPacking" :disabled="isAutoPacking" @click="handleAutoPackAll">混装一键装柜</a-button>
+              <a-button block :disabled="!activeSpawn" @click="toggleSpawnRotation">切换待放货物方向</a-button>
               <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
             </a-space>
@@ -145,6 +155,27 @@
             </div>
           </a-card>
 
+
+          <a-card size="small" title="已装箱清单" style="margin-top:12px;">
+            <div style="max-height:220px; overflow:auto;">
+              <a-table size="small" :columns="placedColumns" :data-source="placedData" :pagination="false" row-key="x">
+                <template #bodyCell="{ column, record, index }">
+                  <template v-if="column.key === 'size'">
+                    {{ record.l }}×{{ record.w }}×{{ record.h }}
+                  </template>
+                  <template v-else-if="column.key === 'pos'">
+                    ({{ record.x.toFixed(0) }}, {{ record.y.toFixed(0) }}, {{ record.z.toFixed(0) }})
+                  </template>
+                  <template v-else-if="column.key === 'rotated'">
+                    <a-tag :color="record.rotated ? 'purple' : 'default'">{{ record.rotated ? '已旋转' : '原方向' }}</a-tag>
+                  </template>
+                  <template v-else-if="column.key === 'actions'">
+                    <a-button danger size="small" @click="removePlacedAt(index)">删</a-button>
+                  </template>
+                </template>
+              </a-table>
+            </div>
+          </a-card>
           <a-card size="small" title="多柜可行性评估（整柜+拼箱）" style="margin-top:12px;">
             <a-form layout="vertical">
               <a-form-item label="最多柜数">
@@ -185,6 +216,8 @@ import { autoPackOne, calcBalanceMetrics, calcCBM, diagnoseUnplacedItem, expandA
 import { exportPlanAsJson } from './three/exporter';
 import type { ExportUnplacedSummary } from './three/exporter';
 import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PackStrategy, PlacedBox, SpawnState } from './three/types';
+
+type ScenarioMode = 'sales' | 'customer';
 import type { PlacementFailReason } from './three/packing';
 
 function uid() {
@@ -222,6 +255,47 @@ const columns = [
   { title: '旋转', key: 'rotatable' },
   { title: '操作', key: 'actions' },
 ];
+
+const placedColumns = [
+  { title: '名称', dataIndex: 'name', key: 'name' },
+  { title: '尺寸', key: 'size' },
+  { title: '坐标', key: 'pos' },
+  { title: '方向', key: 'rotated' },
+  { title: '操作', key: 'actions' },
+];
+
+const activeScenario = ref<ScenarioMode>('sales');
+
+function applyScenario(mode: ScenarioMode, silent = false) {
+  if (mode === 'sales') {
+    Object.assign(config, {
+      snapEnabled: true,
+      snapGrid: 10,
+      snapTolerance: 10,
+      supportRatio: 0.55,
+      autoStep: 10,
+      boxGap: 0.5,
+      balanceToleranceRatio: 0.25,
+      strategy: 'best',
+      doorAccessDepth: 0,
+    });
+    if (!silent) message.success('已切换到销售场景参数');
+    return;
+  }
+
+  Object.assign(config, {
+    snapEnabled: true,
+    snapGrid: 5,
+    snapTolerance: 4,
+    supportRatio: 0.8,
+    autoStep: 5,
+    boxGap: 1.5,
+    balanceToleranceRatio: 0.12,
+    strategy: 'best',
+    doorAccessDepth: 20,
+  });
+  if (!silent) message.success('已切换到客户模拟装箱参数');
+}
 
 const failReasonText: Record<PlacementFailReason, string> = {
   OUT_OF_BOUNDS: '尺寸超出柜内可用范围',
@@ -288,7 +362,7 @@ function spawnBoxes(item: CargoItem) {
     rotated: false,
     maxStackWeightKg: item.maxStackWeightKg,
   };
-  message.info('现在可在 3D 视窗点击空白放置；按 R 键可旋转待放货物');
+  message.info('现在可在 3D 视窗点击空白放置；按 R 键或右侧按钮可切换方向，系统会智能尝试可放方向');
 }
 
 const canvasWrap = ref<HTMLDivElement>();
@@ -318,6 +392,12 @@ function clearPlacedAll() {
   autoPackUnplacedSummary.value = [];
   interactions?.notifyMeshesChanged();
   message.success('已清空摆放');
+}
+
+function toggleSpawnRotation() {
+  if (!activeSpawn.value?.rotatable) return message.warning('当前待放货物不可旋转');
+  activeSpawn.value.rotated = !activeSpawn.value.rotated;
+  message.info(`待放货物方向已切换为：${activeSpawn.value.rotated ? 'W×L' : 'L×W'}`);
 }
 
 function applyPreset(preset: 'light' | 'heavy' | 'deformable') {
@@ -476,20 +556,33 @@ function exportPlan() {
 }
 
 function exportFeasibility() {
-  if (!feasibilityResult.value) return;
-  const payload = {
-    generatedAt: new Date().toISOString(),
-    options: multiContainerOptionIds.value,
-    maxContainers: maxContainerCount.value,
-    ...feasibilityResult.value,
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'multi-container-feasibility.json';
-  a.click();
-  URL.revokeObjectURL(url);
+  if (!feasibilityResult.value) return message.warning('请先执行评估方案');
+  try {
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      options: multiContainerOptionIds.value,
+      maxContainers: maxContainerCount.value,
+      placedCount: feasibilityResult.value.placedCount,
+      unplacedCount: feasibilityResult.value.unplacedCount,
+      lclRemaining: feasibilityResult.value.lclRemaining,
+      plans: feasibilityResult.value.plans.map((plan) => ({
+        serial: plan.serial,
+        container: plan.container,
+        placedCount: plan.placed.length,
+        placed: plan.placed,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'multi-container-feasibility.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  } catch (err) {
+    console.error(err);
+    message.error('导出评估失败，请重试或缩小数据规模');
+  }
 }
 
 onMounted(() => {
@@ -497,6 +590,7 @@ onMounted(() => {
 
   stage = createStage(canvasWrap.value, currentContainer.value);
   stage.start();
+  applyScenario(activeScenario.value, true);
 
   interactions = createInteractions({
     renderer: stage.renderer,
