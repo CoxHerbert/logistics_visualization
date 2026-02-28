@@ -107,6 +107,15 @@
               <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
             </a-space>
+
+            <a-divider v-if="autoPackFailureSummary.length" style="margin:10px 0;" />
+            <div v-if="autoPackFailureSummary.length">
+              <div style="margin-bottom:6px; font-weight:600;">未装入原因</div>
+              <div v-for="item in autoPackFailureSummary" :key="item.reason" style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span>{{ failReasonText[item.reason] }}</span>
+                <span>{{ item.count }}</span>
+              </div>
+            </div>
           </a-card>
 
           <a-card size="small" title="多柜可行性评估（整柜+拼箱）" style="margin-top:12px;">
@@ -145,9 +154,10 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
-import { autoPackOne, calcCBM, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
+import { autoPackOne, calcCBM, diagnoseUnplacedItem, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
 import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PlacedBox, SpawnState } from './three/types';
+import type { PlacementFailReason } from './three/packing';
 
 function uid() {
   return Math.random().toString(16).slice(2);
@@ -182,6 +192,14 @@ const columns = [
   { title: '操作', key: 'actions' },
 ];
 
+const failReasonText: Record<PlacementFailReason, string> = {
+  OUT_OF_BOUNDS: '尺寸超出柜内可用范围',
+  COLLISION: '空间冲突（碰撞）',
+  INSUFFICIENT_SUPPORT: '支撑不足（悬空风险）',
+  NO_LAYER_AVAILABLE: '高度不足，无法进入可用层',
+  UNKNOWN: '无可行摆位',
+};
+
 const activeSpawn = ref<SpawnState | null>(null);
 const activeLayer = ref(0);
 
@@ -194,6 +212,7 @@ const maxContainerCount = ref(3);
 const multiContainerOptionIds = ref<string[]>(containerTypes.map((x) => x.id));
 const feasibilityResult = ref<MultiContainerFeasibility | null>(null);
 const isAutoPacking = ref(false);
+const autoPackFailureSummary = ref<Array<{ reason: PlacementFailReason; count: number }>>([]);
 
 function addCargo() {
   if (!cargoForm.name) return message.warning('请填写名称');
@@ -258,6 +277,7 @@ function clearPlacedAll() {
   if (!stage) return;
   stage.clearPlaced();
   placedData.value.length = 0;
+  autoPackFailureSummary.value = [];
   interactions?.notifyMeshesChanged();
   message.success('已清空摆放');
 }
@@ -307,6 +327,7 @@ async function handleAutoPackAll() {
 
   const computedPlaced: PlacedBox[] = [];
   let unplaced = 0;
+  const failCounter = new Map<PlacementFailReason, number>();
 
   const BATCH = 30;
   for (let i = 0; i < queue.length; i++) {
@@ -322,6 +343,13 @@ async function handleAutoPackAll() {
       computedPlaced.push({ ...item, ...fitted });
     } else {
       unplaced += 1;
+      const reason = diagnoseUnplacedItem({
+        item,
+        placed: computedPlaced,
+        container: currentContainer.value,
+        cfg: config,
+      });
+      failCounter.set(reason, (failCounter.get(reason) || 0) + 1);
     }
 
     if (i % BATCH === 0) {
@@ -336,6 +364,7 @@ async function handleAutoPackAll() {
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   }
 
+  autoPackFailureSummary.value = [...failCounter.entries()].map(([reason, count]) => ({ reason, count }));
   isAutoPacking.value = false;
   message.success(`混装完成：放置 ${computedPlaced.length} 件，未放入 ${unplaced} 件`);
 }

@@ -141,6 +141,100 @@ export function canPlaceAtLayer(
   return supportArea >= supportRatio * footprint;
 }
 
+
+export type PlacementFailReason = 'OUT_OF_BOUNDS' | 'COLLISION' | 'INSUFFICIENT_SUPPORT' | 'NO_LAYER_AVAILABLE' | 'UNKNOWN';
+
+function placementViolationAt(params: {
+  x: number;
+  z: number;
+  yLayer: number;
+  box: { l: number; w: number; h: number };
+  placed: PlacedBox[];
+  container: ContainerType;
+  cfg: EngineConfig;
+}) {
+  const { x, z, yLayer, box, placed, container, cfg } = params;
+  const gap = Math.max(0, cfg.boxGap);
+  const l = box.l + gap;
+  const w = box.w + gap;
+
+  if (x < 0 || z < 0 || x + l > container.innerLength || z + w > container.innerWidth) {
+    return 'OUT_OF_BOUNDS' as PlacementFailReason;
+  }
+
+  for (const p of placed) {
+    if (!almostEqual(p.y, yLayer)) continue;
+    const pl = p.l + gap;
+    const pw = p.w + gap;
+    if (aabbOverlap2D(x, z, l, w, p.x, p.z, pl, pw)) return 'COLLISION' as PlacementFailReason;
+  }
+
+  if (almostEqual(yLayer, 0)) return null;
+
+  const footprint = l * w;
+  let supportArea = 0;
+  for (const p of placed) {
+    if (!almostEqual(p.y + p.h, yLayer)) continue;
+    const pl = p.l + gap;
+    const pw = p.w + gap;
+    supportArea += overlapArea2D(x, z, l, w, p.x, p.z, pl, pw);
+  }
+
+  if (supportArea < cfg.supportRatio * footprint) return 'INSUFFICIENT_SUPPORT' as PlacementFailReason;
+  return null;
+}
+
+export function diagnoseUnplacedItem(params: {
+  item: { l: number; w: number; h: number; rotatable?: boolean };
+  placed: PlacedBox[];
+  container: ContainerType;
+  cfg: EngineConfig;
+}) {
+  const { item, placed, container, cfg } = params;
+  const step = Math.max(1, cfg.autoStep);
+
+  const orientations = orientationList(item);
+  if (!orientations.some((o) => o.l <= container.innerLength && o.w <= container.innerWidth)) {
+    return 'OUT_OF_BOUNDS' as PlacementFailReason;
+  }
+
+  let hasLayer = false;
+  let collisionHit = false;
+  let supportHit = false;
+
+  for (const orient of orientations) {
+    const maxLayer = Math.floor((container.innerHeight - item.h) / item.h);
+    if (maxLayer < 0) continue;
+    hasLayer = true;
+
+    for (let layer = 0; layer <= maxLayer; layer++) {
+      const yLayer = layer * item.h;
+      for (let z = 0; z <= container.innerWidth - orient.w; z += step) {
+        for (let x = 0; x <= container.innerLength - orient.l; x += step) {
+          const snapped = applySnapping(x, z, { l: orient.l, w: orient.w }, placed, container, yLayer, cfg);
+          const violation = placementViolationAt({
+            x: snapped.x,
+            z: snapped.z,
+            yLayer,
+            box: { l: orient.l, w: orient.w, h: item.h },
+            placed,
+            container,
+            cfg,
+          });
+          if (!violation) return 'UNKNOWN' as PlacementFailReason;
+          if (violation === 'COLLISION') collisionHit = true;
+          if (violation === 'INSUFFICIENT_SUPPORT') supportHit = true;
+        }
+      }
+    }
+  }
+
+  if (!hasLayer) return 'NO_LAYER_AVAILABLE' as PlacementFailReason;
+  if (collisionHit) return 'COLLISION' as PlacementFailReason;
+  if (supportHit) return 'INSUFFICIENT_SUPPORT' as PlacementFailReason;
+  return 'UNKNOWN' as PlacementFailReason;
+}
+
 function findPlacementForItem(params: {
   item: { l: number; w: number; h: number; rotatable?: boolean };
   placed: PlacedBox[];
