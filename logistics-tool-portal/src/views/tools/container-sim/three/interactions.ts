@@ -80,7 +80,7 @@ export function createInteractions(opts: {
     const placeW = spawn.rotated ? spawn.l : spawn.w;
     const pos = applySnapping(hit.x, hit.z, { l: placeL, w: placeW }, placed, container, layerY, cfg);
 
-    if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: placeL, w: placeW, h: spawn.h }, placed, container, null, cfg.supportRatio, cfg.boxGap)) return;
+    if (!canPlaceAtLayer(pos.x, pos.z, layerY, { l: placeL, w: placeW, h: spawn.h, weight: spawn.weight }, placed, container, null, cfg.supportRatio, cfg.boxGap, cfg.doorAccessDepth)) return;
 
     opts.addPlaced({
       cargoId: spawn.cargoId,
@@ -137,7 +137,7 @@ export function createInteractions(opts: {
     const baseZ = desired.z - data.w / 2;
     const pos = applySnapping(baseX, baseZ, { l: data.l, w: data.w }, placed, container, data.y, cfg);
 
-    if (!canPlaceAtLayer(pos.x, pos.z, data.y, data, placed, container, idx, cfg.supportRatio, cfg.boxGap)) return;
+    if (!canPlaceAtLayer(pos.x, pos.z, data.y, data, placed, container, idx, cfg.supportRatio, cfg.boxGap, cfg.doorAccessDepth)) return;
 
     dragTarget.position.x = pos.x + data.l / 2;
     dragTarget.position.z = pos.z + data.w / 2;

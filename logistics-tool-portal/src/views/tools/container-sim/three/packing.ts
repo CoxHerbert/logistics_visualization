@@ -7,6 +7,7 @@ import type {
   MultiContainerPlan,
   PlacedBox,
   SpawnState,
+  PackStrategy,
 } from './types';
 
 export function calcCBM(l: number, w: number, h: number) {
@@ -14,6 +15,23 @@ export function calcCBM(l: number, w: number, h: number) {
 }
 
 type Orientation = { l: number; w: number; rotated: boolean };
+
+function strategyComparator(strategy: Exclude<PackStrategy, 'best'>) {
+  if (strategy === 'weight') {
+    return (a: { l: number; w: number; h: number; weight: number }, b: { l: number; w: number; h: number; weight: number }) =>
+      b.weight - a.weight || b.l * b.w - a.l * a.w || b.h - a.h;
+  }
+  if (strategy === 'height') {
+    return (a: { l: number; w: number; h: number; weight: number }, b: { l: number; w: number; h: number; weight: number }) =>
+      b.h - a.h || b.l * b.w - a.l * a.w || b.weight - a.weight;
+  }
+  if (strategy === 'footprint') {
+    return (a: { l: number; w: number; h: number; weight: number }, b: { l: number; w: number; h: number; weight: number }) =>
+      b.l * b.w - a.l * a.w || b.h - a.h || b.weight - a.weight;
+  }
+  return (a: { l: number; w: number; h: number; weight: number }, b: { l: number; w: number; h: number; weight: number }) =>
+    b.l * b.w * b.h - a.l * a.w * a.h || b.weight - a.weight || b.h - a.h;
+}
 
 function orientationList(input: { l: number; w: number; rotatable?: boolean }): Orientation[] {
   const list: Orientation[] = [{ l: input.l, w: input.w, rotated: false }];
@@ -23,7 +41,7 @@ function orientationList(input: { l: number; w: number; rotatable?: boolean }): 
   return list;
 }
 
-export function expandAllItems(cargoList: CargoItem[]) {
+export function expandAllItems(cargoList: CargoItem[], strategy: Exclude<PackStrategy, 'best'> = 'footprint') {
   const items: Array<Omit<PlacedBox, 'x' | 'y' | 'z'> & { rotatable: boolean }> = [];
   for (const c of cargoList) {
     const qty = Math.max(0, Math.floor(c.qty || 0));
@@ -41,7 +59,7 @@ export function expandAllItems(cargoList: CargoItem[]) {
       });
     }
   }
-  items.sort((a, b) => b.l * b.w - a.l * a.w || b.weight - a.weight || b.h - a.h);
+  items.sort(strategyComparator(strategy));
   return items;
 }
 
@@ -206,11 +224,13 @@ export function canPlaceAtLayer(
   exceptIndex: number | null = null,
   supportRatio = 0.6,
   boxGap = 0,
+  doorAccessDepth = 0,
 ) {
   const inflated = inflatedDimensions(box, boxGap);
 
   if (x < 0 || z < 0) return false;
   if (x + inflated.l > container.innerLength || z + inflated.w > container.innerWidth) return false;
+  if (doorAccessDepth > 0 && z < doorAccessDepth) return false;
 
   for (let i = 0; i < placed.length; i++) {
     if (exceptIndex != null && i === exceptIndex) continue;
@@ -256,6 +276,9 @@ function placementViolationAt(params: {
   const w = box.w + gap;
 
   if (x < 0 || z < 0 || x + l > container.innerLength || z + w > container.innerWidth) {
+    return 'OUT_OF_BOUNDS' as PlacementFailReason;
+  }
+  if (cfg.doorAccessDepth > 0 && z < cfg.doorAccessDepth) {
     return 'OUT_OF_BOUNDS' as PlacementFailReason;
   }
 
@@ -366,6 +389,7 @@ function findPlacementForItem(params: {
               null,
               cfg.supportRatio,
               cfg.boxGap,
+              cfg.doorAccessDepth,
             )
           ) {
             continue;
@@ -422,6 +446,7 @@ export function autoPackOne(params: {
             null,
             cfg.supportRatio,
             cfg.boxGap,
+            cfg.doorAccessDepth,
           )
         ) {
           continue;
@@ -452,14 +477,15 @@ export function autoPackOne(params: {
   return result;
 }
 
-export function autoPackAll(params: {
+function autoPackAllByStrategy(params: {
   cargoList: CargoItem[];
   placed: PlacedBox[];
   container: ContainerType;
   cfg: EngineConfig;
+  strategy: Exclude<PackStrategy, 'best'>;
 }) {
-  const { cargoList, placed, container, cfg } = params;
-  const queue = expandAllItems(cargoList);
+  const { cargoList, placed, container, cfg, strategy } = params;
+  const queue = expandAllItems(cargoList, strategy);
   const result: PlacedBox[] = [];
   let unplaced = 0;
 
@@ -473,7 +499,37 @@ export function autoPackAll(params: {
     result.push({ ...item, ...fitted });
   }
 
-  return { placed: result, unplaced };
+  return { placed: result, unplaced, strategy };
+}
+
+export function autoPackAll(params: {
+  cargoList: CargoItem[];
+  placed: PlacedBox[];
+  container: ContainerType;
+  cfg: EngineConfig;
+}) {
+  const { cargoList, placed, container, cfg } = params;
+  if (cfg.strategy !== 'best') {
+    const output = autoPackAllByStrategy({ cargoList, placed, container, cfg, strategy: cfg.strategy });
+    return { placed: output.placed, unplaced: output.unplaced, pickedStrategy: output.strategy };
+  }
+
+  const candidates: Exclude<PackStrategy, 'best'>[] = ['footprint', 'volume', 'weight', 'height'];
+  let best = autoPackAllByStrategy({ cargoList, placed, container, cfg, strategy: candidates[0] });
+  for (let i = 1; i < candidates.length; i++) {
+    const attempt = autoPackAllByStrategy({ cargoList, placed, container, cfg, strategy: candidates[i] });
+    if (attempt.placed.length > best.placed.length) {
+      best = attempt;
+      continue;
+    }
+    if (attempt.placed.length === best.placed.length) {
+      const attemptWeight = attempt.placed.reduce((sum, b) => sum + b.weight, 0);
+      const bestWeight = best.placed.reduce((sum, b) => sum + b.weight, 0);
+      if (attemptWeight > bestWeight) best = attempt;
+    }
+  }
+
+  return { placed: best.placed, unplaced: best.unplaced, pickedStrategy: best.strategy };
 }
 
 export function planMultiContainerFeasibility(params: {
@@ -485,7 +541,7 @@ export function planMultiContainerFeasibility(params: {
   const { cargoList, containerOptions, cfg } = params;
   const maxContainers = Math.max(1, Math.floor(params.maxContainers || 1));
 
-  const queue = expandAllItems(cargoList);
+  const queue = expandAllItems(cargoList, cfg.strategy === 'best' ? 'footprint' : cfg.strategy);
   const placedFlags = queue.map(() => false);
   const plans: MultiContainerPlan[] = [];
 

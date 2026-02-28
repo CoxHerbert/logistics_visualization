@@ -95,6 +95,18 @@
               <a-form-item label="自动步长 (cm)">
                 <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
               </a-form-item>
+              <a-form-item label="自动装箱策略">
+                <a-select v-model:value="config.strategy" style="width:100%">
+                  <a-select-option value="footprint">底面积优先</a-select-option>
+                  <a-select-option value="volume">体积优先</a-select-option>
+                  <a-select-option value="weight">重量优先</a-select-option>
+                  <a-select-option value="height">高度优先</a-select-option>
+                  <a-select-option value="best">多策略择优</a-select-option>
+                </a-select>
+              </a-form-item>
+              <a-form-item label="门口预留深度 (cm)">
+                <a-input-number v-model:value="config.doorAccessDepth" :min="0" :max="120" :step="1" style="width:100%" />
+              </a-form-item>
               <a-form-item label="偏载容差比例">
                 <a-input-number v-model:value="config.balanceToleranceRatio" :min="0" :max="0.5" :step="0.01" style="width:100%" />
               </a-form-item>
@@ -169,10 +181,10 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
-import { autoPackOne, calcBalanceMetrics, calcCBM, diagnoseUnplacedItem, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
+import { autoPackOne, calcBalanceMetrics, calcCBM, diagnoseUnplacedItem, expandAllItems, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
 import type { ExportUnplacedSummary } from './three/exporter';
-import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PlacedBox, SpawnState } from './three/types';
+import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PackStrategy, PlacedBox, SpawnState } from './three/types';
 import type { PlacementFailReason } from './three/packing';
 
 function uid() {
@@ -197,6 +209,8 @@ const config = reactive<EngineConfig>({
   autoStep: 5,
   boxGap: 0,
   balanceToleranceRatio: 0.18,
+  strategy: 'best',
+  doorAccessDepth: 0,
 });
 
 const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10, rotatable: true, maxStackWeightKg: 120 });
@@ -308,16 +322,16 @@ function clearPlacedAll() {
 
 function applyPreset(preset: 'light' | 'heavy' | 'deformable') {
   if (preset === 'light') {
-    Object.assign(config, { snapGrid: 5, snapTolerance: 8, supportRatio: 0.55, autoStep: 10, boxGap: 0.5, balanceToleranceRatio: 0.22 });
+    Object.assign(config, { snapGrid: 5, snapTolerance: 8, supportRatio: 0.55, autoStep: 10, boxGap: 0.5, balanceToleranceRatio: 0.22, strategy: 'footprint', doorAccessDepth: 0 });
     message.success('已应用轻抛货模板');
     return;
   }
   if (preset === 'heavy') {
-    Object.assign(config, { snapGrid: 5, snapTolerance: 4, supportRatio: 0.85, autoStep: 5, boxGap: 0, balanceToleranceRatio: 0.12 });
+    Object.assign(config, { snapGrid: 5, snapTolerance: 4, supportRatio: 0.85, autoStep: 5, boxGap: 0, balanceToleranceRatio: 0.12, strategy: 'weight', doorAccessDepth: 0 });
     message.success('已应用重货模板');
     return;
   }
-  Object.assign(config, { snapGrid: 5, snapTolerance: 6, supportRatio: 0.7, autoStep: 5, boxGap: 2, balanceToleranceRatio: 0.18 });
+  Object.assign(config, { snapGrid: 5, snapTolerance: 6, supportRatio: 0.7, autoStep: 5, boxGap: 2, balanceToleranceRatio: 0.18, strategy: 'footprint', doorAccessDepth: 0 });
   message.success('已应用易变形货模板');
 }
 
@@ -349,69 +363,82 @@ async function handleAutoPackAll() {
   isAutoPacking.value = true;
   clearPlacedAll();
 
-  const queue = cargoList.value
-    .flatMap((cargo) =>
-      Array.from({ length: Math.max(0, Math.floor(cargo.qty || 0)) }, () => ({
-        cargoId: cargo.id,
-        name: cargo.name,
-        l: cargo.l,
-        w: cargo.w,
-        h: cargo.h,
-        weight: cargo.weight,
-        rotatable: cargo.rotatable,
-        rotated: false,
-        maxStackWeightKg: cargo.maxStackWeightKg,
-      })),
-    )
-    .sort((a, b) => b.l * b.w - a.l * a.w || b.weight - a.weight || b.h - a.h);
+  const runByStrategy = async (strategy: Exclude<PackStrategy, 'best'>) => {
+    const queue = expandAllItems(cargoList.value, strategy);
+    const computedPlaced: PlacedBox[] = [];
+    let unplaced = 0;
+    const failCounter = new Map<PlacementFailReason, number>();
+    const unplacedByCargo = new Map<string, { cargoId: string; name: string; qty: number }>();
 
-  const computedPlaced: PlacedBox[] = [];
-  let unplaced = 0;
-  const failCounter = new Map<PlacementFailReason, number>();
-  const unplacedByCargo = new Map<string, { cargoId: string; name: string; qty: number }>();
-
-  const BATCH = 30;
-  for (let i = 0; i < queue.length; i++) {
-    const item = queue[i];
-    const fitted = tryPlaceItem({
-      item,
-      placed: computedPlaced,
-      container: currentContainer.value,
-      cfg: config,
-    });
-
-    if (fitted) {
-      computedPlaced.push({ ...item, ...fitted });
-    } else {
-      unplaced += 1;
-      const reason = diagnoseUnplacedItem({
+    const BATCH = 30;
+    for (let i = 0; i < queue.length; i++) {
+      const item = queue[i];
+      const fitted = tryPlaceItem({
         item,
         placed: computedPlaced,
         container: currentContainer.value,
         cfg: config,
       });
-      failCounter.set(reason, (failCounter.get(reason) || 0) + 1);
-      const prev = unplacedByCargo.get(item.cargoId);
-      if (prev) prev.qty += 1;
-      else unplacedByCargo.set(item.cargoId, { cargoId: item.cargoId, name: item.name, qty: 1 });
+
+      if (fitted) {
+        computedPlaced.push({ ...item, ...fitted });
+      } else {
+        unplaced += 1;
+        const reason = diagnoseUnplacedItem({
+          item,
+          placed: computedPlaced,
+          container: currentContainer.value,
+          cfg: config,
+        });
+        failCounter.set(reason, (failCounter.get(reason) || 0) + 1);
+        const prev = unplacedByCargo.get(item.cargoId);
+        if (prev) prev.qty += 1;
+        else unplacedByCargo.set(item.cargoId, { cargoId: item.cargoId, name: item.name, qty: 1 });
+      }
+
+      if (i % BATCH === 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+      }
     }
 
-    if (i % BATCH === 0) {
-      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    return {
+      strategy,
+      computedPlaced,
+      unplaced,
+      failSummary: [...failCounter.entries()].map(([reason, count]) => ({ reason, count })),
+      unplacedSummary: [...unplacedByCargo.values()],
+    };
+  };
+
+  const candidates: Exclude<PackStrategy, 'best'>[] = config.strategy === 'best'
+    ? ['footprint', 'volume', 'weight', 'height']
+    : [config.strategy];
+
+  let best = await runByStrategy(candidates[0]);
+  for (let i = 1; i < candidates.length; i++) {
+    const attempt = await runByStrategy(candidates[i]);
+    if (attempt.computedPlaced.length > best.computedPlaced.length) {
+      best = attempt;
+      continue;
+    }
+    if (attempt.computedPlaced.length === best.computedPlaced.length) {
+      const aw = attempt.computedPlaced.reduce((s, b) => s + b.weight, 0);
+      const bw = best.computedPlaced.reduce((s, b) => s + b.weight, 0);
+      if (aw > bw) best = attempt;
     }
   }
 
   const RENDER_BATCH = 100;
-  for (let i = 0; i < computedPlaced.length; i += RENDER_BATCH) {
-    const batch = computedPlaced.slice(i, i + RENDER_BATCH);
+  for (let i = 0; i < best.computedPlaced.length; i += RENDER_BATCH) {
+    const batch = best.computedPlaced.slice(i, i + RENDER_BATCH);
     batch.forEach(addPlaced);
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   }
 
-  autoPackFailureSummary.value = [...failCounter.entries()].map(([reason, count]) => ({ reason, count }));
-  autoPackUnplacedSummary.value = [...unplacedByCargo.values()];
+  autoPackFailureSummary.value = best.failSummary;
+  autoPackUnplacedSummary.value = best.unplacedSummary;
   isAutoPacking.value = false;
-  message.success(`混装完成：放置 ${computedPlaced.length} 件，未放入 ${unplaced} 件`);
+  message.success(`混装完成：放置 ${best.computedPlaced.length} 件，未放入 ${best.unplaced} 件（策略=${best.strategy}）`);
 }
 
 function runFeasibility() {

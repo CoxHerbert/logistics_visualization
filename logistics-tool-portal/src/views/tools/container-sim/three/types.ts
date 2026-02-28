@@ -46,6 +46,8 @@ export type PlacedBox = {
   maxStackWeightKg?: number;
 };
 
+export type PackStrategy = 'volume' | 'weight' | 'height' | 'footprint' | 'best';
+
 export type EngineConfig = {
   snapEnabled: boolean;
   snapGrid: number;
@@ -54,6 +56,8 @@ export type EngineConfig = {
   autoStep: number;
   boxGap: number;
   balanceToleranceRatio: number;
+  strategy: PackStrategy;
+  doorAccessDepth: number;
 };
 
 export type MultiContainerPlan = {
