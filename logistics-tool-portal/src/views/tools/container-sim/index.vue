@@ -92,6 +92,13 @@
               <a-form-item label="自动步长 (cm)">
                 <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
               </a-form-item>
+              <a-form-item label="场景模板">
+                <a-space wrap>
+                  <a-button size="small" @click="applyPreset('light')">轻抛货</a-button>
+                  <a-button size="small" @click="applyPreset('heavy')">重货</a-button>
+                  <a-button size="small" @click="applyPreset('deformable')">易变形货</a-button>
+                </a-space>
+              </a-form-item>
             </a-form>
 
             <div>已放置件数：{{ placedCount }}</div>
@@ -156,6 +163,7 @@ import { createStage } from './three/stage';
 import { createInteractions } from './three/interactions';
 import { autoPackOne, calcCBM, diagnoseUnplacedItem, planMultiContainerFeasibility, tryPlaceItem } from './three/packing';
 import { exportPlanAsJson } from './three/exporter';
+import type { ExportUnplacedSummary } from './three/exporter';
 import type { CargoItem, ContainerType, EngineConfig, MultiContainerFeasibility, PlacedBox, SpawnState } from './three/types';
 import type { PlacementFailReason } from './three/packing';
 
@@ -213,6 +221,7 @@ const multiContainerOptionIds = ref<string[]>(containerTypes.map((x) => x.id));
 const feasibilityResult = ref<MultiContainerFeasibility | null>(null);
 const isAutoPacking = ref(false);
 const autoPackFailureSummary = ref<Array<{ reason: PlacementFailReason; count: number }>>([]);
+const autoPackUnplacedSummary = ref<ExportUnplacedSummary>([]);
 
 function addCargo() {
   if (!cargoForm.name) return message.warning('请填写名称');
@@ -278,8 +287,24 @@ function clearPlacedAll() {
   stage.clearPlaced();
   placedData.value.length = 0;
   autoPackFailureSummary.value = [];
+  autoPackUnplacedSummary.value = [];
   interactions?.notifyMeshesChanged();
   message.success('已清空摆放');
+}
+
+function applyPreset(preset: 'light' | 'heavy' | 'deformable') {
+  if (preset === 'light') {
+    Object.assign(config, { snapGrid: 5, snapTolerance: 8, supportRatio: 0.55, autoStep: 10, boxGap: 0.5 });
+    message.success('已应用轻抛货模板');
+    return;
+  }
+  if (preset === 'heavy') {
+    Object.assign(config, { snapGrid: 5, snapTolerance: 4, supportRatio: 0.85, autoStep: 5, boxGap: 0 });
+    message.success('已应用重货模板');
+    return;
+  }
+  Object.assign(config, { snapGrid: 5, snapTolerance: 6, supportRatio: 0.7, autoStep: 5, boxGap: 2 });
+  message.success('已应用易变形货模板');
 }
 
 function onContainerChange() {
@@ -328,6 +353,7 @@ async function handleAutoPackAll() {
   const computedPlaced: PlacedBox[] = [];
   let unplaced = 0;
   const failCounter = new Map<PlacementFailReason, number>();
+  const unplacedByCargo = new Map<string, { cargoId: string; name: string; qty: number }>();
 
   const BATCH = 30;
   for (let i = 0; i < queue.length; i++) {
@@ -350,6 +376,9 @@ async function handleAutoPackAll() {
         cfg: config,
       });
       failCounter.set(reason, (failCounter.get(reason) || 0) + 1);
+      const prev = unplacedByCargo.get(item.cargoId);
+      if (prev) prev.qty += 1;
+      else unplacedByCargo.set(item.cargoId, { cargoId: item.cargoId, name: item.name, qty: 1 });
     }
 
     if (i % BATCH === 0) {
@@ -365,6 +394,7 @@ async function handleAutoPackAll() {
   }
 
   autoPackFailureSummary.value = [...failCounter.entries()].map(([reason, count]) => ({ reason, count }));
+  autoPackUnplacedSummary.value = [...unplacedByCargo.values()];
   isAutoPacking.value = false;
   message.success(`混装完成：放置 ${computedPlaced.length} 件，未放入 ${unplaced} 件`);
 }
@@ -385,7 +415,12 @@ function runFeasibility() {
 }
 
 function exportPlan() {
-  exportPlanAsJson({ container: currentContainer.value, placed: placedData.value });
+  exportPlanAsJson({
+    container: currentContainer.value,
+    placed: placedData.value,
+    unplacedSummary: autoPackUnplacedSummary.value,
+    failureSummary: autoPackFailureSummary.value,
+  });
 }
 
 function exportFeasibility() {
