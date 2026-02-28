@@ -67,6 +67,20 @@
           </template>
         </a-table>
       </a-card>
+
+      <a-card size="small" title="当前待放货物" style="margin-top:12px;">
+        <template v-if="activeSpawn">
+          <div>{{ activeSpawn.name }}（{{ activeSpawn.l }}×{{ activeSpawn.w }}×{{ activeSpawn.h }}）</div>
+          <div style="margin-top:6px;">剩余件数：{{ activeSpawn.remain }}</div>
+          <a-space style="margin-top:8px;">
+            <a-button size="small" :disabled="!activeSpawn.rotatable" @click="toggleSpawnRotation">切换方向</a-button>
+            <a-button size="small" @click="activeSpawn = null">取消待放</a-button>
+          </a-space>
+        </template>
+        <template v-else>
+          <span style="color:#999;">请在货物列表点击“摆放”进入手动放置模式</span>
+        </template>
+      </a-card>
     </a-layout-sider>
 
     <a-layout>
@@ -92,19 +106,19 @@
               <a-form-item label="网格大小 (cm)">
                 <a-input-number v-model:value="config.snapGrid" :min="1" :max="50" style="width:100%" />
               </a-form-item>
-              <a-form-item label="吸附容差 (cm)">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="吸附容差 (cm)">
                 <a-input-number v-model:value="config.snapTolerance" :min="0" :max="50" style="width:100%" />
               </a-form-item>
-              <a-form-item label="货物间距/形变量 (cm)">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="货物间距/形变量 (cm)">
                 <a-input-number v-model:value="config.boxGap" :min="0" :max="30" :step="0.5" style="width:100%" />
               </a-form-item>
-              <a-form-item label="支撑比例 (0~1)">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="支撑比例 (0~1)">
                 <a-input-number v-model:value="config.supportRatio" :min="0" :max="1" :step="0.05" style="width:100%" />
               </a-form-item>
-              <a-form-item label="自动步长 (cm)">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="自动步长 (cm)">
                 <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
               </a-form-item>
-              <a-form-item label="自动装箱策略">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="自动装箱策略">
                 <a-select v-model:value="config.strategy" style="width:100%">
                   <a-select-option value="footprint">底面积优先</a-select-option>
                   <a-select-option value="volume">体积优先</a-select-option>
@@ -113,13 +127,13 @@
                   <a-select-option value="best">多策略择优</a-select-option>
                 </a-select>
               </a-form-item>
-              <a-form-item label="门口预留深度 (cm)">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="门口预留深度 (cm)">
                 <a-input-number v-model:value="config.doorAccessDepth" :min="0" :max="120" :step="1" style="width:100%" />
               </a-form-item>
-              <a-form-item label="偏载容差比例">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="偏载容差比例">
                 <a-input-number v-model:value="config.balanceToleranceRatio" :min="0" :max="0.5" :step="0.01" style="width:100%" />
               </a-form-item>
-              <a-form-item label="场景模板">
+              <a-form-item v-if="showAdvancedControls || activeScenario === 'customer'" label="场景模板">
                 <a-space wrap>
                   <a-button size="small" @click="applyPreset('light')">轻抛货</a-button>
                   <a-button size="small" @click="applyPreset('heavy')">重货</a-button>
@@ -138,8 +152,9 @@
 
             <a-divider style="margin:8px 0;" />
             <a-space direction="vertical" style="width:100%">
-              <a-button type="primary" block @click="handleAutoPackOne">单货自动摆放</a-button>
+              <a-button type="primary" block @click="handleSmartPack">智能装箱（推荐）</a-button>
               <a-button block :loading="isAutoPacking" :disabled="isAutoPacking" @click="handleAutoPackAll">混装一键装柜</a-button>
+              <a-button block @click="handleAutoPackOne">单货自动摆放</a-button>
               <a-button block :disabled="!activeSpawn" @click="toggleSpawnRotation">切换待放货物方向</a-button>
               <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
               <a-button block @click="exportPlan">导出 JSON 方案</a-button>
@@ -155,6 +170,10 @@
               <div style="font-size:12px; color:#666; margin-bottom:4px;">{{ packingStatus }}</div>
               <a-progress :percent="packingProgress" size="small" />
             </div>
+
+            <a-button type="link" style="padding:0; margin-top:6px;" @click="showAdvancedControls = !showAdvancedControls">
+              {{ showAdvancedControls ? '收起高级参数' : '展开高级参数' }}
+            </a-button>
 
             <a-divider v-if="autoPackFailureSummary.length" style="margin:10px 0;" />
             <div v-if="autoPackFailureSummary.length">
@@ -290,6 +309,7 @@ function applyScenario(mode: ScenarioMode, silent = false) {
       strategy: 'best',
       doorAccessDepth: 0,
     });
+    showAdvancedControls.value = false;
     if (!silent) message.success('已切换到销售场景参数');
     return;
   }
@@ -305,6 +325,7 @@ function applyScenario(mode: ScenarioMode, silent = false) {
     strategy: 'best',
     doorAccessDepth: 20,
   });
+  showAdvancedControls.value = true;
   if (!silent) message.success('已切换到客户模拟装箱参数');
 }
 
@@ -333,6 +354,7 @@ const feasibilityResult = ref<MultiContainerFeasibility | null>(null);
 const isAutoPacking = ref(false);
 const autoPackFailureSummary = ref<Array<{ reason: PlacementFailReason; count: number }>>([]);
 const autoPackUnplacedSummary = ref<ExportUnplacedSummary>([]);
+const showAdvancedControls = ref(false);
 const enablePackAnimation = ref(true);
 const showPackingProgress = ref(false);
 const packingProgress = ref(0);
@@ -436,6 +458,22 @@ function onContainerChange() {
   stage.buildContainerBox(currentContainer.value);
   stage.controls.target.set(currentContainer.value.innerLength / 2, currentContainer.value.innerHeight / 3, currentContainer.value.innerWidth / 2);
   stage.controls.update();
+}
+
+async function handleSmartPack() {
+  if (!cargoList.value.length) return message.warning('请先添加货物');
+  const previous = {
+    strategy: config.strategy,
+    enablePackAnimation: enablePackAnimation.value,
+    snapEnabled: config.snapEnabled,
+  };
+  config.strategy = 'best';
+  enablePackAnimation.value = activeScenario.value === 'customer';
+  config.snapEnabled = true;
+  await handleAutoPackAll();
+  config.strategy = previous.strategy;
+  enablePackAnimation.value = previous.enablePackAnimation;
+  config.snapEnabled = previous.snapEnabled;
 }
 
 function handleAutoPackOne() {
