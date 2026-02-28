@@ -206,7 +206,7 @@ function removePlacedAt(index: number) {
 function clearPlacedAll() {
     if (!stage) return
     stage.clearPlaced()
-    placedData.value = []
+    placedData.value.length = 0
     message.success('已清空摆放')
 }
 
