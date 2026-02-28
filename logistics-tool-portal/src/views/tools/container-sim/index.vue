@@ -1,329 +1,285 @@
 <template>
-    <a-layout style="height: calc(100vh - 64px); background: #fff;">
-        <a-layout-sider width="360"
-            style="background:#fff; border-right: 1px solid #f0f0f0; padding: 16px; overflow:auto;">
-            <a-typography-title :level="4" style="margin:0 0 12px;">整柜/拼箱 3D 装柜模拟</a-typography-title>
+  <a-layout style="height: calc(100vh - 64px); background: #fff;">
+    <a-layout-sider width="350" style="background:#fff; border-right:1px solid #f0f0f0; padding:16px; overflow:auto;">
+      <a-typography-title :level="4" style="margin:0 0 12px;">整柜/拼箱 3D 装柜模拟</a-typography-title>
 
-            <a-card size="small" title="柜型">
-                <a-select v-model:value="selectedContainerId" style="width:100%" @change="onContainerChange">
-                    <a-select-option v-for="c in containerTypes" :key="c.id" :value="c.id">
-                        {{ c.name }}（{{ c.innerLength }}×{{ c.innerWidth }}×{{ c.innerHeight }} cm）
-                    </a-select-option>
-                </a-select>
-                <a-divider style="margin:12px 0;" />
-                <a-space direction="vertical" style="width:100%">
-                    <div>最大载重：{{ currentContainer.maxWeight }} kg</div>
-                    <div>可用体积：{{ containerCBM.toFixed(2) }} CBM</div>
-                </a-space>
-            </a-card>
+      <a-card size="small" title="柜型">
+        <a-select v-model:value="selectedContainerId" style="width:100%" @change="onContainerChange">
+          <a-select-option v-for="c in containerTypes" :key="c.id" :value="c.id">
+            {{ c.name }}（{{ c.innerLength }}×{{ c.innerWidth }}×{{ c.innerHeight }} cm）
+          </a-select-option>
+        </a-select>
+        <a-divider style="margin:12px 0;" />
+        <a-space direction="vertical" style="width:100%">
+          <div>最大载重：{{ currentContainer.maxWeight }} kg</div>
+          <div>可用体积：{{ containerCBM.toFixed(2) }} CBM</div>
+        </a-space>
+      </a-card>
 
-            <a-card size="small" title="新增货物" style="margin-top:12px;">
-                <a-form layout="vertical">
-                    <a-form-item label="SKU/名称">
-                        <a-input v-model:value="cargoForm.name" placeholder="例如：Carton A" />
-                    </a-form-item>
-                    <a-row :gutter="8">
-                        <a-col :span="8"><a-form-item label="长(cm)"><a-input-number v-model:value="cargoForm.l" :min="1"
-                                    style="width:100%" /></a-form-item></a-col>
-                        <a-col :span="8"><a-form-item label="宽(cm)"><a-input-number v-model:value="cargoForm.w" :min="1"
-                                    style="width:100%" /></a-form-item></a-col>
-                        <a-col :span="8"><a-form-item label="高(cm)"><a-input-number v-model:value="cargoForm.h" :min="1"
-                                    style="width:100%" /></a-form-item></a-col>
-                    </a-row>
-                    <a-row :gutter="8">
-                        <a-col :span="12"><a-form-item label="重量(kg)"><a-input-number v-model:value="cargoForm.weight"
-                                    :min="0" style="width:100%" /></a-form-item></a-col>
-                        <a-col :span="12"><a-form-item label="件数"><a-input-number v-model:value="cargoForm.qty" :min="1"
-                                    style="width:100%" /></a-form-item></a-col>
-                    </a-row>
-                    <a-form-item>
-                        <a-space>
-                            <a-button type="primary" @click="addCargo">加入列表</a-button>
-                            <a-button @click="resetForm">重置</a-button>
-                        </a-space>
-                    </a-form-item>
-                </a-form>
-            </a-card>
+      <a-card size="small" title="新增货物" style="margin-top:12px;">
+        <a-form layout="vertical">
+          <a-form-item label="SKU/名称">
+            <a-input v-model:value="cargoForm.name" placeholder="例如：Carton A" />
+          </a-form-item>
+          <a-row :gutter="8">
+            <a-col :span="8"><a-form-item label="长(cm)"><a-input-number v-model:value="cargoForm.l" :min="1" style="width:100%" /></a-form-item></a-col>
+            <a-col :span="8"><a-form-item label="宽(cm)"><a-input-number v-model:value="cargoForm.w" :min="1" style="width:100%" /></a-form-item></a-col>
+            <a-col :span="8"><a-form-item label="高(cm)"><a-input-number v-model:value="cargoForm.h" :min="1" style="width:100%" /></a-form-item></a-col>
+          </a-row>
+          <a-row :gutter="8">
+            <a-col :span="12"><a-form-item label="重量(kg)"><a-input-number v-model:value="cargoForm.weight" :min="0" style="width:100%" /></a-form-item></a-col>
+            <a-col :span="12"><a-form-item label="件数"><a-input-number v-model:value="cargoForm.qty" :min="1" style="width:100%" /></a-form-item></a-col>
+          </a-row>
+          <a-space>
+            <a-button type="primary" @click="addCargo">加入列表</a-button>
+            <a-button @click="resetForm">重置</a-button>
+          </a-space>
+        </a-form>
+      </a-card>
 
-            <a-card size="small" title="货物列表" style="margin-top:12px;">
-                <a-table size="small" :columns="columns" :data-source="cargoList" :pagination="false" row-key="id">
-                    <template #bodyCell="{ column, record }">
-                        <template v-if="column.key === 'actions'">
-                            <a-space>
-                                <a-button size="small" @click="spawnBoxes(record)">摆放</a-button>
-                                <a-popconfirm title="删除该货物？" @confirm="removeCargo(record.id)">
-                                    <a-button size="small" danger>删</a-button>
-                                </a-popconfirm>
-                            </a-space>
-                        </template>
-                    </template>
-                </a-table>
-            </a-card>
-        </a-layout-sider>
+      <a-card size="small" title="货物列表" style="margin-top:12px;">
+        <a-table size="small" :columns="columns" :data-source="cargoList" :pagination="false" row-key="id">
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'actions'">
+              <a-space>
+                <a-button size="small" @click="spawnBoxes(record)">摆放</a-button>
+                <a-popconfirm title="删除该货物？" @confirm="removeCargo(record.id)">
+                  <a-button size="small" danger>删</a-button>
+                </a-popconfirm>
+              </a-space>
+            </template>
+          </template>
+        </a-table>
+      </a-card>
+    </a-layout-sider>
 
-        <a-layout>
-            <a-layout-content style="display:flex; gap:12px; padding: 12px;">
-                <div style="flex: 1; border:1px solid #f0f0f0; border-radius: 8px; overflow:hidden; position:relative;">
-                    <div ref="canvasWrap" style="width:100%; height:100%;"></div>
-                    <div style="position:absolute; left:12px; top:12px;">
-                        <a-tag color="blue">点击空白：按当前层放置</a-tag>
-                        <a-tag color="gold">点击箱子：选中；拖拽移动；Delete 删除</a-tag>
-                        <a-tag>左键旋转 / 右键平移 / 滚轮缩放</a-tag>
-                    </div>
-                </div>
+    <a-layout>
+      <a-layout-content style="display:flex; gap:12px; padding:12px;">
+        <div style="flex:1; border:1px solid #f0f0f0; border-radius:8px; overflow:hidden; position:relative;">
+          <div ref="canvasWrap" style="width:100%; height:100%;"></div>
+          <div style="position:absolute; left:12px; top:12px;">
+            <a-tag color="blue">点击空白：按当前层放置</a-tag>
+            <a-tag color="gold">点击箱子：选中；拖拽移动；Delete 删除</a-tag>
+            <a-tag>左键旋转 / 右键平移 / 滚轮缩放</a-tag>
+          </div>
+        </div>
 
-                <div style="width: 340px;">
-                    <a-card size="small" title="统计 / 操作">
-                        <a-space direction="vertical" style="width:100%">
-                            <a-form layout="vertical">
-                                <a-form-item label="当前层（叠放）">
-                                    <a-input-number v-model:value="activeLayer" :min="0" :max="50" style="width:100%" />
-                                </a-form-item>
-                            </a-form>
+        <div style="width:340px;">
+          <a-card size="small" title="统计 / 操作">
+            <a-space direction="vertical" style="width:100%">
+              <a-form layout="vertical">
+                <a-form-item label="当前层（叠放）">
+                  <a-input-number v-model:value="activeLayer" :min="0" :max="50" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="吸附开关">
+                  <a-switch v-model:checked="config.snapEnabled" checked-children="开" un-checked-children="关" />
+                </a-form-item>
+                <a-form-item label="网格大小 (cm)">
+                  <a-input-number v-model:value="config.snapGrid" :min="1" :max="50" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="吸附容差 (cm)">
+                  <a-input-number v-model:value="config.snapTolerance" :min="0" :max="50" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="支撑比例 (0~1)">
+                  <a-input-number v-model:value="config.supportRatio" :min="0" :max="1" :step="0.05" style="width:100%" />
+                </a-form-item>
+                <a-form-item label="自动步长 (cm)">
+                  <a-input-number v-model:value="config.autoStep" :min="1" :max="50" style="width:100%" />
+                </a-form-item>
+              </a-form>
 
-                            <div>已放置件数：{{ placedCount }}</div>
-                            <div>已占用体积：{{ usedCBM.toFixed(2) }} CBM</div>
-                            <div>体积利用率：{{ (usedCBM / containerCBM * 100).toFixed(1) }}%</div>
-                            <div>已占用重量：{{ usedWeight.toFixed(1) }} kg</div>
-                            <div>重量利用率：{{ (usedWeight / currentContainer.maxWeight * 100).toFixed(1) }}%</div>
+              <div>已放置件数：{{ placedCount }}</div>
+              <div>已占用体积：{{ usedCBM.toFixed(2) }} CBM</div>
+              <div>体积利用率：{{ (usedCBM / containerCBM * 100).toFixed(1) }}%</div>
+              <div>已占用重量：{{ usedWeight.toFixed(1) }} kg</div>
+              <div>重量利用率：{{ (usedWeight / currentContainer.maxWeight * 100).toFixed(1) }}%</div>
 
-                            <a-divider style="margin:8px 0;" />
+              <a-divider style="margin:8px 0;" />
 
-                            <a-space>
-                                <a-button type="primary" @click="autoPackOne">单货自动摆放</a-button>
-                                <a-button danger @click="clearPlacedAll">清空摆放</a-button>
-                            </a-space>
-
-                            <a-button block @click="autoPackAll">混装一键装柜</a-button>
-                            <a-button block @click="exportPlan">导出方案 JSON</a-button>
-                        </a-space>
-                    </a-card>
-
-                    <a-card size="small" title="当前待放箱子" style="margin-top:12px;">
-                        <div v-if="activeSpawn">
-                            <div>名称：{{ activeSpawn.name }}</div>
-                            <div>尺寸：{{ activeSpawn.l }}×{{ activeSpawn.w }}×{{ activeSpawn.h }} cm</div>
-                            <div>剩余：{{ activeSpawn.remain }} 件</div>
-                        </div>
-                        <div v-else style="color:#999;">从左侧货物列表点击「摆放」开始</div>
-                    </a-card>
-                </div>
-            </a-layout-content>
-        </a-layout>
+              <a-button type="primary" block @click="handleAutoPackOne">单货自动摆放</a-button>
+              <a-button block @click="handleAutoPackAll">混装一键装柜</a-button>
+              <a-button danger block @click="clearPlacedAll">清空摆放</a-button>
+              <a-button block @click="exportPlan">导出 JSON 方案</a-button>
+            </a-space>
+          </a-card>
+        </div>
+      </a-layout-content>
     </a-layout>
+  </a-layout>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { message } from 'ant-design-vue'
-import type { CargoItem, ContainerType, PlacedBox, SpawnState } from './three/types'
-import { calcCBM, canPlaceAtLayer, expandAllItems } from './three/packing'
-import { createStage } from './three/useThreeStage'
-import { createInteractions } from './three/useInteractions'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { message } from 'ant-design-vue';
+import { createStage } from './three/stage';
+import { createInteractions } from './three/interactions';
+import { autoPackAll, autoPackOne, calcCBM } from './three/packing';
+import { exportPlanAsJson } from './three/exporter';
+import type { CargoItem, ContainerType, EngineConfig, PlacedBox, SpawnState } from './three/types';
 
-function uid() { return Math.random().toString(16).slice(2) }
+function uid() {
+  return Math.random().toString(16).slice(2);
+}
 
-// ---------------- 数据 ----------------
 const containerTypes: ContainerType[] = [
-    { id: '20gp', name: '20GP', innerLength: 589, innerWidth: 235, innerHeight: 239, maxWeight: 28000 },
-    { id: '40gp', name: '40GP', innerLength: 1203, innerWidth: 235, innerHeight: 239, maxWeight: 28000 },
-    { id: '40hq', name: '40HQ', innerLength: 1203, innerWidth: 235, innerHeight: 269, maxWeight: 28000 }
-]
-const selectedContainerId = ref('20gp')
-const currentContainer = computed(() => containerTypes.find(c => c.id === selectedContainerId.value)!)
-const containerCBM = computed(() => {
-    const c = currentContainer.value
-    return calcCBM(c.innerLength, c.innerWidth, c.innerHeight)
-})
+  { id: '20gp', name: '20GP', innerLength: 589, innerWidth: 235, innerHeight: 239, maxWeight: 28000 },
+  { id: '40gp', name: '40GP', innerLength: 1203, innerWidth: 235, innerHeight: 239, maxWeight: 28000 },
+  { id: '40hq', name: '40HQ', innerLength: 1203, innerWidth: 235, innerHeight: 269, maxWeight: 28000 },
+];
 
-const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10 })
-const cargoList = ref<CargoItem[]>([])
+const selectedContainerId = ref('20gp');
+const currentContainer = computed(() => containerTypes.find((c) => c.id === selectedContainerId.value) || containerTypes[0]);
+const containerCBM = computed(() => calcCBM(currentContainer.value.innerLength, currentContainer.value.innerWidth, currentContainer.value.innerHeight));
+
+const config = reactive<EngineConfig>({
+  snapEnabled: true,
+  snapGrid: 5,
+  snapTolerance: 6,
+  supportRatio: 0.6,
+  autoStep: 5,
+});
+
+const cargoForm = reactive({ name: 'Carton A', l: 60, w: 40, h: 35, weight: 22, qty: 10 });
+const cargoList = ref<CargoItem[]>([]);
 const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name' },
-    { title: '尺寸', key: 'size', customRender: ({ record }: any) => `${record.l}×${record.w}×${record.h}` },
-    { title: '件数', dataIndex: 'qty', key: 'qty' },
-    { title: '操作', key: 'actions' }
-]
+  { title: '名称', dataIndex: 'name', key: 'name' },
+  { title: '尺寸', key: 'size', customRender: ({ record }: { record: CargoItem }) => `${record.l}×${record.w}×${record.h}` },
+  { title: '件数', dataIndex: 'qty', key: 'qty' },
+  { title: '操作', key: 'actions' },
+];
 
-// spawn
-const activeSpawn = ref<SpawnState | null>(null)
-const activeLayer = ref(0)
+const activeSpawn = ref<SpawnState | null>(null);
+const activeLayer = ref(0);
 
-// placed
-const placedData = ref<PlacedBox[]>([])
-const placedCount = computed(() => placedData.value.length)
-const usedCBM = computed(() => placedData.value.reduce((s, b) => s + calcCBM(b.l, b.w, b.h), 0))
-const usedWeight = computed(() => placedData.value.reduce((s, b) => s + b.weight, 0))
+const placedData = ref<PlacedBox[]>([]);
+const placedCount = computed(() => placedData.value.length);
+const usedCBM = computed(() => placedData.value.reduce((s, b) => s + calcCBM(b.l, b.w, b.h), 0));
+const usedWeight = computed(() => placedData.value.reduce((s, b) => s + b.weight, 0));
 
 function addCargo() {
-    if (!cargoForm.name) return message.warning('请填写名称')
-    if (!cargoForm.l || !cargoForm.w || !cargoForm.h) return message.warning('尺寸必须 > 0')
-    cargoList.value.unshift({
-        id: uid(),
-        name: cargoForm.name,
-        l: cargoForm.l,
-        w: cargoForm.w,
-        h: cargoForm.h,
-        weight: cargoForm.weight || 0,
-        qty: cargoForm.qty || 1
-    })
-    message.success('已加入货物列表')
-}
-function resetForm() {
-    Object.assign(cargoForm, { name: '', l: 60, w: 40, h: 35, weight: 0, qty: 1 })
-}
-function removeCargo(id: string) {
-    cargoList.value = cargoList.value.filter(x => x.id !== id)
-    if (activeSpawn.value?.cargoId === id) activeSpawn.value = null
-}
-function spawnBoxes(item: CargoItem) {
-    activeSpawn.value = { cargoId: item.id, name: item.name, l: item.l, w: item.w, h: item.h, weight: item.weight, remain: item.qty }
-    message.info('现在可在 3D 视窗点击空白放置；点击箱子可拖拽移动')
+  if (!cargoForm.name) return message.warning('请填写名称');
+  if (!cargoForm.l || !cargoForm.w || !cargoForm.h) return message.warning('尺寸必须 > 0');
+  cargoList.value.unshift({
+    id: uid(),
+    name: cargoForm.name,
+    l: cargoForm.l,
+    w: cargoForm.w,
+    h: cargoForm.h,
+    weight: cargoForm.weight || 0,
+    qty: cargoForm.qty || 1,
+  });
+  message.success('已加入货物列表');
 }
 
-// ---------------- 3D stage ----------------
-const canvasWrap = ref<HTMLDivElement>()
-let stage: ReturnType<typeof createStage> | null = null
-let interactions: ReturnType<typeof createInteractions> | null = null
+function resetForm() {
+  Object.assign(cargoForm, { name: '', l: 60, w: 40, h: 35, weight: 0, qty: 1 });
+}
+
+function removeCargo(id: string) {
+  cargoList.value = cargoList.value.filter((x) => x.id !== id);
+  if (activeSpawn.value?.cargoId === id) activeSpawn.value = null;
+}
+
+function spawnBoxes(item: CargoItem) {
+  activeSpawn.value = { cargoId: item.id, name: item.name, l: item.l, w: item.w, h: item.h, weight: item.weight, remain: item.qty };
+  message.info('现在可在 3D 视窗点击空白放置；点击箱子可拖拽移动');
+}
+
+const canvasWrap = ref<HTMLDivElement>();
+let stage: ReturnType<typeof createStage> | null = null;
+let interactions: ReturnType<typeof createInteractions> | null = null;
 
 function getActiveLayerY(spawnH: number) {
-    // 叠放：按当前层 * spawnH
-    return activeLayer.value * spawnH
+  return activeLayer.value * spawnH;
 }
 
 function addPlaced(box: PlacedBox) {
-    placedData.value.push(box)
-    stage?.addPlacedMesh(box)
+  placedData.value.push(box);
+  stage?.addPlacedMesh(box);
 }
+
 function removePlacedAt(index: number) {
-    if (!stage) return
-    const mesh = stage.placedMeshes[index]
-    if (mesh) stage.scene.remove(mesh)
-    stage.placedMeshes.splice(index, 1)
-    placedData.value.splice(index, 1)
+  if (!stage) return;
+  stage.removePlacedMesh(index);
+  placedData.value.splice(index, 1);
 }
 
 function clearPlacedAll() {
-    if (!stage) return
-    stage.clearPlaced()
-    placedData.value.length = 0
-    message.success('已清空摆放')
+  if (!stage) return;
+  stage.clearPlaced();
+  placedData.value.length = 0;
+  interactions?.notifyMeshesChanged();
+  message.success('已清空摆放');
 }
 
 function onContainerChange() {
-    if (!stage) return
-    clearPlacedAll()
-    stage.buildContainerBox(currentContainer.value)
-    stage.controls.target.set(currentContainer.value.innerLength / 2, currentContainer.value.innerHeight / 3, currentContainer.value.innerWidth / 2)
-    stage.controls.update()
+  if (!stage) return;
+  clearPlacedAll();
+  stage.buildContainerBox(currentContainer.value);
+  stage.controls.target.set(currentContainer.value.innerLength / 2, currentContainer.value.innerHeight / 3, currentContainer.value.innerWidth / 2);
+  stage.controls.update();
 }
 
-// 单货自动摆放（对 activeSpawn）
-function autoPackOne() {
-    if (!activeSpawn.value) return message.warning('先在左侧选择一个货物点击「摆放」')
-    const spawn = activeSpawn.value
-    const c = currentContainer.value
-    const step = 5
-
-    let placed = 0
-    const yLayer = getActiveLayerY(spawn.h)
-
-    for (let z = 0; z <= c.innerWidth - spawn.w; z += step) {
-        for (let x = 0; x <= c.innerLength - spawn.l; x += step) {
-            if (spawn.remain <= 0) break
-            if (canPlaceAtLayer(x, z, yLayer, { l: spawn.l, w: spawn.w }, placedData.value, c)) {
-                addPlaced({ cargoId: spawn.cargoId, name: spawn.name, l: spawn.l, w: spawn.w, h: spawn.h, weight: spawn.weight, x, y: yLayer, z })
-                spawn.remain -= 1
-                placed++
-            }
-        }
-        if (spawn.remain <= 0) break
-    }
-    message.success(`单货自动摆放完成：放置 ${placed} 件（层=${activeLayer.value}）`)
+function handleAutoPackOne() {
+  if (!activeSpawn.value) return message.warning('先在左侧选择一个货物点击「摆放」');
+  const placed = autoPackOne({
+    spawn: activeSpawn.value,
+    yLayer: getActiveLayerY(activeSpawn.value.h),
+    placed: placedData.value,
+    container: currentContainer.value,
+    cfg: config,
+  });
+  placed.forEach(addPlaced);
+  message.success(`单货自动摆放完成：放置 ${placed.length} 件（层=${activeLayer.value}）`);
 }
 
-// 混装一键装柜（所有 cargoList）
-function autoPackAll() {
-    if (!stage) return
-    if (!cargoList.value.length) return message.warning('请先添加货物')
-    clearPlacedAll()
-
-    const c = currentContainer.value
-    const items = expandAllItems(cargoList.value)
-    const step = 5
-
-    let placed = 0
-    let unplaced = 0
-
-    for (const item of items) {
-        let done = false
-        const maxLayer = Math.floor((c.innerHeight - item.h) / item.h)
-        for (let layer = 0; layer <= maxLayer && !done; layer++) {
-            const yLayer = layer * item.h
-            for (let z = 0; z <= c.innerWidth - item.w && !done; z += step) {
-                for (let x = 0; x <= c.innerLength - item.l && !done; x += step) {
-                    if (canPlaceAtLayer(x, z, yLayer, { l: item.l, w: item.w }, placedData.value, c)) {
-                        addPlaced({ ...item, x, y: yLayer, z })
-                        placed++
-                        done = true
-                    }
-                }
-            }
-        }
-        if (!done) unplaced++
-    }
-
-    message.success(`混装完成：放置 ${placed} 件，未放入 ${unplaced} 件`)
+function handleAutoPackAll() {
+  if (!cargoList.value.length) return message.warning('请先添加货物');
+  clearPlacedAll();
+  const result = autoPackAll({
+    cargoList: cargoList.value,
+    placed: placedData.value,
+    container: currentContainer.value,
+    cfg: config,
+  });
+  result.placed.forEach(addPlaced);
+  message.success(`混装完成：放置 ${result.placed.length} 件，未放入 ${result.unplaced} 件`);
 }
 
 function exportPlan() {
-    const payload = {
-        container: currentContainer.value,
-        placed: placedData.value,
-        summary: {
-            placedCount: placedCount.value,
-            usedCBM: usedCBM.value,
-            usedWeight: usedWeight.value
-        }
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `container-plan-${selectedContainerId.value}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+  exportPlanAsJson({ container: currentContainer.value, placed: placedData.value });
 }
 
 onMounted(() => {
-    if (!canvasWrap.value) return
-    stage = createStage(canvasWrap.value, currentContainer.value)
-    stage.start()
+  if (!canvasWrap.value) return;
 
-    interactions = createInteractions({
-        renderer: stage.renderer,
-        camera: stage.camera,
-        controls: stage.controls,
-        placedMeshes: stage.placedMeshes,
-        placedData: placedData.value,
-        getContainer: () => currentContainer.value,
-        getActiveLayerY,
-        getActiveSpawn: () => activeSpawn.value,
-        onPlacedDataChange: () => { }, // 这里不需要额外刷新
-        addPlaced,
-        removePlacedAt
-    })
-    interactions.bind()
+  stage = createStage(canvasWrap.value, currentContainer.value);
+  stage.start();
 
-    const onResize = () => stage?.resize()
-    window.addEventListener('resize', onResize)
+  interactions = createInteractions({
+    renderer: stage.renderer,
+    camera: stage.camera,
+    controls: stage.controls,
+    placedMeshes: stage.placedMeshes,
+    getPlacedData: () => placedData.value,
+    getContainer: () => currentContainer.value,
+    getConfig: () => config,
+    getActiveLayerY,
+    getActiveSpawn: () => activeSpawn.value,
+    addPlaced,
+    removePlacedAt,
+  });
+  interactions.bind();
 
-    onBeforeUnmount(() => {
-        window.removeEventListener('resize', onResize)
-        interactions?.unbind()
-        stage?.dispose()
-        stage = null
-        interactions = null
-    })
-})
+  const onResize = () => stage?.resize();
+  window.addEventListener('resize', onResize);
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', onResize);
+    interactions?.unbind();
+    stage?.dispose();
+    stage = null;
+    interactions = null;
+  });
+});
 </script>
