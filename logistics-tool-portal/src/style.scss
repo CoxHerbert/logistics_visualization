@@ -234,3 +234,86 @@ body {
         bottom: 12px;
     }
 }
+
+/* Container calculator */
+.page-shell {
+    min-height: 100%;
+    background: linear-gradient(180deg, #eef4ff 0%, #f7f8fa 180px, #f5f7fa 100%);
+    border-radius: 16px;
+}
+
+.page-container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.hero-card {
+    border-radius: 20px;
+    padding: 28px;
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.08), rgba(114, 46, 209, 0.06));
+    border: 1px solid rgba(22, 119, 255, 0.12);
+    margin-bottom: 20px;
+}
+
+.hero-title {
+    margin: 0 0 8px;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.hero-desc {
+    color: #5c6370;
+    line-height: 1.7;
+}
+
+.section-card {
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(18, 38, 63, 0.06);
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.metric-label {
+    color: #667085;
+    font-size: 13px;
+}
+
+.preview-legend {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: #667085;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.preview-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.table-note {
+    color: #667085;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+    .page-container {
+        padding: 16px;
+    }
+
+    .hero-card {
+        padding: 20px;
+    }
+
+    .hero-title {
+        font-size: 24px;
+    }
+}

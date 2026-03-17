@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="tool-center-page">
     <a-card title="工具中心" :bordered="false">
       <a-alert
@@ -30,21 +30,36 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink } from 'vue-router';
 
 interface ToolItem {
-  title: string
-  description: string
-  path: string
+  title: string;
+  description: string;
+  path: string;
 }
 
 const toolItems: ToolItem[] = [
   {
     title: 'FBA头程价格计算',
     description: '根据运输方式与基础参数，快速查看 FBA 头程报价结果。',
-    path: '/tool-center/fba-first-leg-calculator'
-  }
-]
+    path: '/tool-center/fba-first-leg-calculator',
+  },
+  {
+    title: '装柜计算器 V8',
+    description: '支持多柜规划 + 包装优化 + 成本模型 + V8 分层装柜结构图。',
+    path: '/tool-center/container-calculator',
+  },
+  {
+    title: '装柜计算器 V9 向导',
+    description: '四步向导：货物信息、装柜条件、方案结果、优化建议。',
+    path: '/tool-center/container-calculator/wizard',
+  },
+  {
+    title: '3D装箱模拟',
+    description: '三维集装箱装载模拟，支持拖拽摆放与装箱可视化。',
+    path: '/tool-center/container-sim',
+  },
+];
 </script>
 
 <style scoped>

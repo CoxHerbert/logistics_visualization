@@ -29,6 +29,16 @@ const router = createRouter({
             component: () => import('@/views/tools/container-sim/index.vue'),
         },
         {
+            path: '/tool-center/container-calculator',
+            name: 'container-calculator',
+            component: () => import('@/views/tools/container-calculator/index.vue'),
+        },
+        {
+            path: '/tool-center/container-calculator/wizard',
+            name: 'container-calculator-wizard',
+            component: () => import('@/views/tools/container-calculator-wizard/index.vue'),
+        },
+        {
             path: '/me',
             name: 'me',
             component: () => import('@/views/Me.vue'),
