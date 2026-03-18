@@ -168,9 +168,15 @@ async function loadData() {
     order.value = detail;
     feeList.value = fees;
     logList.value = logs;
-    contract.value = detail.contractId
-      ? await getContract(detail.contractId)
-      : undefined;
+    if (detail.contractId) {
+      try {
+        contract.value = await getContract(detail.contractId);
+      } catch {
+        contract.value = undefined;
+      }
+    } else {
+      contract.value = undefined;
+    }
   } finally {
     loading.value = false;
   }
