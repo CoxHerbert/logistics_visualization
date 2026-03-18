@@ -58,6 +58,22 @@ public class CrmContractDO extends BaseDO {
      * 最后跟进时间
      */
     private LocalDateTime contactLastTime;
+    /**
+     * 收款账户 ID
+     */
+    private Long bankAccountId;
+    /**
+     * 收款户名快照
+     */
+    private String bankAccountName;
+    /**
+     * 开户行快照
+     */
+    private String bankName;
+    /**
+     * 银行账号快照
+     */
+    private String bankAccountNo;
 
     /**
      * 负责人的用户编号

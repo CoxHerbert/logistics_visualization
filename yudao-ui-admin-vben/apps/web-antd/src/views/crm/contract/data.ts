@@ -8,6 +8,7 @@ import { erpPriceInputFormatter, erpPriceMultiply } from '@vben/utils';
 import { z } from '#/adapter/form';
 import { getSimpleBusinessList } from '#/api/crm/business';
 import { getSimpleContactList } from '#/api/crm/contact';
+import { getCustomerBankAccountListByCustomer } from '#/api/crm/customer/bankAccount';
 import { getCustomerSimpleList } from '#/api/crm/customer';
 import { getSimpleUserList } from '#/api/system/user';
 
@@ -67,6 +68,46 @@ export function useFormSchema(): VbenFormSchema[] {
         labelField: 'name',
         valueField: 'id',
         placeholder: '请选择客户',
+      },
+    },
+    {
+      fieldName: 'bankAccountId',
+      label: '收款账户',
+      component: 'Select',
+      componentProps: {
+        options: [],
+        placeholder: '请选择收款账户',
+      },
+      dependencies: {
+        triggerFields: ['customerId', 'id'],
+        disabled: (values) => !values.customerId,
+        async componentProps(values) {
+          if (!values.customerId) {
+            return {
+              options: [],
+              placeholder: '请先选择客户',
+            };
+          }
+          if (!values.id) {
+            values.bankAccountId = undefined;
+          }
+          const list = await getCustomerBankAccountListByCustomer(
+            values.customerId,
+          );
+          if (!values.id && !values.bankAccountId) {
+            const defaultAccount = list.find((item) => item.defaultStatus);
+            if (defaultAccount) {
+              values.bankAccountId = defaultAccount.id;
+            }
+          }
+          return {
+            options: list.map((item) => ({
+              label: `${item.accountName} / ${item.bankName}`,
+              value: item.id,
+            })),
+            placeholder: '请选择收款账户',
+          };
+        },
       },
     },
     {
@@ -298,6 +339,16 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       field: 'customerName',
       minWidth: 120,
       slots: { default: 'customerName' },
+    },
+    {
+      title: '收款户名',
+      field: 'bankAccountName',
+      minWidth: 180,
+    },
+    {
+      title: '开户行',
+      field: 'bankName',
+      minWidth: 180,
     },
     {
       title: '商机名称',

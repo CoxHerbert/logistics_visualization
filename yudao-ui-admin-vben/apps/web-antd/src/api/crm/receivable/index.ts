@@ -13,6 +13,10 @@ export namespace CrmReceivableApi {
     customerName?: string;
     contractId?: number;
     contract?: Contract;
+    bankAccountId?: number;
+    bankAccountName?: string;
+    bankName?: string;
+    bankAccountNo?: string;
     auditStatus: number;
     processInstanceId: number;
     returnTime: Date;

@@ -57,6 +57,22 @@ public class CrmReceivableDO extends BaseDO {
      */
     private Long contractId;
     /**
+     * 收款账户 ID
+     */
+    private Long bankAccountId;
+    /**
+     * 收款户名快照
+     */
+    private String bankAccountName;
+    /**
+     * 开户行快照
+     */
+    private String bankName;
+    /**
+     * 银行账号快照
+     */
+    private String bankAccountNo;
+    /**
      * 负责人编号，关联 {@link AdminUserRespDTO#getId()}
      */
     private Long ownerUserId;

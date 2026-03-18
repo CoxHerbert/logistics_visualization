@@ -5,7 +5,8 @@ import { DICT_TYPE } from '@vben/constants';
 import { getDictOptions } from '@vben/hooks';
 import { useUserStore } from '@vben/stores';
 
-import { getContractSimpleList } from '#/api/crm/contract';
+import { getContract, getContractSimpleList } from '#/api/crm/contract';
+import { getCustomerBankAccountListByCustomer } from '#/api/crm/customer/bankAccount';
 import { getCustomerSimpleList } from '#/api/crm/customer';
 import {
   getReceivablePlan,
@@ -13,9 +14,10 @@ import {
 } from '#/api/crm/receivable/plan';
 import { getSimpleUserList } from '#/api/system/user';
 
-/** 新增/修改的表单 */
+/** 新增/修改表单 */
 export function useFormSchema(): VbenFormSchema[] {
   const userStore = useUserStore();
+
   return [
     {
       fieldName: 'id',
@@ -77,20 +79,75 @@ export function useFormSchema(): VbenFormSchema[] {
         triggerFields: ['customerId'],
         disabled: (values) => !values.customerId || values.id,
         async componentProps(values) {
-          if (values.customerId) {
-            if (!values.id) {
-              // 特殊：只有在【新增】时，才清空合同编号
-              values.contractId = undefined;
-            }
-            const contracts = await getContractSimpleList(values.customerId);
+          if (!values.customerId) {
             return {
-              options: contracts.map((item) => ({
-                label: item.name,
-                value: item.id,
-              })),
-              placeholder: '请选择合同',
+              options: [],
+              placeholder: '请先选择客户',
             } as any;
           }
+          if (!values.id) {
+            values.contractId = undefined;
+            values.bankAccountId = undefined;
+            values.planId = undefined;
+          }
+          const contracts = await getContractSimpleList(values.customerId);
+          return {
+            options: contracts.map((item) => ({
+              label: item.name,
+              value: item.id,
+            })),
+            placeholder: '请选择合同',
+            onChange: async (value: any) => {
+              values.contractId = value;
+              values.planId = undefined;
+              if (!value) {
+                values.bankAccountId = undefined;
+                return;
+              }
+              const contract = await getContract(value);
+              values.bankAccountId = contract?.bankAccountId;
+            },
+          } as any;
+        },
+      },
+    },
+    {
+      fieldName: 'bankAccountId',
+      label: '收款账户',
+      component: 'Select',
+      componentProps: {
+        options: [],
+        placeholder: '请选择收款账户',
+      },
+      dependencies: {
+        triggerFields: ['customerId', 'contractId', 'id'],
+        disabled: (values) => !values.customerId,
+        async componentProps(values) {
+          if (!values.customerId) {
+            return {
+              options: [],
+              placeholder: '请先选择客户',
+            } as any;
+          }
+          const list = await getCustomerBankAccountListByCustomer(
+            values.customerId,
+          );
+          if (!values.id && !values.bankAccountId) {
+            const defaultAccount = list.find((item) => item.defaultStatus);
+            if (defaultAccount) {
+              values.bankAccountId = defaultAccount.id;
+            }
+          }
+          return {
+            options: list.map((item) => ({
+              label: `${item.accountName} / ${item.bankName}`,
+              value: item.id,
+            })),
+            placeholder: '请选择收款账户',
+            onChange: (value: any) => {
+              values.bankAccountId = value;
+            },
+          } as any;
         },
       },
     },
@@ -103,26 +160,32 @@ export function useFormSchema(): VbenFormSchema[] {
         triggerFields: ['contractId'],
         disabled: (values) => !values.contractId,
         async componentProps(values) {
-          if (values.contractId) {
-            values.planId = undefined;
-            const plans = await getReceivablePlanSimpleList(
-              values.customerId,
-              values.contractId,
-            );
+          if (!values.contractId) {
             return {
-              options: plans.map((item) => ({
-                label: item.period,
-                value: item.id,
-              })),
-              placeholder: '请选择回款期数',
-              onChange: async (value: any) => {
-                const plan = await getReceivablePlan(value);
-                values.returnTime = plan?.returnTime;
-                values.price = plan?.price;
-                values.returnType = plan?.returnType;
-              },
+              options: [],
+              placeholder: '请先选择合同',
             } as any;
           }
+          if (!values.id) {
+            values.planId = undefined;
+          }
+          const plans = await getReceivablePlanSimpleList(
+            values.customerId,
+            values.contractId,
+          );
+          return {
+            options: plans.map((item) => ({
+              label: item.period,
+              value: item.id,
+            })),
+            placeholder: '请选择回款期数',
+            onChange: async (value: any) => {
+              const plan = await getReceivablePlan(value);
+              values.returnTime = plan?.returnTime;
+              values.price = plan?.price;
+              values.returnType = plan?.returnType;
+            },
+          } as any;
         },
       },
     },
@@ -171,7 +234,7 @@ export function useFormSchema(): VbenFormSchema[] {
   ];
 }
 
-/** 列表的搜索表单 */
+/** 列表搜索表单 */
 export function useGridFormSchema(): VbenFormSchema[] {
   return [
     {
@@ -218,6 +281,16 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       field: 'contract',
       minWidth: 160,
       slots: { default: 'contractNo' },
+    },
+    {
+      title: '收款户名',
+      field: 'bankAccountName',
+      minWidth: 180,
+    },
+    {
+      title: '开户行',
+      field: 'bankName',
+      minWidth: 180,
     },
     {
       title: '回款日期',

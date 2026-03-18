@@ -39,6 +39,18 @@ public class CrmContractSaveReqVO {
     @DiffLogField(name = "商机", function = CrmBusinessParseFunction.NAME)
     private Long businessId;
 
+    @Schema(description = "收款账户", example = "10864")
+    private Long bankAccountId;
+
+    @Schema(description = "收款户名快照", example = "宁波XX公司")
+    private String bankAccountName;
+
+    @Schema(description = "开户行快照", example = "中国银行宁波分行")
+    private String bankName;
+
+    @Schema(description = "银行账号快照", example = "6222000000000000")
+    private String bankAccountNo;
+
     @Schema(description = "负责人的用户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "17144")
     @DiffLogField(name = "负责人", function = SysAdminUserParseFunction.NAME)
     @NotNull(message = "负责人不能为空")

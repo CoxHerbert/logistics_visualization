@@ -17,6 +17,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '线索详情',
           activePath: '/crm/clue',
+          hideInMenu: true,
+          authority: ['crm:clue:query'],
         },
         component: () => import('#/views/crm/clue/detail/index.vue'),
       },
@@ -26,6 +28,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '客户详情',
           activePath: '/crm/customer',
+          hideInMenu: true,
+          authority: ['crm:customer:query'],
         },
         component: () => import('#/views/crm/customer/detail/index.vue'),
       },
@@ -35,6 +39,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '商机详情',
           activePath: '/crm/business',
+          hideInMenu: true,
+          authority: ['crm:business:query'],
         },
         component: () => import('#/views/crm/business/detail/index.vue'),
       },
@@ -44,6 +50,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '合同详情',
           activePath: '/crm/contract',
+          hideInMenu: true,
+          authority: ['crm:contract:query'],
         },
         component: () => import('#/views/crm/contract/detail/index.vue'),
       },
@@ -53,6 +61,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '回款计划详情',
           activePath: '/crm/receivable-plan',
+          hideInMenu: true,
+          authority: ['crm:receivable-plan:query'],
         },
         component: () => import('#/views/crm/receivable/plan/detail/index.vue'),
       },
@@ -62,6 +72,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '回款详情',
           activePath: '/crm/receivable',
+          hideInMenu: true,
+          authority: ['crm:receivable:query'],
         },
         component: () => import('#/views/crm/receivable/detail/index.vue'),
       },
@@ -71,6 +83,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '联系人详情',
           activePath: '/crm/contact',
+          hideInMenu: true,
+          authority: ['crm:contact:query'],
         },
         component: () => import('#/views/crm/contact/detail/index.vue'),
       },
@@ -80,6 +94,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '产品详情',
           activePath: '/crm/product',
+          hideInMenu: true,
+          authority: ['crm:product:query'],
         },
         component: () => import('#/views/crm/product/detail/index.vue'),
       },

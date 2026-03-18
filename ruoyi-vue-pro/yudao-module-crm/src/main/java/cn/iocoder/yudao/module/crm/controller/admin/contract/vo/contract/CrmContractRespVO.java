@@ -42,6 +42,18 @@ public class CrmContractRespVO {
     @ExcelProperty("商机名称")
     private String businessName;
 
+    @Schema(description = "收款账户 ID", example = "10864")
+    private Long bankAccountId;
+    @Schema(description = "收款户名", example = "宁波XX公司")
+    @ExcelProperty("收款户名")
+    private String bankAccountName;
+    @Schema(description = "开户行", example = "中国银行宁波分行")
+    @ExcelProperty("开户行")
+    private String bankName;
+    @Schema(description = "银行账号", example = "6222000000000000")
+    @ExcelProperty("银行账号")
+    private String bankAccountNo;
+
     @Schema(description = "最后跟进时间")
     @ExcelProperty("最后跟进时间")
     private LocalDateTime contactLastTime;

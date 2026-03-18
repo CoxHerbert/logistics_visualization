@@ -54,6 +54,18 @@ public class CrmReceivableRespVO {
     @Schema(description = "合同信息")
     private CrmContractRespVO contract;
 
+    @Schema(description = "收款账户 ID", example = "2")
+    private Long bankAccountId;
+    @Schema(description = "收款户名", example = "宁波XX公司")
+    @ExcelProperty("收款户名")
+    private String bankAccountName;
+    @Schema(description = "开户行", example = "中国银行宁波分行")
+    @ExcelProperty("开户行")
+    private String bankName;
+    @Schema(description = "银行账号", example = "6222000000000000")
+    @ExcelProperty("银行账号")
+    private String bankAccountNo;
+
     @Schema(description = "负责人的用户编号", example = "25682")
     private Long ownerUserId;
     @Schema(description = "负责人名字", example = "25682")

@@ -4,17 +4,22 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
+import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.customer.CrmCustomerDO;
+import cn.iocoder.yudao.module.crm.service.contract.CrmContractService;
 import cn.iocoder.yudao.module.crm.service.customer.CrmCustomerService;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderFeeBatchSaveReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderFeeSaveReqVO;
+import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderExceptionSaveReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderPageReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderSaveReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderUpdateStatusReqVO;
 import cn.iocoder.yudao.module.freight.convert.freight.FreightOrderConvert;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderDO;
+import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderExceptionDO;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderFeeDO;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderLogDO;
+import cn.iocoder.yudao.module.freight.dal.mysql.freight.FreightOrderExceptionMapper;
 import cn.iocoder.yudao.module.freight.dal.mysql.freight.FreightOrderFeeMapper;
 import cn.iocoder.yudao.module.freight.dal.mysql.freight.FreightOrderLogMapper;
 import cn.iocoder.yudao.module.freight.dal.mysql.freight.FreightOrderMapper;
@@ -30,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.freight.enums.ErrorCodeConstants.FREIGHT_ORDER_CONTRACT_INVALID;
 import static cn.iocoder.yudao.module.freight.enums.ErrorCodeConstants.FREIGHT_ORDER_DATA_INCOMPLETE;
 import static cn.iocoder.yudao.module.freight.enums.ErrorCodeConstants.FREIGHT_ORDER_NOT_EXISTS;
 import static cn.iocoder.yudao.module.freight.enums.ErrorCodeConstants.FREIGHT_ORDER_STATUS_INVALID;
@@ -43,14 +49,19 @@ public class FreightOrderServiceImpl implements FreightOrderService {
     @Resource
     private FreightOrderFeeMapper freightOrderFeeMapper;
     @Resource
+    private FreightOrderExceptionMapper freightOrderExceptionMapper;
+    @Resource
     private FreightOrderLogMapper freightOrderLogMapper;
     @Resource
     private CrmCustomerService crmCustomerService;
+    @Resource
+    private CrmContractService crmContractService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createOrder(@Valid AdminFreightOrderSaveReqVO createReqVO) {
         FreightOrderDO order = FreightOrderConvert.INSTANCE.convert(createReqVO);
+        syncContractSelection(order, createReqVO);
         fillCustomerInfo(order);
         fillDefaultValues(order);
         order.setOrderNo(generateOrderNo());
@@ -65,6 +76,7 @@ public class FreightOrderServiceImpl implements FreightOrderService {
     public void updateOrder(@Valid AdminFreightOrderSaveReqVO updateReqVO) {
         FreightOrderDO dbOrder = validateOrderExists(updateReqVO.getId());
         FreightOrderDO updateObj = FreightOrderConvert.INSTANCE.convert(updateReqVO);
+        syncContractSelection(updateObj, updateReqVO);
         fillCustomerInfo(updateObj);
         fillDefaultValues(updateObj);
         updateObj.setId(dbOrder.getId());
@@ -148,6 +160,51 @@ public class FreightOrderServiceImpl implements FreightOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long saveOrderException(@Valid AdminFreightOrderExceptionSaveReqVO reqVO) {
+        validateOrderExists(reqVO.getOrderId());
+        FreightOrderExceptionDO exception = FreightOrderConvert.INSTANCE.convert(reqVO);
+        if (exception.getClosed() == null) {
+            exception.setClosed(Boolean.FALSE);
+        }
+        if (Boolean.TRUE.equals(exception.getClosed()) && exception.getClosedTime() == null) {
+            exception.setClosedTime(java.time.LocalDateTime.now());
+        }
+        if (exception.getOccurTime() == null) {
+            exception.setOccurTime(java.time.LocalDateTime.now());
+        }
+        if (exception.getId() == null) {
+            freightOrderExceptionMapper.insert(exception);
+            createLog(reqVO.getOrderId(), "EXCEPTION_CREATE", null, null, reqVO.getTitle());
+        } else {
+            FreightOrderExceptionDO dbException = freightOrderExceptionMapper.selectById(exception.getId());
+            if (dbException == null) {
+                throw exception(FREIGHT_ORDER_NOT_EXISTS);
+            }
+            freightOrderExceptionMapper.updateById(exception);
+            createLog(reqVO.getOrderId(), "EXCEPTION_UPDATE", null, null, reqVO.getTitle());
+        }
+        return exception.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOrderException(Long id) {
+        FreightOrderExceptionDO dbException = freightOrderExceptionMapper.selectById(id);
+        if (dbException == null) {
+            return;
+        }
+        freightOrderExceptionMapper.deleteById(id);
+        createLog(dbException.getOrderId(), "EXCEPTION_DELETE", null, null, dbException.getTitle());
+    }
+
+    @Override
+    public List<FreightOrderExceptionDO> getOrderExceptionList(Long orderId) {
+        validateOrderExists(orderId);
+        return freightOrderExceptionMapper.selectListByOrderId(orderId);
+    }
+
+    @Override
     public List<FreightOrderLogDO> getOrderLogList(Long orderId) {
         validateOrderExists(orderId);
         return freightOrderLogMapper.selectListByOrderId(orderId);
@@ -196,10 +253,36 @@ public class FreightOrderServiceImpl implements FreightOrderService {
             return;
         }
         crmCustomerService.validateCustomer(order.getCustomerId());
-        CrmCustomerDO customer = crmCustomerService.getCustomer(order.getCustomerId());
+        List<CrmCustomerDO> customers = crmCustomerService.getCustomerList(
+                Arrays.asList(order.getCustomerId()));
+        CrmCustomerDO customer = customers.isEmpty() ? null : customers.get(0);
         if (customer != null) {
             order.setCustomerName(customer.getName());
         }
+        fillContractInfo(order);
+    }
+
+    private void syncContractSelection(FreightOrderDO order, AdminFreightOrderSaveReqVO reqVO) {
+        order.setContractId(reqVO.getContractId());
+        if (reqVO.getContractId() == null) {
+            order.setContractNo(null);
+            order.setContractName(null);
+        }
+    }
+
+    private void fillContractInfo(FreightOrderDO order) {
+        if (order.getContractId() == null) {
+            order.setContractNo(null);
+            order.setContractName(null);
+            return;
+        }
+        CrmContractDO contract = crmContractService.validateContract(order.getContractId());
+        if (contract == null || contract.getCustomerId() == null
+                || !contract.getCustomerId().equals(order.getCustomerId())) {
+            throw exception(FREIGHT_ORDER_CONTRACT_INVALID);
+        }
+        order.setContractNo(contract.getNo());
+        order.setContractName(contract.getName());
     }
 
     private String generateOrderNo() {

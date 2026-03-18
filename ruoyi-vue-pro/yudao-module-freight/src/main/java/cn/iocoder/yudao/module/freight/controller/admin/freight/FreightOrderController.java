@@ -4,6 +4,8 @@ import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderFeeBatchSaveReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderFeeRespVO;
+import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderExceptionRespVO;
+import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderExceptionSaveReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderLogRespVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderPageReqVO;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderRespVO;
@@ -11,6 +13,7 @@ import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFr
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.order.AdminFreightOrderUpdateStatusReqVO;
 import cn.iocoder.yudao.module.freight.convert.freight.FreightOrderConvert;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderDO;
+import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderExceptionDO;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderFeeDO;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightOrderLogDO;
 import cn.iocoder.yudao.module.freight.service.freight.FreightOrderService;
@@ -96,6 +99,30 @@ public class FreightOrderController {
     @PreAuthorize("@ss.hasPermission('freight:order:update')")
     public CommonResult<Boolean> saveOrderFees(@Valid @RequestBody AdminFreightOrderFeeBatchSaveReqVO reqVO) {
         freightOrderService.saveOrderFees(reqVO);
+        return success(true);
+    }
+
+    @GetMapping("/exception/list")
+    @Operation(summary = "Get freight order exception list")
+    @Parameter(name = "orderId", description = "freight order id", required = true)
+    @PreAuthorize("@ss.hasPermission('freight:order:query')")
+    public CommonResult<List<AdminFreightOrderExceptionRespVO>> getOrderExceptionList(@RequestParam("orderId") Long orderId) {
+        List<FreightOrderExceptionDO> exceptions = freightOrderService.getOrderExceptionList(orderId);
+        return success(FreightOrderConvert.INSTANCE.convertExceptionList(exceptions));
+    }
+
+    @PostMapping("/exception/save")
+    @Operation(summary = "Save freight order exception")
+    @PreAuthorize("@ss.hasPermission('freight:order:update')")
+    public CommonResult<Long> saveOrderException(@Valid @RequestBody AdminFreightOrderExceptionSaveReqVO reqVO) {
+        return success(freightOrderService.saveOrderException(reqVO));
+    }
+
+    @PostMapping("/exception/delete")
+    @Operation(summary = "Delete freight order exception")
+    @PreAuthorize("@ss.hasPermission('freight:order:update')")
+    public CommonResult<Boolean> deleteOrderException(@RequestParam("id") Long id) {
+        freightOrderService.deleteOrderException(id);
         return success(true);
     }
 

@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS freight_order_exception (
+  id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  order_id BIGINT NOT NULL COMMENT '业务单ID',
+  exception_type VARCHAR(64) NOT NULL COMMENT '异常类型',
+  exception_stage VARCHAR(64) DEFAULT NULL COMMENT '异常阶段',
+  severity VARCHAR(32) DEFAULT NULL COMMENT '严重程度',
+  title VARCHAR(255) NOT NULL COMMENT '异常标题',
+  content VARCHAR(1000) DEFAULT NULL COMMENT '异常说明',
+  solution VARCHAR(1000) DEFAULT NULL COMMENT '处理方案',
+  responsible_user_id BIGINT DEFAULT NULL COMMENT '责任人',
+  occur_time DATETIME DEFAULT NULL COMMENT '发生时间',
+  closed BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否关闭',
+  closed_time DATETIME DEFAULT NULL COMMENT '关闭时间',
+  creator VARCHAR(64) DEFAULT '' COMMENT '创建者',
+  create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  updater VARCHAR(64) DEFAULT '' COMMENT '更新者',
+  update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  deleted BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  tenant_id BIGINT NOT NULL DEFAULT 1 COMMENT '租户编号',
+  PRIMARY KEY (id),
+  KEY idx_freight_order_exception_order_id (order_id),
+  KEY idx_freight_order_exception_tenant_id (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务单异常记录';

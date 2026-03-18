@@ -7,7 +7,6 @@ import { erpPriceInputFormatter, formatDateTime } from '@vben/utils';
 
 import { DictTag } from '#/components/dict-tag';
 
-/** 详情页的字段 */
 export function useDetailSchema(): DescriptionItemSchema[] {
   return [
     {
@@ -37,7 +36,6 @@ export function useDetailSchema(): DescriptionItemSchema[] {
   ];
 }
 
-/** 详情页的基础字段 */
 export function useDetailBaseSchema(): DescriptionItemSchema[] {
   return [
     {
@@ -51,8 +49,19 @@ export function useDetailBaseSchema(): DescriptionItemSchema[] {
     {
       field: 'contract',
       label: '合同编号',
-      render: (val, data) =>
-        val && data?.contract?.no ? data?.contract?.no : '',
+      render: (val, data) => (val && data?.contract?.no ? data.contract.no : ''),
+    },
+    {
+      field: 'bankAccountName',
+      label: '收款户名',
+    },
+    {
+      field: 'bankName',
+      label: '开户行',
+    },
+    {
+      field: 'bankAccountNo',
+      label: '银行账号',
     },
     {
       field: 'returnTime',
@@ -80,7 +89,6 @@ export function useDetailBaseSchema(): DescriptionItemSchema[] {
   ];
 }
 
-/** 系统信息字段 */
 export function useDetailSystemSchema(): DescriptionItemSchema[] {
   return [
     {

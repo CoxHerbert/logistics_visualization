@@ -7,7 +7,6 @@ import { erpPriceInputFormatter, formatDateTime } from '@vben/utils';
 
 import { DictTag } from '#/components/dict-tag';
 
-/** 详情头部的配置 */
 export function useDetailSchema(): DescriptionItemSchema[] {
   return [
     {
@@ -36,7 +35,6 @@ export function useDetailSchema(): DescriptionItemSchema[] {
   ];
 }
 
-/** 详情基本信息的配置 */
 export function useDetailBaseSchema(): DescriptionItemSchema[] {
   return [
     {
@@ -54,6 +52,18 @@ export function useDetailBaseSchema(): DescriptionItemSchema[] {
     {
       field: 'businessName',
       label: '商机名称',
+    },
+    {
+      field: 'bankAccountName',
+      label: '收款户名',
+    },
+    {
+      field: 'bankName',
+      label: '开户行',
+    },
+    {
+      field: 'bankAccountNo',
+      label: '银行账号',
     },
     {
       field: 'totalPrice',

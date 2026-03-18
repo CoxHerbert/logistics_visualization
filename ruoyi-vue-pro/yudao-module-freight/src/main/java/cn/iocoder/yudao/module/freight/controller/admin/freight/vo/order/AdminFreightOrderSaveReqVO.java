@@ -18,6 +18,9 @@ public class AdminFreightOrderSaveReqVO {
     private Long customerId;
 
     private String customerName;
+    private Long contractId;
+    private String contractNo;
+    private String contractName;
 
     private String contactName;
     private String contactPhone;
@@ -44,6 +47,11 @@ public class AdminFreightOrderSaveReqVO {
     private Boolean sensitive;
     private String customsType;
     private String shippingMark;
+    private String deliveryType;
+    private String deliveryWarehouseCode;
+    private String deliveryWarehouseName;
+    private String amazonShipmentId;
+    private String amazonReferenceNo;
     private String bookingNo;
     private String soNo;
     private String blNo;

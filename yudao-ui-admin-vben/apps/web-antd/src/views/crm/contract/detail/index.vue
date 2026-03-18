@@ -25,6 +25,7 @@ import { ReceivablePlanDetailsList } from '#/views/crm/receivable/plan/component
 
 import Form from '../modules/form.vue';
 import { useDetailSchema } from './data';
+import FreightOrders from './modules/freight-orders.vue';
 import ContractDetailsInfo from './modules/info.vue';
 
 const props = defineProps<{ id?: number }>();
@@ -141,9 +142,12 @@ onMounted(() => {
             :biz-type="BizTypeEnum.CRM_CONTRACT"
           />
         </Tabs.TabPane>
+        <Tabs.TabPane tab="关联业务单" key="4" :force-render="true">
+          <FreightOrders :contract-id="contractId" />
+        </Tabs.TabPane>
         <Tabs.TabPane
           tab="回款"
-          key="4"
+          key="5"
           :force-render="true"
           v-if="contract.customerId"
         >
@@ -156,7 +160,7 @@ onMounted(() => {
             :customer-id="contract.customerId"
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="团队成员" key="5" :force-render="true">
+        <Tabs.TabPane tab="团队成员" key="6" :force-render="true">
           <PermissionList
             ref="permissionListRef"
             :biz-id="contractId"
@@ -165,7 +169,7 @@ onMounted(() => {
             @quit-team="handleBack"
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="操作日志" key="6" :force-render="true">
+        <Tabs.TabPane tab="操作日志" key="7" :force-render="true">
           <OperateLog :log-list="logList" />
         </Tabs.TabPane>
       </Tabs>

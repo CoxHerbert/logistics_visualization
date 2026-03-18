@@ -32,6 +32,18 @@ public class CrmReceivableSaveReqVO {
     @NotNull(message = "合同编号不能为空")
     private Long contractId;
 
+    @Schema(description = "收款账户", example = "2")
+    private Long bankAccountId;
+
+    @Schema(description = "收款户名快照", example = "宁波XX公司")
+    private String bankAccountName;
+
+    @Schema(description = "开户行快照", example = "中国银行宁波分行")
+    private String bankName;
+
+    @Schema(description = "银行账号快照", example = "6222000000000000")
+    private String bankAccountNo;
+
     @Schema(description = "回款计划编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     @DiffLogField(name = "合同", function = CrmReceivablePlanParseFunction.NAME)
     private Long planId;

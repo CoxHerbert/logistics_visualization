@@ -14,6 +14,10 @@ export namespace CrmContractApi {
     customerName?: string;
     businessId: number;
     businessName: string;
+    bankAccountId?: number;
+    bankAccountName?: string;
+    bankName?: string;
+    bankAccountNo?: string;
     contactLastTime: Date;
     ownerUserId: number;
     ownerUserName?: string;

@@ -8,6 +8,9 @@ export namespace FreightOrderApi {
     orderNo?: string;
     customerId: number;
     customerName?: string;
+    contractId?: number;
+    contractNo?: string;
+    contractName?: string;
     contactName?: string;
     contactPhone?: string;
     bizType: string;
@@ -29,6 +32,11 @@ export namespace FreightOrderApi {
     sensitive?: boolean;
     customsType?: string;
     shippingMark?: string;
+    deliveryType?: string;
+    deliveryWarehouseCode?: string;
+    deliveryWarehouseName?: string;
+    amazonShipmentId?: string;
+    amazonReferenceNo?: string;
     bookingNo?: string;
     soNo?: string;
     blNo?: string;
@@ -55,6 +63,9 @@ export namespace FreightOrderApi {
   export interface OrderPageReqVO extends PageParam {
     orderNo?: string;
     customerId?: number;
+    contractId?: number;
+    contractNo?: string;
+    contractName?: string;
     status?: string;
     transportMode?: string;
     originPort?: string;
@@ -88,6 +99,22 @@ export namespace FreightOrderApi {
     unitPrice?: number;
     amount?: number;
     remark?: string;
+  }
+
+  export interface OrderException {
+    id?: number;
+    orderId: number;
+    exceptionType: string;
+    exceptionStage?: string;
+    severity?: string;
+    title: string;
+    content?: string;
+    solution?: string;
+    responsibleUserId?: number;
+    occurTime?: string;
+    closed?: boolean;
+    closedTime?: string;
+    createTime?: string;
   }
 }
 
@@ -139,4 +166,20 @@ export function saveFreightOrderFees(data: {
   orderId: number;
 }) {
   return requestClient.post('/freight/order/fee/save', data);
+}
+
+export function getFreightOrderExceptionList(orderId: number) {
+  return requestClient.get<FreightOrderApi.OrderException[]>(
+    `/freight/order/exception/list?orderId=${orderId}`,
+  );
+}
+
+export function saveFreightOrderException(
+  data: FreightOrderApi.OrderException,
+) {
+  return requestClient.post<number>('/freight/order/exception/save', data);
+}
+
+export function deleteFreightOrderException(id: number) {
+  return requestClient.post(`/freight/order/exception/delete?id=${id}`);
 }

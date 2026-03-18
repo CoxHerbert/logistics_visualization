@@ -17,6 +17,9 @@ public class AdminFreightOrderPageReqVO extends PageParam {
 
     private String orderNo;
     private Long customerId;
+    private Long contractId;
+    private String contractNo;
+    private String contractName;
     private String status;
     private String transportMode;
     private String originPort;

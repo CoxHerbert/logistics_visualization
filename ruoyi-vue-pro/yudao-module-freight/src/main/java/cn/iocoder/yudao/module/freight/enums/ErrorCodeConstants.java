@@ -12,4 +12,6 @@ public interface ErrorCodeConstants {
     ErrorCode FREIGHT_ORDER_STATUS_INVALID = new ErrorCode(1_031_000_004, "业务单状态流转不合法");
     ErrorCode FREIGHT_ORDER_DATA_INCOMPLETE = new ErrorCode(1_031_000_005, "业务单当前阶段数据不完整，请先补充必填信息");
 
+    ErrorCode FREIGHT_ORDER_CONTRACT_INVALID = new ErrorCode(1_031_000_006, "业务单关联合同不合法或与客户不匹配");
+
 }

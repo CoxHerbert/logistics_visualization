@@ -33,8 +33,10 @@ import { ReceivablePlanDetailsList } from '#/views/crm/receivable/plan/component
 
 import Form from '../modules/form.vue';
 import { useDetailSchema } from './data';
+import BankAccountList from './modules/bank-account-list.vue';
 import DistributeForm from './modules/distribute-form.vue';
 import Info from './modules/info.vue';
+import LicenseList from './modules/license-list.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -297,11 +299,17 @@ onMounted(() => {
             :biz-type="BizTypeEnum.CRM_CUSTOMER"
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="回款" key="7" :force-render="true">
+        <Tabs.TabPane tab="银行账户" key="7" :force-render="true">
+          <BankAccountList :customer-id="customerId" />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="营业执照/资质" key="8" :force-render="true">
+          <LicenseList :customer-id="customerId" />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="回款" key="9" :force-render="true">
           <ReceivablePlanDetailsList :customer-id="customerId" />
           <ReceivableDetailsList :customer-id="customerId" />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="操作日志" key="8" :force-render="true">
+        <Tabs.TabPane tab="操作日志" key="10" :force-render="true">
           <OperateLog :log-list="logList" />
         </Tabs.TabPane>
       </Tabs>

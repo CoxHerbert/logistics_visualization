@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.exception.ErrorCode;
  */
 public interface ErrorCodeConstants {
 
+    ErrorCode CONTRACT_SUBMIT_FAIL_PROCESS_NOT_FOUND = new ErrorCode(1_020_000_006, "合同提交审核失败，原因：合同审批流程未配置或未发布");
     // ========== 合同管理 1-020-000-000 ==========
     ErrorCode CONTRACT_NOT_EXISTS = new ErrorCode(1_020_000_000, "合同不存在");
     ErrorCode CONTRACT_UPDATE_FAIL_NOT_DRAFT = new ErrorCode(1_020_000_001, "合同更新失败，原因：合同不是草稿状态");
@@ -47,6 +48,13 @@ public interface ErrorCodeConstants {
     ErrorCode RECEIVABLE_PLAN_NOT_EXISTS = new ErrorCode(1_020_005_000, "回款计划不存在");
     ErrorCode RECEIVABLE_PLAN_UPDATE_FAIL = new ErrorCode(1_020_006_000, "更想回款计划失败，原因：已经有对应的还款");
     ErrorCode RECEIVABLE_PLAN_EXISTS_RECEIVABLE = new ErrorCode(1_020_006_001, "回款计划已经有对应的回款，不能使用");
+
+    // ========== 客户银行账户 1-020-007-000 ==========
+    ErrorCode CUSTOMER_BANK_ACCOUNT_NOT_EXISTS = new ErrorCode(1_020_007_000, "客户银行账户不存在");
+    ErrorCode CUSTOMER_BANK_ACCOUNT_NOT_BELONG_TO_CUSTOMER = new ErrorCode(1_020_007_001, "银行账户不属于当前客户");
+
+    // ========== 客户资质 1-020-008-000 ==========
+    ErrorCode CUSTOMER_LICENSE_NOT_EXISTS = new ErrorCode(1_020_008_000, "客户资质不存在");
 
     // ========== 客户管理 1_020_006_000 ==========
     ErrorCode CUSTOMER_NOT_EXISTS = new ErrorCode(1_020_006_000, "客户不存在");

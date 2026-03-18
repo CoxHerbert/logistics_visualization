@@ -38,6 +38,13 @@ export const incotermsOptions = [
   { label: 'DAP', value: 'DAP' },
 ];
 
+export const deliveryTypeOptions = [
+  { label: '普通地址', value: 'NORMAL' },
+  { label: 'FBA仓库', value: 'FBA_WAREHOUSE' },
+  { label: '海外仓', value: 'OVERSEAS_WAREHOUSE' },
+  { label: '自提', value: 'SELF_PICKUP' },
+];
+
 export const orderStatusOptions = [
   { label: '草稿', value: 'DRAFT' },
   { label: '待审核', value: 'PENDING_REVIEW' },
@@ -70,6 +77,7 @@ function createDivider(fieldName: string, title: string): VbenFormSchema {
     component: 'Divider',
     fieldName,
     label: '',
+    formItemClass: 'col-span-2 freight-order-section',
     renderComponentContent: () => ({
       default: () => [title],
     }),
@@ -154,6 +162,36 @@ function createBasicSchema(): VbenFormSchema[] {
     },
     { fieldName: 'pickupAddress', label: '提货地址', component: 'Input' },
     { fieldName: 'deliveryAddress', label: '送货地址', component: 'Input' },
+    {
+      fieldName: 'deliveryType',
+      label: '交付类型',
+      component: 'Select',
+      componentProps: {
+        options: deliveryTypeOptions,
+        allowClear: true,
+        placeholder: '请选择交付类型',
+      },
+    },
+    {
+      fieldName: 'deliveryWarehouseCode',
+      label: 'FBA仓库代码',
+      component: 'Input',
+    },
+    {
+      fieldName: 'deliveryWarehouseName',
+      label: 'FBA仓库名称',
+      component: 'Input',
+    },
+    {
+      fieldName: 'amazonShipmentId',
+      label: 'Amazon Shipment ID',
+      component: 'Input',
+    },
+    {
+      fieldName: 'amazonReferenceNo',
+      label: 'Amazon Reference',
+      component: 'Input',
+    },
     createDivider('cargoDivider', '货物信息'),
     { fieldName: 'carrierName', label: '船司/航司', component: 'Input' },
     { fieldName: 'cargoName', label: '货物品名', component: 'Input' },
@@ -234,6 +272,7 @@ function createBasicSchema(): VbenFormSchema[] {
       label: '备注',
       component: 'Textarea',
       componentProps: { rows: 3 },
+      formItemClass: 'col-span-2',
     },
   ];
 }
@@ -558,6 +597,18 @@ export function useGridFormSchema(): VbenFormSchema[] {
       },
     },
     {
+      fieldName: 'contractNo',
+      label: '合同编号',
+      component: 'Input',
+      componentProps: { allowClear: true },
+    },
+    {
+      fieldName: 'contractName',
+      label: '合同名称',
+      component: 'Input',
+      componentProps: { allowClear: true },
+    },
+    {
       fieldName: 'status',
       label: '状态',
       component: 'Select',
@@ -600,6 +651,8 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       slots: { default: 'orderNo' },
     },
     { field: 'customerName', title: '客户', minWidth: 180 },
+    { field: 'contractNo', title: '合同编号', minWidth: 160 },
+    { field: 'contractName', title: '合同名称', minWidth: 220 },
     {
       field: 'transportMode',
       title: '运输方式',

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { CrmContractApi } from '#/api/crm/contract';
 import type { FreightOrderApi } from '#/api/freight/order';
 
 import { computed, onMounted, ref } from 'vue';
@@ -10,6 +11,7 @@ import { formatDateTime } from '@vben/utils';
 
 import { message } from 'ant-design-vue';
 
+import { getContract } from '#/api/crm/contract';
 import {
   getFreightOrder,
   getFreightOrderFeeList,
@@ -17,11 +19,13 @@ import {
 } from '#/api/freight/order';
 import { ACTION_ICON, TableAction } from '#/components/table-action';
 import {
+  bizTypeOptions,
   statusTextMap,
   transportModeOptions,
 } from '#/views/freight/orders/data';
 
 import Form from '../orders/modules/form.vue';
+import ExceptionList from './modules/exception-list.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -29,6 +33,7 @@ const tabs = useTabs();
 
 const loading = ref(false);
 const order = ref<FreightOrderApi.Order>();
+const contract = ref<CrmContractApi.Contract>();
 const feeList = ref<FreightOrderApi.OrderFee[]>([]);
 const logList = ref<FreightOrderApi.OrderLog[]>([]);
 
@@ -38,28 +43,46 @@ const [FormModal, formModalApi] = useVbenModal({
 });
 
 const stepStatusMap: Record<string, number> = {
-  ARRIVED: 4,
-  BOOKED: 3,
-  CANCELLED: 0,
-  COMPLETED: 5,
-  CUSTOMS_PROCESSING: 4,
   DRAFT: 0,
-  IN_TRANSIT: 4,
-  PENDING_BOOKING: 3,
-  PENDING_QUOTE: 2,
   PENDING_REVIEW: 1,
+  PENDING_QUOTE: 2,
   QUOTED: 2,
+  PENDING_BOOKING: 3,
+  BOOKED: 3,
+  CUSTOMS_PROCESSING: 4,
+  IN_TRANSIT: 4,
+  ARRIVED: 4,
   SIGNED: 4,
+  COMPLETED: 5,
+  CANCELLED: 0,
 };
 
-const stepItems = computed(() => [
-  { title: '创建评估', tip: '录入客户、运输方式、POL、POD 等基础委托资料' },
-  { title: '评估中', tip: '确认资料完整，提交审核并进入报价准备' },
-  { title: '最终评审', tip: '补充货物、GW、CBM 等报价关键字段' },
-  { title: '执行订舱', tip: '维护 Booking No.、SO No.、ETD、ETA 等订舱信息' },
-  { title: '运输交付', tip: '跟踪报关、ATD、ATA、POD 等运输节点' },
-  { title: '评估完成', tip: '确认应收、应付、利润，完成业务归档' },
-]);
+const stepItems = [
+  {
+    title: '录单',
+    tip: '录入客户、业务类型、运输方式、POL、POD 等基础资料',
+  },
+  {
+    title: '审核',
+    tip: '确认委托资料完整并提交审核，进入报价准备阶段',
+  },
+  {
+    title: '报价',
+    tip: '补充货物、PKGS、GW、CBM 等关键字段并完成报价',
+  },
+  {
+    title: '订舱',
+    tip: '维护 Booking No.、SO No.、ETD、ETA 等订舱信息',
+  },
+  {
+    title: '运输',
+    tip: '跟踪报关、B/L No.、ATD、ATA、POD 等运输节点',
+  },
+  {
+    title: '完成',
+    tip: '确认应收、应付、利润，完成业务归档',
+  },
+];
 
 const currentStep = computed(
   () => stepStatusMap[order.value?.status || 'DRAFT'] ?? 0,
@@ -75,9 +98,23 @@ const transportModeText = computed(
     order.value?.transportMode ||
     '-',
 );
+const bizTypeText = computed(
+  () =>
+    bizTypeOptions.find((item) => item.value === order.value?.bizType)?.label ||
+    order.value?.bizType ||
+    '-',
+);
 const totalReceivable = computed(() => order.value?.receivableAmount ?? 0);
 const totalPayable = computed(() => order.value?.payableAmount ?? 0);
 const totalProfit = computed(() => order.value?.profitAmount ?? 0);
+const contractReceived = computed(
+  () => contract.value?.totalReceivablePrice ?? 0,
+);
+const contractUnreceived = computed(() => {
+  const total = contract.value?.totalPrice ?? 0;
+  const received = contract.value?.totalReceivablePrice ?? 0;
+  return Number(total) - Number(received);
+});
 const pageTitle = computed(() => order.value?.orderNo || '业务单详情');
 
 function formatValue(value?: null | number | string) {
@@ -107,6 +144,14 @@ function handleEdit() {
   formModalApi.setData({ id: order.value.id }).open();
 }
 
+function handleViewContract() {
+  if (!order.value?.contractId) return;
+  router.push({
+    name: 'CrmContractDetail',
+    params: { id: order.value.contractId },
+  });
+}
+
 async function loadData() {
   const id = Number(route.params.id);
   if (!id) {
@@ -123,6 +168,9 @@ async function loadData() {
     order.value = detail;
     feeList.value = fees;
     logList.value = logs;
+    contract.value = detail.contractId
+      ? await getContract(detail.contractId)
+      : undefined;
   } finally {
     loading.value = false;
   }
@@ -149,6 +197,13 @@ onMounted(loadData);
             icon: ACTION_ICON.EDIT,
             auth: ['freight:order:update'],
             onClick: handleEdit,
+          },
+          {
+            label: '查看合同',
+            type: 'default',
+            icon: 'lucide:file-text',
+            ifShow: !!order?.contractId,
+            onClick: handleViewContract,
           },
         ]"
       />
@@ -178,6 +233,43 @@ onMounted(loadData);
     <a-card>
       <a-tabs>
         <a-tab-pane key="basic" tab="基础信息" force-render>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-label">合同编号</div>
+              <div class="summary-value">
+                {{ formatValue(order?.contractNo || contract?.no) }}
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">合同名称</div>
+              <div class="summary-value">
+                {{ formatValue(order?.contractName || contract?.name) }}
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">合同金额</div>
+              <div class="summary-value">
+                {{ formatValue(contract?.totalPrice) }}
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">已回款</div>
+              <div class="summary-value">
+                {{ formatValue(contractReceived) }}
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">待回款</div>
+              <div class="summary-value">
+                {{ formatValue(contractUnreceived) }}
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">当前业务状态</div>
+              <div class="summary-value">{{ currentStatusText }}</div>
+            </div>
+          </div>
+
           <div class="label-value-grid">
             <div class="label-value-item">
               <div class="label-value-label">客户</div>
@@ -191,9 +283,7 @@ onMounted(loadData);
             </div>
             <div class="label-value-item">
               <div class="label-value-label">业务类型</div>
-              <div class="label-value-value">
-                {{ formatValue(order?.bizType) }}
-              </div>
+              <div class="label-value-value">{{ bizTypeText }}</div>
             </div>
             <div class="label-value-item">
               <div class="label-value-label">贸易条款</div>
@@ -211,6 +301,18 @@ onMounted(loadData);
               <div class="label-value-label">POD 目的港</div>
               <div class="label-value-value">
                 {{ formatValue(order?.destinationPort) }}
+              </div>
+            </div>
+            <div class="label-value-item">
+              <div class="label-value-label">交付类型</div>
+              <div class="label-value-value">
+                {{ formatValue(order?.deliveryType) }}
+              </div>
+            </div>
+            <div class="label-value-item">
+              <div class="label-value-label">送货地址</div>
+              <div class="label-value-value">
+                {{ formatValue(order?.deliveryAddress) }}
               </div>
             </div>
             <div class="label-value-item">
@@ -273,6 +375,18 @@ onMounted(loadData);
             </a-descriptions-item>
             <a-descriptions-item label="Seal No. 封条号">
               {{ formatValue(order?.sealNo) }}
+            </a-descriptions-item>
+            <a-descriptions-item label="FBA仓库代码">
+              {{ formatValue(order?.deliveryWarehouseCode) }}
+            </a-descriptions-item>
+            <a-descriptions-item label="FBA仓库名称">
+              {{ formatValue(order?.deliveryWarehouseName) }}
+            </a-descriptions-item>
+            <a-descriptions-item label="Amazon Shipment ID">
+              {{ formatValue(order?.amazonShipmentId) }}
+            </a-descriptions-item>
+            <a-descriptions-item label="Amazon Reference">
+              {{ formatValue(order?.amazonReferenceNo) }}
             </a-descriptions-item>
             <a-descriptions-item label="ETD 预计离港">
               {{ formatDateTime(order?.etd) || '-' }}
@@ -337,6 +451,9 @@ onMounted(loadData);
             <a-table-column title="金额" data-index="amount" width="110" />
             <a-table-column title="备注" data-index="remark" />
           </a-table>
+        </a-tab-pane>
+        <a-tab-pane key="exceptions" tab="异常记录" force-render>
+          <ExceptionList :order-id="order?.id" />
         </a-tab-pane>
       </a-tabs>
     </a-card>
@@ -420,6 +537,35 @@ onMounted(loadData);
   line-height: 1.6;
 }
 
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  padding: 14px 16px;
+}
+
+.summary-label {
+  color: #8c8c8c;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.summary-value {
+  margin-top: 6px;
+  color: #262626;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.8;
+  word-break: break-all;
+}
+
 .label-value-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -486,13 +632,15 @@ onMounted(loadData);
   .order-steps-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
-  .order-steps-grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-
+  .order-steps-grid,
+  .summary-grid,
   .label-value-grid {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }

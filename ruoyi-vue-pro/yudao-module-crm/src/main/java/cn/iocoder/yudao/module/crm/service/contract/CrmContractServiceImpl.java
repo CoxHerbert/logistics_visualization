@@ -16,6 +16,7 @@ import cn.iocoder.yudao.module.crm.controller.admin.contract.vo.contract.CrmCont
 import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractConfigDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractProductDO;
+import cn.iocoder.yudao.module.crm.dal.dataobject.customer.CrmCustomerBankAccountDO;
 import cn.iocoder.yudao.module.crm.dal.mysql.contract.CrmContractMapper;
 import cn.iocoder.yudao.module.crm.dal.mysql.contract.CrmContractProductMapper;
 import cn.iocoder.yudao.module.crm.dal.redis.no.CrmNoRedisDAO;
@@ -26,6 +27,7 @@ import cn.iocoder.yudao.module.crm.framework.permission.core.annotations.CrmPerm
 import cn.iocoder.yudao.module.crm.service.business.CrmBusinessService;
 import cn.iocoder.yudao.module.crm.service.contact.CrmContactService;
 import cn.iocoder.yudao.module.crm.service.customer.CrmCustomerService;
+import cn.iocoder.yudao.module.crm.service.customer.CrmCustomerBankAccountService;
 import cn.iocoder.yudao.module.crm.service.permission.CrmPermissionService;
 import cn.iocoder.yudao.module.crm.service.permission.bo.CrmPermissionCreateReqBO;
 import cn.iocoder.yudao.module.crm.service.permission.bo.CrmPermissionTransferReqBO;
@@ -36,6 +38,7 @@ import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.engine.RepositoryService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +86,8 @@ public class CrmContractServiceImpl implements CrmContractService {
     @Resource
     private CrmCustomerService customerService;
     @Resource
+    private CrmCustomerBankAccountService customerBankAccountService;
+    @Resource
     private CrmBusinessService businessService;
     @Resource
     private CrmContactService contactService;
@@ -95,6 +100,8 @@ public class CrmContractServiceImpl implements CrmContractService {
     private AdminUserApi adminUserApi;
     @Resource
     private BpmProcessInstanceApi bpmProcessInstanceApi;
+    @Resource
+    private RepositoryService repositoryService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -205,6 +212,22 @@ public class CrmContractServiceImpl implements CrmContractService {
         if (reqVO.getSignUserId() != null) {
             adminUserApi.validateUser(reqVO.getSignUserId());
         }
+        if (reqVO.getBankAccountId() != null) {
+            CrmCustomerBankAccountDO bankAccount = customerBankAccountService.getCustomerBankAccount(reqVO.getBankAccountId());
+            if (bankAccount == null) {
+                throw exception(CUSTOMER_BANK_ACCOUNT_NOT_EXISTS);
+            }
+            if (!bankAccount.getCustomerId().equals(reqVO.getCustomerId())) {
+                throw exception(CUSTOMER_BANK_ACCOUNT_NOT_BELONG_TO_CUSTOMER);
+            }
+            reqVO.setBankAccountName(bankAccount.getAccountName());
+            reqVO.setBankName(bankAccount.getBankName());
+            reqVO.setBankAccountNo(bankAccount.getBankAccountNo());
+        } else {
+            reqVO.setBankAccountName(null);
+            reqVO.setBankName(null);
+            reqVO.setBankAccountNo(null);
+        }
     }
 
     private List<CrmContractProductDO> validateContractProducts(List<CrmContractSaveReqVO.Product> list) {
@@ -294,6 +317,13 @@ public class CrmContractServiceImpl implements CrmContractService {
         CrmContractDO contract = validateContractExists(id);
         if (ObjUtil.notEqual(contract.getAuditStatus(), CrmAuditStatusEnum.DRAFT.getStatus())) {
             throw exception(CONTRACT_SUBMIT_FAIL_NOT_DRAFT);
+        }
+        if (repositoryService.createProcessDefinitionQuery()
+                .processDefinitionKey(BPM_PROCESS_DEFINITION_KEY)
+                .latestVersion()
+                .active()
+                .count() == 0) {
+            throw exception(CONTRACT_SUBMIT_FAIL_PROCESS_NOT_FOUND);
         }
 
         // 2. 创建合同审批流程实例

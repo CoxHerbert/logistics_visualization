@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { VbenFormSchema } from '#/adapter/form';
 import type { FreightOrderApi } from '#/api/freight/order';
 
 import { computed, ref } from 'vue';
@@ -8,6 +9,7 @@ import { useVbenModal } from '@vben/common-ui';
 import { message } from 'ant-design-vue';
 
 import { useVbenForm } from '#/adapter/form';
+import { getContractSimpleList } from '#/api/crm/contract';
 import {
   createFreightOrder,
   getFreightOrder,
@@ -45,18 +47,67 @@ const defaultFormValues: Partial<FreightOrderApi.Order> = {
   profitAmount: 0,
 };
 
+const contractSchema: VbenFormSchema[] = [
+  {
+    fieldName: 'contractId',
+    label: '合同',
+    component: 'Select',
+    formItemClass: 'col-span-1',
+    componentProps: {
+      options: [],
+      placeholder: '请先选择客户',
+      allowClear: true,
+    },
+    dependencies: {
+      triggerFields: ['customerId'],
+      disabled: (values) => !values.customerId,
+      async componentProps(values) {
+        if (!values.customerId) {
+          return {
+            options: [],
+            placeholder: '请先选择客户',
+          };
+        }
+        const res = await getContractSimpleList(values.customerId);
+        return {
+          options: res.map((item) => ({
+            label: `${item.no || ''} ${item.name}`.trim(),
+            value: item.id,
+          })),
+          placeholder: '请选择合同',
+          allowClear: true,
+        };
+      },
+    },
+  },
+];
+
+function buildFormSchema(status?: string) {
+  const schema = [...useFormSchema(getOrderFormStage(status))];
+  const customerIndex = schema.findIndex(
+    (item) => item.fieldName === 'customerId',
+  );
+  if (customerIndex >= 0) {
+    schema.splice(customerIndex + 1, 0, ...contractSchema);
+  } else {
+    schema.push(...contractSchema);
+  }
+  return schema;
+}
+
 function updateStageSchema(status?: string) {
-  formApi.updateSchema(useFormSchema(getOrderFormStage(status)));
+  formApi.setState({
+    schema: buildFormSchema(status),
+  });
 }
 
 const [Form, formApi] = useVbenForm({
   commonConfig: {
     componentProps: { class: 'w-full' },
-    labelWidth: 150,
   },
-  wrapperClass: 'grid-cols-2',
-  layout: 'horizontal',
-  schema: useFormSchema('basic'),
+  wrapperClass: 'grid-cols-2 gap-x-8 gap-y-1',
+  layout: 'vertical',
+  schema: buildFormSchema('DRAFT'),
   showDefaultActions: false,
 });
 
@@ -100,7 +151,7 @@ const [Modal, modalApi] = useVbenModal({
 </script>
 
 <template>
-  <Modal :title="getTitle" class="w-3/4">
+  <Modal :title="getTitle" class="w-5/6">
     <div class="mx-4 mb-3">
       <a-alert
         type="info"
@@ -109,6 +160,35 @@ const [Modal, modalApi] = useVbenModal({
         :description="`当前填写阶段：${stageTextMap[currentStage]}。页面仅保留货运专业术语英文，其余字段均使用中文。`"
       />
     </div>
-    <Form class="mx-4" />
+    <Form class="freight-order-form mx-4" />
   </Modal>
 </template>
+
+<style scoped>
+.freight-order-form {
+  :deep(.ant-form-item) {
+    margin-bottom: 14px;
+  }
+
+  :deep(.freight-order-section) {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    padding: 10px 16px 0;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+  }
+
+  :deep(.freight-order-section .ant-divider) {
+    margin: 0 0 12px;
+    color: #262626;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  :deep(.ant-form-item-label > label) {
+    color: #262626;
+    font-weight: 500;
+  }
+}
+</style>
