@@ -134,13 +134,30 @@ export const useAuthStore = defineStore('auth', () => {
     // 加载
     let authPermissionInfo: AuthPermissionInfo | null = null;
     authPermissionInfo = await getAuthPermissionInfoApi();
+    if (!authPermissionInfo) {
+      throw new Error('Auth permission info is empty');
+    }
+    const roles = Array.isArray(authPermissionInfo.roles)
+      ? authPermissionInfo.roles
+      : [];
+    const permissions = Array.isArray(authPermissionInfo.permissions)
+      ? authPermissionInfo.permissions
+      : [];
+    const menus = Array.isArray(authPermissionInfo.menus)
+      ? authPermissionInfo.menus
+      : [];
     // userStore
     userStore.setUserInfo(authPermissionInfo.user);
-    userStore.setUserRoles(authPermissionInfo.roles);
+    userStore.setUserRoles(roles);
     // accessStore
-    accessStore.setAccessMenus(authPermissionInfo.menus);
-    accessStore.setAccessCodes(authPermissionInfo.permissions);
-    return authPermissionInfo;
+    accessStore.setAccessMenus(menus);
+    accessStore.setAccessCodes(permissions);
+    return {
+      ...authPermissionInfo,
+      menus,
+      permissions,
+      roles,
+    };
   }
 
   function $reset() {

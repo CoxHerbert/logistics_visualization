@@ -42,6 +42,11 @@ export const useDictStore = defineStore('core-dict', {
       valueField: string = 'value',
     ) {
       api(params).then((dicts) => {
+        if (!Array.isArray(dicts)) {
+          console.error('Dict api should return an array, but got:', dicts);
+          this.setDictCache({});
+          return;
+        }
         const dictCacheData: Dict = {};
         dicts.forEach((dict) => {
           dictCacheData[dict.dictType] = dicts

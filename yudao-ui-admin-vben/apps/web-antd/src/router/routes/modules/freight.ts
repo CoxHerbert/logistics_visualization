@@ -5,29 +5,12 @@ const routes: RouteRecordRaw[] = [
     path: '/freight',
     name: 'Freight',
     meta: {
-      title: '货运线索',
+      title: '国际货代',
       icon: 'lucide:truck',
       order: 90,
+      hideInMenu: true,
     },
     children: [
-       {
-        path: '/tools/fba-flex',
-        name: 'FbaFlexCost',
-        component: () => import('#/views/freight/tools/fba-flex/index.vue'),
-        meta: {
-          title: 'FBA 成本计算器',
-          icon: 'mdi:calculator'
-        },
-      },
-      {
-        path: 'leads',
-        name: 'FreightLeads',
-        component: () => import('#/views/freight/leads/index.vue'),
-        meta: {
-          title: '线索列表',
-          authority: ['freight:lead:query'],
-        },
-      },
       {
         path: 'leads/:id',
         name: 'FreightLeadDetail',
@@ -59,6 +42,17 @@ const routes: RouteRecordRaw[] = [
           activePath: '/freight/leads',
           hideInMenu: true,
           authority: ['freight:quote:query'],
+        },
+      },
+      {
+        path: 'orders/:id',
+        name: 'FreightOrderDetail',
+        component: () => import('#/views/freight/order-detail/index.vue'),
+        meta: {
+          title: '业务单详情',
+          activePath: '/freight/orders',
+          hideInMenu: true,
+          authority: ['freight:order:query'],
         },
       },
     ],
