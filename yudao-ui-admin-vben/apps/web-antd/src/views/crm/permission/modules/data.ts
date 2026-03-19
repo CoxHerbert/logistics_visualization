@@ -7,7 +7,41 @@ import { getDictOptions } from '@vben/hooks';
 import { BizTypeEnum, PermissionLevelEnum } from '#/api/crm/permission';
 import { getSimpleUserList } from '#/api/system/user';
 
-/** 新增/修改的表单 */
+function getCustomerRelatedBizOptions() {
+  return [
+    {
+      label: '联系人',
+      value: BizTypeEnum.CRM_CONTACT,
+    },
+    {
+      label: '商机',
+      value: BizTypeEnum.CRM_BUSINESS,
+    },
+    {
+      label: '合同',
+      value: BizTypeEnum.CRM_CONTRACT,
+    },
+    {
+      label: '银行账户（继承客户权限）',
+      value: -101,
+      disabled: true,
+    },
+    {
+      label: '营业执照/资质（继承客户权限）',
+      value: -102,
+      disabled: true,
+    },
+    {
+      label: '回款计划',
+      value: BizTypeEnum.CRM_RECEIVABLE_PLAN,
+    },
+    {
+      label: '回款',
+      value: BizTypeEnum.CRM_RECEIVABLE,
+    },
+  ];
+}
+
 export function useTransferFormSchema(): VbenFormSchema[] {
   return [
     {
@@ -31,7 +65,7 @@ export function useTransferFormSchema(): VbenFormSchema[] {
     },
     {
       fieldName: 'oldOwnerHandler',
-      label: '老负责人',
+      label: '原负责人',
       component: 'RadioGroup',
       componentProps: {
         options: [
@@ -49,7 +83,7 @@ export function useTransferFormSchema(): VbenFormSchema[] {
     },
     {
       fieldName: 'oldOwnerPermissionLevel',
-      label: '老负责人权限级别',
+      label: '原负责人权限级别',
       component: 'RadioGroup',
       componentProps: {
         options: getDictOptions(
@@ -73,26 +107,12 @@ export function useTransferFormSchema(): VbenFormSchema[] {
       label: '同时转移',
       component: 'CheckboxGroup',
       componentProps: {
-        options: [
-          {
-            label: '联系人',
-            value: BizTypeEnum.CRM_CONTACT,
-          },
-          {
-            label: '商机',
-            value: BizTypeEnum.CRM_BUSINESS,
-          },
-          {
-            label: '合同',
-            value: BizTypeEnum.CRM_CONTRACT,
-          },
-        ],
+        options: getCustomerRelatedBizOptions(),
       },
     },
   ];
 }
 
-/** 新增/修改的表单 */
 export function useFormSchema(): VbenFormSchema[] {
   return [
     {
@@ -122,9 +142,7 @@ export function useFormSchema(): VbenFormSchema[] {
       },
       dependencies: {
         triggerFields: ['ids'],
-        show: (values) => {
-          return values.ids === undefined;
-        },
+        show: (values) => values.ids === undefined,
       },
     },
     {
@@ -141,7 +159,7 @@ export function useFormSchema(): VbenFormSchema[] {
     },
     {
       fieldName: 'bizType',
-      label: 'Crm 类型',
+      label: 'CRM 类型',
       component: 'RadioGroup',
       componentProps: {
         options: [
@@ -169,35 +187,18 @@ export function useFormSchema(): VbenFormSchema[] {
       label: '同时添加至',
       component: 'CheckboxGroup',
       componentProps: {
-        options: [
-          {
-            label: '联系人',
-            value: BizTypeEnum.CRM_CONTACT,
-          },
-          {
-            label: '商机',
-            value: BizTypeEnum.CRM_BUSINESS,
-          },
-          {
-            label: '合同',
-            value: BizTypeEnum.CRM_CONTRACT,
-          },
-        ],
+        options: getCustomerRelatedBizOptions(),
       },
       dependencies: {
         triggerFields: ['ids', 'bizType'],
-        show: (values) => {
-          return (
-            values.ids === undefined &&
-            values.bizType === BizTypeEnum.CRM_CUSTOMER
-          );
-        },
+        show: (values) =>
+          values.ids === undefined &&
+          values.bizType === BizTypeEnum.CRM_CUSTOMER,
       },
     },
   ];
 }
 
-/** 列表的字段 */
 export function useGridColumns(): VxeTableGridOptions['columns'] {
   return [
     {

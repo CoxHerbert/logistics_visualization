@@ -23,11 +23,6 @@ import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
-/**
- * 回款 Mapper
- *
- * @author 赤焰
- */
 @Mapper
 public interface CrmReceivableMapper extends BaseMapperX<CrmReceivableDO> {
 
@@ -37,19 +32,23 @@ public interface CrmReceivableMapper extends BaseMapperX<CrmReceivableDO> {
 
     default PageResult<CrmReceivableDO> selectPageByCustomerId(CrmReceivablePageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<CrmReceivableDO>()
-                .eq(CrmReceivableDO::getCustomerId, reqVO.getCustomerId()) // 必须传递
+                .eq(CrmReceivableDO::getCustomerId, reqVO.getCustomerId())
                 .eqIfPresent(CrmReceivableDO::getNo, reqVO.getNo())
                 .eqIfPresent(CrmReceivableDO::getContractId, reqVO.getContractId())
                 .eqIfPresent(CrmReceivableDO::getPlanId, reqVO.getPlanId())
                 .orderByDesc(CrmReceivableDO::getId));
     }
 
+    default List<CrmReceivableDO> selectListByCustomerId(Long customerId) {
+        return selectList(new LambdaQueryWrapperX<CrmReceivableDO>()
+                .eq(CrmReceivableDO::getCustomerId, customerId)
+                .orderByDesc(CrmReceivableDO::getId));
+    }
+
     default PageResult<CrmReceivableDO> selectPage(CrmReceivablePageReqVO pageReqVO, Long userId) {
         MPJLambdaWrapperX<CrmReceivableDO> query = new MPJLambdaWrapperX<>();
-        // 拼接数据权限的查询条件
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_RECEIVABLE.getType(),
                 CrmReceivableDO::getId, userId, pageReqVO.getSceneType());
-        // 拼接自身的查询条件
         query.selectAll(CrmReceivableDO.class)
                 .eqIfPresent(CrmReceivableDO::getNo, pageReqVO.getNo())
                 .eqIfPresent(CrmReceivableDO::getPlanId, pageReqVO.getPlanId())
@@ -61,10 +60,8 @@ public interface CrmReceivableMapper extends BaseMapperX<CrmReceivableDO> {
 
     default Long selectCountByAudit(Long userId) {
         MPJLambdaWrapperX<CrmReceivableDO> query = new MPJLambdaWrapperX<>();
-        // 我负责的 + 非公海
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_RECEIVABLE.getType(),
                 CrmReceivableDO::getId, userId, CrmSceneTypeEnum.OWNER.getType());
-        // 未审核
         query.eq(CrmContractDO::getAuditStatus, CrmAuditStatusEnum.PROCESS.getStatus());
         return selectCount(query);
     }
@@ -79,19 +76,16 @@ public interface CrmReceivableMapper extends BaseMapperX<CrmReceivableDO> {
         if (CollUtil.isEmpty(contractIds)) {
             return Collections.emptyMap();
         }
-        // SQL sum 查询
         List<Map<String, Object>> result = selectMaps(new QueryWrapper<CrmReceivableDO>()
                 .select("contract_id, SUM(price) AS total_price")
-                .in("audit_status", CrmAuditStatusEnum.DRAFT.getStatus(), // 草稿 + 审批中 + 审批通过
+                .in("audit_status", CrmAuditStatusEnum.DRAFT.getStatus(),
                         CrmAuditStatusEnum.PROCESS.getStatus(), CrmAuditStatusEnum.APPROVE.getStatus())
                 .groupBy("contract_id")
                 .in("contract_id", contractIds));
-        // 获得金额
         return convertMap(result, obj -> (Long) obj.get("contract_id"), obj -> (BigDecimal) obj.get("total_price"));
     }
 
     default Long selectCountByContractId(Long contractId) {
         return selectCount(CrmReceivableDO::getContractId, contractId);
     }
-
 }

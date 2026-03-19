@@ -10,7 +10,11 @@ import cn.iocoder.yudao.module.crm.dal.dataobject.business.CrmBusinessDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contact.CrmContactDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.permission.CrmPermissionDO;
+import cn.iocoder.yudao.module.crm.dal.dataobject.receivable.CrmReceivableDO;
+import cn.iocoder.yudao.module.crm.dal.dataobject.receivable.CrmReceivablePlanDO;
 import cn.iocoder.yudao.module.crm.dal.mysql.permission.CrmPermissionMapper;
+import cn.iocoder.yudao.module.crm.dal.mysql.receivable.CrmReceivableMapper;
+import cn.iocoder.yudao.module.crm.dal.mysql.receivable.CrmReceivablePlanMapper;
 import cn.iocoder.yudao.module.crm.enums.common.CrmBizTypeEnum;
 import cn.iocoder.yudao.module.crm.enums.permission.CrmPermissionLevelEnum;
 import cn.iocoder.yudao.module.crm.framework.permission.core.annotations.CrmPermission;
@@ -56,6 +60,10 @@ public class CrmPermissionServiceImpl implements CrmPermissionService {
     @Lazy // 解决依赖循环
     private CrmContractService contractService;
     @Resource
+    private CrmReceivableMapper receivableMapper;
+    @Resource
+    private CrmReceivablePlanMapper receivablePlanMapper;
+    @Resource
     private AdminUserApi adminUserApi;
 
 
@@ -74,6 +82,8 @@ public class CrmPermissionServiceImpl implements CrmPermissionService {
         buildContactPermissions(reqVO, userId, createPermissions);
         buildBusinessPermissions(reqVO, userId, createPermissions);
         buildContractPermissions(reqVO, userId, createPermissions);
+        buildReceivablePlanPermissions(reqVO, createPermissions);
+        buildReceivablePermissions(reqVO, createPermissions);
         if (CollUtil.isEmpty(createPermissions)) {
             return;
         }
@@ -132,6 +142,24 @@ public class CrmPermissionServiceImpl implements CrmPermissionService {
         // 2. 添加数据权限
         List<CrmContractDO> contractList = contractService.getContractListByCustomerIdOwnerUserId(reqVO.getBizId(), userId);
         contractList.forEach(item -> createBizTypePermissions(reqVO, type, item.getId(), item.getName(), createPermissions));
+    }
+
+    private void buildReceivablePlanPermissions(CrmPermissionSaveReqVO reqVO, List<CrmPermissionCreateReqBO> createPermissions) {
+        Integer type = CrmBizTypeEnum.CRM_RECEIVABLE_PLAN.getType();
+        if (!reqVO.getToBizTypes().contains(type)) {
+            return;
+        }
+        List<CrmReceivablePlanDO> planList = receivablePlanMapper.selectListByCustomerId(reqVO.getBizId());
+        planList.forEach(item -> createBizTypePermissions(reqVO, type, item.getId(), "PLAN-" + item.getPeriod(), createPermissions));
+    }
+
+    private void buildReceivablePermissions(CrmPermissionSaveReqVO reqVO, List<CrmPermissionCreateReqBO> createPermissions) {
+        Integer type = CrmBizTypeEnum.CRM_RECEIVABLE.getType();
+        if (!reqVO.getToBizTypes().contains(type)) {
+            return;
+        }
+        List<CrmReceivableDO> receivableList = receivableMapper.selectListByCustomerId(reqVO.getBizId());
+        receivableList.forEach(item -> createBizTypePermissions(reqVO, type, item.getId(), item.getNo(), createPermissions));
     }
 
     private void createBizTypePermissions(CrmPermissionSaveReqVO reqVO, Integer type, Long bizId, String name,
