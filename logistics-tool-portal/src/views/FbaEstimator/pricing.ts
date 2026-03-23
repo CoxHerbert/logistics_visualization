@@ -5,8 +5,8 @@ export interface EstimateOut {
   priceMaxCny: number;
   transitMinDays: number;
   transitMaxDays: number;
-  included: string[];
-  excluded: string[];
+  included: readonly string[];
+  excluded: readonly string[];
   notes: string[];
   basis: {
     cbm: number;
