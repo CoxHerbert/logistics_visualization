@@ -165,6 +165,71 @@ body {
     justify-content: flex-end;
 }
 
+/* ========== 浪漫互动栏 ========== */
+
+.romance-widget {
+    flex: 0 0 300px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 176, 206, 0.45);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 173, 204, 0.18));
+    box-shadow: 0 8px 22px rgba(44, 8, 27, 0.22);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    user-select: none;
+}
+
+.romance-widget:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(60, 10, 34, 0.28);
+}
+
+.romance-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 12px;
+}
+
+.heart-dot {
+    color: #ff85c0;
+}
+
+.heart-dot.pulse {
+    animation: heartPulse 0.35s ease;
+}
+
+.romance-title {
+    font-weight: 700;
+    opacity: 0.95;
+}
+
+.romance-score {
+    margin-left: auto;
+    font-weight: 700;
+    color: #ffd6e7;
+}
+
+.romance-line {
+    margin-top: 6px;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.romance-tip {
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+@keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
 .header-search {
     width: 100%;
 }
@@ -219,8 +284,10 @@ body {
     }
 
     .brand,
-    .header-actions {
+    .header-actions,
+    .romance-widget {
         width: 100%;
+        flex: none;
     }
 }
 

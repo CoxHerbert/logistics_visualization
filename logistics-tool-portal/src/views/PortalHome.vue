@@ -1,8 +1,10 @@
 <template>
   <section class="hero-section">
+    <div class="hero-love-note">To My Love · 每一票货都像一次准时奔赴 ❤️</div>
     <a-row :gutter="24" align="middle">
       <a-col :xs="24" :lg="13">
         <h1>中美线国际货运代理</h1>
+        <p class="hero-subtitle">给你看的版本：稳、快、透明，也要好看。</p>
         <p>
           聚焦中国至美国海运与空运专线，提供订舱、报关、清关、尾程派送与保险服务，适配跨境电商与一般贸易场景。
         </p>
@@ -480,12 +482,35 @@ section {
   padding: 40px 28px;
   border-radius: 20px;
   background:
-    radial-gradient(800px 400px at 20% 0%, rgba(22, 119, 255, 0.18), transparent 60%),
-    radial-gradient(700px 380px at 100% 30%, rgba(82, 196, 26, 0.12), transparent 55%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+    radial-gradient(780px 390px at 10% 0%, rgba(255, 94, 146, 0.2), transparent 60%),
+    radial-gradient(760px 400px at 95% 25%, rgba(141, 111, 255, 0.16), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 251, 0.8));
   border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 50px rgba(175, 92, 137, 0.18);
   backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::after {
+  content: '❤';
+  position: absolute;
+  right: 26px;
+  top: 18px;
+  font-size: 20px;
+  color: rgba(255, 67, 132, 0.4);
+}
+
+.hero-love-note {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: rgba(170, 38, 92, 0.9);
+  border: 1px solid rgba(255, 98, 152, 0.35);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .hero-section h1 {
@@ -503,6 +528,13 @@ section {
   line-height: 1.75;
   color: rgba(0, 0, 0, 0.62);
   max-width: 640px;
+}
+
+.hero-subtitle {
+  margin: 0 0 8px 0 !important;
+  font-size: 16px !important;
+  font-weight: 700;
+  color: rgba(146, 53, 92, 0.9) !important;
 }
 
 :deep(.ant-btn-lg) {
@@ -527,8 +559,8 @@ section {
 .hero-tags :deep(.ant-tag) {
   padding: 4px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(22, 119, 255, 0.18);
-  background: rgba(22, 119, 255, 0.06);
+  border: 1px solid rgba(255, 98, 152, 0.3);
+  background: rgba(255, 111, 163, 0.08);
   color: rgba(0, 0, 0, 0.72);
 }
 
