@@ -8,11 +8,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
-/**
- * CRM 业务类型枚举
- *
- * @author HUIHUI
- */
 @RequiredArgsConstructor
 @Getter
 public enum CrmBizTypeEnum implements ArrayValuable<Integer> {
@@ -24,18 +19,14 @@ public enum CrmBizTypeEnum implements ArrayValuable<Integer> {
     CRM_CONTRACT(5, "合同"),
     CRM_PRODUCT(6, "产品"),
     CRM_RECEIVABLE(7, "回款"),
-    CRM_RECEIVABLE_PLAN(8, "回款计划")
-    ;
+    CRM_RECEIVABLE_PLAN(8, "回款计划"),
+    CRM_CUSTOMER_BANK_ACCOUNT(9, "银行账户"),
+    CRM_CUSTOMER_LICENSE(10, "营业执照/资质");
 
-    public static final Integer[] ARRAYS = Arrays.stream(values()).map(CrmBizTypeEnum::getType).toArray(Integer[]::new);
+    public static final Integer[] ARRAYS =
+            Arrays.stream(values()).map(CrmBizTypeEnum::getType).toArray(Integer[]::new);
 
-    /**
-     * 类型
-     */
     private final Integer type;
-    /**
-     * 名称
-     */
     private final String name;
 
     public static String getNameByType(Integer type) {
@@ -48,5 +39,4 @@ public enum CrmBizTypeEnum implements ArrayValuable<Integer> {
     public Integer[] array() {
         return ARRAYS;
     }
-
 }

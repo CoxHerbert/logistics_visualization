@@ -191,13 +191,6 @@ function getActiveLayerY(spawnH: number) {
     return activeLayer.value * spawnH
 }
 
-function rebuildFromData() {
-    if (!stage) return
-    stage.clearPlaced()
-    for (const b of placedData.value) stage.addPlacedMesh(b)
-    interactions?.notifyMeshesChanged()
-}
-
 function addPlaced(box: PlacedBox) {
     placedData.value.push(box)
     stage?.addPlacedMesh(box)

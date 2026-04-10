@@ -25,7 +25,6 @@ import { ReceivablePlanDetailsList } from '#/views/crm/receivable/plan/component
 
 import Form from '../modules/form.vue';
 import { useDetailSchema } from './data';
-import FreightOrders from './modules/freight-orders.vue';
 import ContractDetailsInfo from './modules/info.vue';
 
 const props = defineProps<{ id?: number }>();
@@ -34,11 +33,11 @@ const route = useRoute();
 const router = useRouter();
 const tabs = useTabs();
 
-const loading = ref(false); // 加载中
-const contractId = ref(0); // 合同编号
-const contract = ref<CrmContractApi.Contract>({} as CrmContractApi.Contract); // 合同详情
-const logList = ref<SystemOperateLogApi.OperateLog[]>([]); // 操作日志
-const permissionListRef = ref<InstanceType<typeof PermissionList>>(); // 团队成员列表 Ref
+const loading = ref(false);
+const contractId = ref(0);
+const contract = ref<CrmContractApi.Contract>({} as CrmContractApi.Contract);
+const logList = ref<SystemOperateLogApi.OperateLog[]>([]);
+const permissionListRef = ref<InstanceType<typeof PermissionList>>();
 
 const [Descriptions] = useDescription({
   bordered: false,
@@ -56,12 +55,10 @@ const [TransferModal, transferModalApi] = useVbenModal({
   destroyOnClose: true,
 });
 
-/** 加载合同详情 */
 async function loadContractDetail() {
   loading.value = true;
   try {
     contract.value = await getContract(contractId.value);
-    // 操作日志
     const res = await getOperateLogPage({
       bizType: BizTypeEnum.CRM_CONTRACT,
       bizId: contractId.value,
@@ -72,23 +69,19 @@ async function loadContractDetail() {
   }
 }
 
-/** 返回列表页 */
 function handleBack() {
   tabs.closeCurrentTab();
   router.push({ name: 'CrmContract' });
 }
 
-/** 编辑合同 */
 function handleEdit() {
   formModalApi.setData({ id: contractId.value }).open();
 }
 
-/** 转移合同 */
 function handleTransfer() {
   transferModalApi.setData({ bizType: BizTypeEnum.CRM_CONTRACT }).open();
 }
 
-/** 加载数据 */
 onMounted(() => {
   contractId.value = Number(props.id || route.params.id);
   loadContractDetail();
@@ -142,12 +135,9 @@ onMounted(() => {
             :biz-type="BizTypeEnum.CRM_CONTRACT"
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="关联业务单" key="4" :force-render="true">
-          <FreightOrders :contract-id="contractId" />
-        </Tabs.TabPane>
         <Tabs.TabPane
           tab="回款"
-          key="5"
+          key="4"
           :force-render="true"
           v-if="contract.customerId"
         >
@@ -160,7 +150,7 @@ onMounted(() => {
             :customer-id="contract.customerId"
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="团队成员" key="6" :force-render="true">
+        <Tabs.TabPane tab="团队成员" key="5" :force-render="true">
           <PermissionList
             ref="permissionListRef"
             :biz-id="contractId"
@@ -169,7 +159,7 @@ onMounted(() => {
             @quit-team="handleBack"
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="操作日志" key="7" :force-render="true">
+        <Tabs.TabPane tab="操作日志" key="6" :force-render="true">
           <OperateLog :log-list="logList" />
         </Tabs.TabPane>
       </Tabs>

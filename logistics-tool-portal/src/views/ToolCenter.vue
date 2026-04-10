@@ -1,74 +1,306 @@
-﻿<template>
-  <section class="tool-center-page">
-    <a-card title="工具中心" :bordered="false">
-      <a-alert
-        type="info"
-        show-icon
-        message="已启用二级分类导航"
-        description="请先选择工具分类，再进入具体工具。"
-        class="tool-hint"
-      />
+<template>
+  <div class="tool-center-page">
+    <section class="tool-center-hero">
+      <div>
+        <div class="tool-center-kicker">Tool Center</div>
+        <h1>国际货运工具中心</h1>
+        <p>
+          先把高频决策工具放在前面。优先服务报价判断、运输方式选择、装柜规划和 FBA
+          场景测算，减少销售重复解释成本。
+        </p>
+      </div>
+      <div class="tool-center-hero__meta">
+        <div class="hero-meta-card">
+          <div class="hero-meta-card__label">当前优先级</div>
+          <div class="hero-meta-card__value">海运费走势</div>
+          <div class="hero-meta-card__desc">先做趋势判断，再承接报价和方案咨询</div>
+        </div>
+      </div>
+    </section>
 
-      <a-collapse :default-active-key="['price-calculator']" accordion>
-        <a-collapse-panel key="price-calculator" header="报价计算器">
-          <a-list item-layout="horizontal" :data-source="toolItems">
-            <template #renderItem="{ item }">
-              <a-list-item>
-                <a-list-item-meta :title="item.title" :description="item.description" />
-                <template #actions>
-                  <RouterLink :to="item.path">
-                    <a-button type="primary" size="small">进入</a-button>
-                  </RouterLink>
-                </template>
-              </a-list-item>
-            </template>
-          </a-list>
-        </a-collapse-panel>
-      </a-collapse>
-    </a-card>
-  </section>
+    <section class="tool-section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Priority Tools</div>
+          <h2 class="section-title">优先建设</h2>
+        </div>
+      </div>
+
+      <a-row :gutter="[18, 18]">
+        <a-col v-for="item in priorityTools" :key="item.title" :xs="24" :md="12" :xl="8">
+          <RouterLink :to="item.path" class="tool-card" :class="{ 'is-featured': item.featured }">
+            <div class="tool-card__top">
+              <div class="tool-card__badge">{{ item.badge }}</div>
+              <div v-if="item.featured" class="tool-card__feature">推荐</div>
+            </div>
+            <div class="tool-card__title">{{ item.title }}</div>
+            <div class="tool-card__desc">{{ item.description }}</div>
+            <div class="tool-card__footer">{{ item.footer }}</div>
+          </RouterLink>
+        </a-col>
+      </a-row>
+    </section>
+
+    <section class="tool-section">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker">Existing Tools</div>
+          <h2 class="section-title">现有工具</h2>
+        </div>
+      </div>
+
+      <a-row :gutter="[18, 18]">
+        <a-col v-for="item in existingTools" :key="item.title" :xs="24" :md="12" :xl="6">
+          <RouterLink :to="item.path" class="tool-card tool-card--compact">
+            <div class="tool-card__badge">{{ item.badge }}</div>
+            <div class="tool-card__title">{{ item.title }}</div>
+            <div class="tool-card__desc">{{ item.description }}</div>
+          </RouterLink>
+        </a-col>
+      </a-row>
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 
-interface ToolItem {
-  title: string;
+type ToolCard = {
+  badge: string;
   description: string;
+  featured?: boolean;
+  footer?: string;
   path: string;
-}
+  title: string;
+};
 
-const toolItems: ToolItem[] = [
+const priorityTools: ToolCard[] = [
   {
-    title: 'FBA头程价格计算',
-    description: '根据运输方式与基础参数，快速查看 FBA 头程报价结果。',
+    badge: '01',
+    description: '查看中美海运价格的周度趋势、航线差异和近期波动判断。',
+    featured: true,
+    footer: '适合门户内容展示和报价前判断',
+    path: '/tool-center/ocean-rate-trends',
+    title: '海运费走势',
+  },
+  {
+    badge: '02',
+    description: '输入体积、重量和件数，快速换算空运或快递计费重。',
+    footer: '下一步可继续建设',
     path: '/tool-center/fba-first-leg-calculator',
+    title: '体积重 / 计费重',
   },
   {
-    title: '装柜计算器 V8',
-    description: '支持多柜规划 + 包装优化 + 成本模型 + V8 分层装柜结构图。',
+    badge: '03',
+    description: '根据 CBM、重量和件型，辅助判断整柜、拼箱或多柜方案。',
+    footer: '适合承接装柜和订舱判断',
     path: '/tool-center/container-calculator',
+    title: '整柜 / 拼箱建议',
+  },
+];
+
+const existingTools: ToolCard[] = [
+  {
+    badge: 'FBA',
+    description: '面向 FBA 头程场景的费用测算。',
+    path: '/tool-center/fba-first-leg-calculator',
+    title: 'FBA头程价格计算',
   },
   {
-    title: '装柜计算器 V9 向导',
-    description: '四步向导：货物信息、装柜条件、方案结果、优化建议。',
+    badge: 'V8',
+    description: '支持多柜规划、包装优化和成本模型。',
+    path: '/tool-center/container-calculator',
+    title: '装柜计算器 V8',
+  },
+  {
+    badge: 'V9',
+    description: '四步向导式装柜计算流程。',
     path: '/tool-center/container-calculator/wizard',
+    title: '装柜计算器 V9',
   },
   {
-    title: '3D装箱模拟',
-    description: '三维集装箱装载模拟，支持拖拽摆放与装箱可视化。',
+    badge: '3D',
+    description: '三维装箱模拟与装载可视化。',
     path: '/tool-center/container-sim',
+    title: '3D装箱模拟',
   },
 ];
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .tool-center-page {
-  max-width: 1080px;
+  max-width: 1380px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.tool-hint {
+.tool-center-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) 320px;
+  gap: 20px;
+  padding: 28px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.15), transparent 30%),
+    linear-gradient(135deg, #f8fbff, #ffffff 48%, #f8fafc);
+  box-shadow: 0 26px 70px -44px rgba(15, 23, 42, 0.28);
+}
+
+.tool-center-kicker,
+.section-kicker {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.tool-center-hero h1,
+.section-title {
+  margin: 8px 0 0;
+  color: #0f172a;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tool-center-hero p {
+  max-width: 760px;
+  margin: 14px 0 0;
+  color: #64748b;
+  line-height: 1.9;
+}
+
+.hero-meta-card {
+  height: 100%;
+  padding: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+}
+
+.hero-meta-card__label {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-meta-card__value {
+  margin-top: 12px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.hero-meta-card__desc {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.8;
+}
+
+.section-head {
   margin-bottom: 16px;
+}
+
+.tool-card {
+  display: block;
+  height: 100%;
+  padding: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 18px 50px -42px rgba(15, 23, 42, 0.26);
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.tool-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(37, 99, 235, 0.16);
+  box-shadow: 0 28px 72px -42px rgba(15, 23, 42, 0.28);
+}
+
+.tool-card.is-featured {
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 35%),
+    linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.tool-card--compact {
+  min-height: 210px;
+}
+
+.tool-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tool-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.tool-card__feature {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tool-card__title {
+  margin-top: 18px;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tool-card__desc {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.tool-card__footer {
+  margin-top: 18px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 992px) {
+  .tool-center-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .tool-center-hero {
+    padding: 22px;
+  }
+
+  .tool-center-hero h1,
+  .section-title {
+    font-size: 28px;
+  }
 }
 </style>

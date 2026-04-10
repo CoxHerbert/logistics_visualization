@@ -1,5 +1,3 @@
-/* ========== 基础 ========== */
-
 :root {
     font-family:
         Inter,
@@ -16,6 +14,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     margin: 0;
 }
@@ -24,67 +26,62 @@ body {
     min-height: 100vh;
 }
 
-/* ========== Header 核心 ========== */
-
 .portal-header.ant-layout-header {
-    padding: 0 !important;
-    height: 72px !important;
-    line-height: normal !important;
-
     position: sticky;
     top: 0;
     z-index: 50;
-
-    backdrop-filter: blur(10px);
-    background: linear-gradient(120deg, #041a33 0%, #0a2f5f 55%, #0f4c8c 100%);
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 88px !important;
+    line-height: normal !important;
+    padding: 0 !important;
+    background:
+        linear-gradient(180deg, rgba(247, 250, 252, 0.94), rgba(247, 250, 252, 0.82));
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
-/* Header 容器 */
 .header-inner {
+    display: flex;
+    align-items: center;
     max-width: 1460px;
-    height: 72px;
+    height: 88px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 12px 24px;
+}
 
+.header-shell {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    width: 100%;
+    min-height: 64px;
+    padding: 10px 14px;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow: 0 22px 54px -42px rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(16px);
 }
-
-/* 左区 */
-.header-main {
-    flex: 1;
-    min-width: 0;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-/* ========== 品牌 ========== */
 
 .brand {
-    min-width: 220px;
-    padding: 6px 12px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.06);
-
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 260px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    text-decoration: none;
 }
 
 .brand-logo {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 2px;
     flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.96);
+    object-fit: contain;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
 }
 
 .brand-text {
@@ -92,35 +89,43 @@ body {
 }
 
 .brand-title {
+    color: #0f172a;
     font-size: 18px;
     font-weight: 700;
     line-height: 1.2;
-    color: #ffd666;
 }
 
 .brand-sub {
+    color: #64748b;
     font-size: 12px;
-    color: #e4eeff;
-    opacity: 0.85;
 }
-
-/* ========== 菜单 ========== */
 
 .top-menu {
     flex: 1;
     min-width: 0;
-
-    background: transparent;
-    border-bottom: none;
-
+    background: transparent !important;
+    border-bottom: none !important;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
 }
 
+.top-menu.ant-menu {
+    background: transparent !important;
+}
+
 .top-menu.ant-menu-horizontal {
     height: 48px;
     line-height: 48px;
+}
+
+.top-menu.ant-menu-horizontal::after {
+    display: none;
+}
+
+.top-menu.ant-menu-horizontal > .ant-menu-item::after,
+.top-menu.ant-menu-horizontal > .ant-menu-submenu::after {
+    display: none !important;
 }
 
 .top-menu .ant-menu-overflow {
@@ -130,61 +135,45 @@ body {
 .top-menu .ant-menu-item {
     height: 48px !important;
     line-height: 48px !important;
-
-    margin-inline: 2px !important;
-    border-radius: 8px;
-
+    margin-inline: 4px !important;
+    padding-inline: 14px !important;
+    border-radius: 12px;
     transition: all 0.2s ease;
 }
 
 .top-menu .ant-menu-item:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(37, 99, 235, 0.08) !important;
 }
 
 .top-menu .ant-menu-item a {
-    color: #eaf2ff;
-    font-weight: 500;
+    color: #334155;
+    font-weight: 600;
 }
 
 .top-menu .ant-menu-item-selected {
-    background: linear-gradient(135deg, #1f74ff, #0c57cc) !important;
+    background: rgba(37, 99, 235, 0.1) !important;
 }
 
 .top-menu .ant-menu-item-selected a {
-    color: #fff !important;
+    color: #1d4ed8 !important;
 }
 
-/* ========== 搜索框 ========== */
-
-.header-actions {
-    flex: 0 0 auto;
-    width: 320px;
-
+.header-cta {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
-    justify-content: flex-end;
 }
 
-.header-search {
-    width: 100%;
-}
-
-.header-search .ant-input-affix-wrapper {
-    height: 36px;
-
+.header-cta .ant-btn {
+    height: 42px;
+    padding-inline: 18px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-
-    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 16px 28px -18px rgba(37, 99, 235, 0.5);
 }
-
-/* ========== 内容区 ========== */
 
 .portal-content {
     padding: 24px;
 }
-
-/* ========== 悬浮 CTA ========== */
 
 .floating-cta {
     position: fixed;
@@ -198,8 +187,6 @@ body {
     box-shadow: 0 8px 20px rgba(11, 30, 54, 0.28);
 }
 
-/* ========== 响应式 ========== */
-
 @media (max-width: 992px) {
     .portal-header.ant-layout-header {
         height: auto !important;
@@ -208,18 +195,20 @@ body {
     .header-inner {
         height: auto;
         padding: 12px 16px;
-
-        flex-direction: column;
-        align-items: stretch;
     }
 
-    .header-main {
-        flex-direction: column;
+    .header-shell {
         align-items: stretch;
+        flex-direction: column;
+        padding: 12px;
     }
 
     .brand,
-    .header-actions {
+    .header-cta {
+        width: 100%;
+    }
+
+    .header-cta .ant-btn {
         width: 100%;
     }
 }
@@ -235,11 +224,10 @@ body {
     }
 }
 
-/* Container calculator */
 .page-shell {
     min-height: 100%;
-    background: linear-gradient(180deg, #eef4ff 0%, #f7f8fa 180px, #f5f7fa 100%);
     border-radius: 16px;
+    background: linear-gradient(180deg, #eef4ff 0%, #f7f8fa 180px, #f5f7fa 100%);
 }
 
 .page-container {
@@ -249,11 +237,11 @@ body {
 }
 
 .hero-card {
-    border-radius: 20px;
-    padding: 28px;
-    background: linear-gradient(135deg, rgba(22, 119, 255, 0.08), rgba(114, 46, 209, 0.06));
-    border: 1px solid rgba(22, 119, 255, 0.12);
     margin-bottom: 20px;
+    padding: 28px;
+    border: 1px solid rgba(22, 119, 255, 0.12);
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(22, 119, 255, 0.08), rgba(114, 46, 209, 0.06));
 }
 
 .hero-title {
@@ -284,24 +272,24 @@ body {
 
 .preview-legend {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     align-items: center;
     color: #667085;
     font-size: 12px;
-    flex-wrap: wrap;
 }
 
 .preview-dot {
+    display: inline-block;
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    display: inline-block;
 }
 
 .table-note {
+    margin-top: 8px;
     color: #667085;
     font-size: 12px;
-    margin-top: 8px;
 }
 
 @media (max-width: 768px) {

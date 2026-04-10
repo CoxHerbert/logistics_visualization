@@ -30,7 +30,7 @@ export interface PreciseForm {
     cargoValueUsd?: number;
     readyDate?: string;
     remark?: string;
-    flags?: {
+    flags: {
         isBattery: boolean;
         isLiquid: boolean;
         isPowder: boolean;

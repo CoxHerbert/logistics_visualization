@@ -7,7 +7,7 @@ import { getDictOptions } from '@vben/hooks';
 import { BizTypeEnum, PermissionLevelEnum } from '#/api/crm/permission';
 import { getSimpleUserList } from '#/api/system/user';
 
-function getCustomerRelatedBizOptions() {
+function getCustomerTransferBizOptions() {
   return [
     {
       label: '联系人',
@@ -21,15 +21,19 @@ function getCustomerRelatedBizOptions() {
       label: '合同',
       value: BizTypeEnum.CRM_CONTRACT,
     },
+  ];
+}
+
+function getCustomerRelatedBizOptions() {
+  return [
+    ...getCustomerTransferBizOptions(),
     {
-      label: '银行账户（继承客户权限）',
-      value: -101,
-      disabled: true,
+      label: '银行账户',
+      value: BizTypeEnum.CRM_CUSTOMER_BANK_ACCOUNT,
     },
     {
-      label: '营业执照/资质（继承客户权限）',
-      value: -102,
-      disabled: true,
+      label: '营业执照/资质',
+      value: BizTypeEnum.CRM_CUSTOMER_LICENSE,
     },
     {
       label: '回款计划',
@@ -107,7 +111,7 @@ export function useTransferFormSchema(): VbenFormSchema[] {
       label: '同时转移',
       component: 'CheckboxGroup',
       componentProps: {
-        options: getCustomerRelatedBizOptions(),
+        options: getCustomerTransferBizOptions(),
       },
     },
   ];
