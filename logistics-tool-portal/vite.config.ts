@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
 
     return {
-        base: '/portal/',
+        base: '/',
         plugins: [vue()],
         resolve: {
             alias: {
