@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <a-layout class="portal-layout">
     <a-layout-header class="portal-header">
       <div class="header-inner">
@@ -27,6 +27,7 @@
           </a-menu>
 
           <div class="header-cta">
+            <a-button @click="goToAdmin">{{ copy.adminAction }}</a-button>
             <RouterLink to="/get-plan?remark=来源入口：首页顶部CTA">
               <a-button type="primary">{{ copy.headerAction }}</a-button>
             </RouterLink>
@@ -40,7 +41,7 @@
     </a-layout-content>
 
     <div class="floating-cta">
-      <RouterLink to="/get-plan?remark=来源入口：全站悬浮CTA">
+      <RouterLink to="/get-plan?remark=来源入口：首页顶部CTA">
         <a-button type="primary" size="large">{{ copy.floatingAction }}</a-button>
       </RouterLink>
     </div>
@@ -54,16 +55,20 @@ import { RouterLink, RouterView, useRoute } from 'vue-router';
 const route = useRoute();
 
 const copy = {
+  adminAction: '进入后台管理',
   brandSub: 'China-US Freight Forwarding Portal',
-  brandTitle: '中美专线国际货运门户',
-  floatingAction: '获取运输方案',
-  headerAction: '立即询价',
+  brandTitle: '中美货运转运平台',
+  floatingAction: '获取咨询',
+  headerAction: '去往后台',
   navGetPlan: '获取方案',
   navHome: '首页',
-  navMe: '我的名片',
+  navMe: '个人中心',
   navToolCenter: '工具中心',
 };
-
+const adminUrl = import.meta.env.VITE_ADMIN_URL || '/';
+const goToAdmin = () => {
+  window.open(adminUrl, '_blank', 'noopener,noreferrer');
+};
 const activeKey = computed(() => {
   if (route.path.startsWith('/tool-center')) return 'tool-center';
   if (route.path.startsWith('/me')) return 'me';
