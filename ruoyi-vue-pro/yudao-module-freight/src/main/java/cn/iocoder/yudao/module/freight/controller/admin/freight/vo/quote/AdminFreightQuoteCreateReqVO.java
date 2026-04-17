@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote;
+﻿package cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -11,10 +11,6 @@ import java.math.BigDecimal;
 @Schema(description = "管理后台 - 货运报价创建 Request VO")
 @Data
 public class AdminFreightQuoteCreateReqVO {
-
-    @Schema(description = "线索编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "线索编号不能为空")
-    private Long leadId;
 
     @Schema(description = "币种", requiredMode = Schema.RequiredMode.REQUIRED, example = "USD")
     @NotBlank(message = "币种不能为空")

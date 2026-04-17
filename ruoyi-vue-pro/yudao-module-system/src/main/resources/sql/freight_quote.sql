@@ -1,6 +1,5 @@
-CREATE TABLE IF NOT EXISTS `freight_quote` (
+﻿CREATE TABLE IF NOT EXISTS `freight_quote` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `lead_id` bigint NOT NULL COMMENT '线索编号',
   `currency` varchar(16) NOT NULL COMMENT '币种',
   `unit_price` decimal(18,2) NOT NULL COMMENT '单价',
   `quantity` decimal(18,2) NOT NULL COMMENT '数量',
@@ -14,6 +13,5 @@ CREATE TABLE IF NOT EXISTS `freight_quote` (
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
   `tenant_id` bigint NOT NULL DEFAULT '0' COMMENT '租户编号',
   PRIMARY KEY (`id`),
-  KEY `idx_lead_id` (`lead_id`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='货运报价表';

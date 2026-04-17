@@ -19,11 +19,6 @@ const router = createRouter({
             component: () => import('@/views/ToolCenter.vue'),
         },
         {
-            path: '/tool-center/ocean-rate-trends',
-            name: 'ocean-rate-trends',
-            component: () => import('@/views/OceanRateTrends.vue'),
-        },
-        {
             path: '/tool-center/fba-first-leg-calculator',
             name: 'fba-first-leg-calculator',
             component: () => import('@/views/FbaEstimator/index.vue'),

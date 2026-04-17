@@ -1,66 +1,69 @@
-<script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
+﻿<script setup lang="ts">
+import { reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { message } from 'ant-design-vue';
 
-import { createFreightLead, type FreightLeadCreateReq } from '@/api/portal'
+type PlanRequestForm = {
+  contactName: string;
+  contactPhone: string;
+  departureCity?: string;
+  destinationCity?: string;
+  shipMode: number;
+  cargoType: number;
+  remark?: string;
+};
 
-const route = useRoute()
-const submitting = ref(false)
+const route = useRoute();
+const submitting = ref(false);
 
-const formState = reactive<FreightLeadCreateReq>({
+const formState = reactive<PlanRequestForm>({
   contactName: (route.query.contactName as string) || '',
   contactPhone: (route.query.contactPhone as string) || '',
   departureCity: (route.query.departureCity as string) || (route.query.origin as string) || '',
   destinationCity: (route.query.destinationCity as string) || (route.query.destination as string) || '',
   shipMode: Number(route.query.shipMode || 10),
   cargoType: Number(route.query.cargoType || 10),
-  remark: (route.query.remark as string) || ''
-})
+  remark: (route.query.remark as string) || '',
+});
 
 const shipModeOptions = [
   { label: '快递', value: 10 },
   { label: '零担', value: 20 },
-  { label: '整车', value: 30 }
-]
+  { label: '整车', value: 30 },
+];
 
 const cargoTypeOptions = [
   { label: '普货', value: 10 },
   { label: '易碎', value: 20 },
-  { label: '冷链', value: 30 }
-]
+  { label: '冷链', value: 30 },
+];
 
 const formRules = {
   contactName: [
     { required: true, message: '请输入联系人', trigger: 'blur' },
-    { min: 2, max: 20, message: '联系人长度需在 2-20 个字符之间', trigger: 'blur' }
+    { min: 2, max: 20, message: '联系人长度需在 2-20 个字符之间', trigger: 'blur' },
   ],
   contactPhone: [
     { required: true, message: '请输入联系电话', trigger: 'blur' },
-    { pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    { pattern: /^1\d{10}$/, message: '请输入正确的手机号', trigger: 'blur' },
   ],
   shipMode: [{ required: true, message: '请选择运输方式', trigger: 'change' }],
-  cargoType: [{ required: true, message: '请选择货物类型', trigger: 'change' }]
-}
-
-const extractErrorMessage = (error: any) => {
-  return error?.response?.data?.msg || error?.message || '提交失败，请稍后重试'
-}
+  cargoType: [{ required: true, message: '请选择货物类型', trigger: 'change' }],
+};
 
 const handleSubmit = async () => {
   if (submitting.value) {
-    return
+    return;
   }
-  submitting.value = true
+  submitting.value = true;
   try {
-    const leadId = await createFreightLead(formState)
-    message.success(`提交成功，线索编号：${leadId}`)
-  } catch (error: any) {
-    message.error(extractErrorMessage(error))
+    // 线索管理模块已下线：当前仅保留前端收集与成功提示
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    message.success('提交成功，我们会尽快与您联系');
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 </script>
 
 <template>

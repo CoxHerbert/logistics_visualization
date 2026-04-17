@@ -1,19 +1,18 @@
-<template>
+﻿<template>
   <div class="tool-center-page">
     <section class="tool-center-hero">
       <div>
         <div class="tool-center-kicker">Tool Center</div>
         <h1>国际货运工具中心</h1>
         <p>
-          先把高频决策工具放在前面。优先服务报价判断、运输方式选择、装柜规划和 FBA
-          场景测算，减少销售重复解释成本。
+          聚焦高频决策工具，优先支持报价判断、运输方式选择和装柜规划，减少重复沟通成本。
         </p>
       </div>
       <div class="tool-center-hero__meta">
         <div class="hero-meta-card">
           <div class="hero-meta-card__label">当前优先级</div>
-          <div class="hero-meta-card__value">海运费走势</div>
-          <div class="hero-meta-card__desc">先做趋势判断，再承接报价和方案咨询</div>
+          <div class="hero-meta-card__value">装柜测算</div>
+          <div class="hero-meta-card__desc">先测算装柜与成本，再进入询价或方案提交。</div>
         </div>
       </div>
     </section>
@@ -35,7 +34,7 @@
             </div>
             <div class="tool-card__title">{{ item.title }}</div>
             <div class="tool-card__desc">{{ item.description }}</div>
-            <div class="tool-card__footer">{{ item.footer }}</div>
+            <div v-if="item.footer" class="tool-card__footer">{{ item.footer }}</div>
           </RouterLink>
         </a-col>
       </a-row>
@@ -77,21 +76,14 @@ type ToolCard = {
 const priorityTools: ToolCard[] = [
   {
     badge: '01',
-    description: '查看中美海运价格的周度趋势、航线差异和近期波动判断。',
-    featured: true,
-    footer: '适合门户内容展示和报价前判断',
-    path: '/tool-center/ocean-rate-trends',
-    title: '海运费走势',
-  },
-  {
-    badge: '02',
     description: '输入体积、重量和件数，快速换算空运或快递计费重。',
+    featured: true,
     footer: '下一步可继续建设',
     path: '/tool-center/fba-first-leg-calculator',
     title: '体积重 / 计费重',
   },
   {
-    badge: '03',
+    badge: '02',
     description: '根据 CBM、重量和件型，辅助判断整柜、拼箱或多柜方案。',
     footer: '适合承接装柜和订舱判断',
     path: '/tool-center/container-calculator',

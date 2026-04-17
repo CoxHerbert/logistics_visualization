@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.freight.dal.dataobject.freight;
+﻿package cn.iocoder.yudao.module.freight.dal.dataobject.freight;
 
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
@@ -18,9 +18,6 @@ import java.math.BigDecimal;
 public class FreightQuoteDO extends BaseDO {
 
     private Long id;
-
-    /** 线索编号 */
-    private Long leadId;
 
     /** 币种 */
     private String currency;

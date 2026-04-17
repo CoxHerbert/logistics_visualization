@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote;
+﻿package cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class AdminFreightQuoteRespVO {
 
     private Long id;
-    private Long leadId;
     private String currency;
     private BigDecimal unitPrice;
     private BigDecimal quantity;

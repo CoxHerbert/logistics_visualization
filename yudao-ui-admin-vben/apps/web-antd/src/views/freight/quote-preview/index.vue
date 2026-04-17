@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+﻿<script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -62,9 +62,7 @@ async function loadData() {
     quote.value = await getFreightQuote(quoteId.value);
     parseRemark(quote.value?.remark);
     if (feeItems.value.length === 0) {
-      feeItems.value = [
-        { name: '报价总额', amount: Number(quote.value?.total || 0) },
-      ];
+      feeItems.value = [{ name: '报价总额', amount: Number(quote.value?.total || 0) }];
     }
   } finally {
     loading.value = false;
@@ -88,28 +86,13 @@ onMounted(loadData);
     <Card class="print-area" title="货运报价单">
       <Descriptions :column="2" bordered size="small">
         <Descriptions.Item label="报价单号">{{ quote?.id }}</Descriptions.Item>
-        <Descriptions.Item label="线索 ID">
-          {{ quote?.leadId }}
-        </Descriptions.Item>
-        <Descriptions.Item label="币种">
-          {{ quote?.currency }}
-        </Descriptions.Item>
-        <Descriptions.Item label="创建时间">
-          {{ formatDisplayDateTime(quote?.createTime) }}
-        </Descriptions.Item>
+        <Descriptions.Item label="币种">{{ quote?.currency }}</Descriptions.Item>
+        <Descriptions.Item label="创建时间">{{ formatDisplayDateTime(quote?.createTime) }}</Descriptions.Item>
       </Descriptions>
 
-      <Table
-        class="mt-4"
-        :data-source="feeItems"
-        :columns="columns"
-        :pagination="false"
-        row-key="name"
-      >
+      <Table class="mt-4" :data-source="feeItems" :columns="columns" :pagination="false" row-key="name">
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'amount'">
-            {{ quote?.currency }} {{ Number(record.amount || 0).toFixed(2) }}
-          </template>
+          <template v-if="column.key === 'amount'">{{ quote?.currency }} {{ Number(record.amount || 0).toFixed(2) }}</template>
         </template>
       </Table>
 
@@ -117,9 +100,7 @@ onMounted(loadData);
         合计：{{ quote?.currency }} {{ Number(quote?.total || 0).toFixed(2) }}
       </div>
 
-      <div v-if="extraRemark" class="mt-4 text-gray-600">
-        备注：{{ extraRemark }}
-      </div>
+      <div v-if="extraRemark" class="mt-4 text-gray-600">备注：{{ extraRemark }}</div>
     </Card>
   </Page>
 </template>

@@ -1,4 +1,4 @@
-import { portalRequestClient } from '#/api/request';
+﻿import { portalRequestClient } from '#/api/request';
 
 export namespace FreightQuoteApi {
   export interface FeeItem {
@@ -8,7 +8,6 @@ export namespace FreightQuoteApi {
 
   export interface Quote {
     id: number;
-    leadId: number;
     currency: string;
     unitPrice: number;
     quantity: number;
@@ -19,7 +18,6 @@ export namespace FreightQuoteApi {
   }
 
   export interface QuoteCreateReqVO {
-    leadId: number;
     currency: string;
     unitPrice: number;
     quantity: number;
@@ -29,17 +27,9 @@ export namespace FreightQuoteApi {
 }
 
 export function createFreightQuote(data: FreightQuoteApi.QuoteCreateReqVO) {
-  return portalRequestClient.post<number>('/leads/quote/create', data);
+  return portalRequestClient.post<number>('/freight/quote/create', data);
 }
 
 export function getFreightQuote(id: number) {
-  return portalRequestClient.get<FreightQuoteApi.Quote>(
-    `/leads/quote/get?id=${id}`,
-  );
-}
-
-export function getFreightQuoteListByLead(leadId: number) {
-  return portalRequestClient.get<FreightQuoteApi.Quote[]>(
-    `/leads/quote/list-by-lead?leadId=${leadId}`,
-  );
+  return portalRequestClient.get<FreightQuoteApi.Quote>(`/freight/quote/get?id=${id}`);
 }

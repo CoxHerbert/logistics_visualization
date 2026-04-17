@@ -1,263 +1,306 @@
-<template>
+﻿<template>
   <div class="home-page">
-    <section id="hero" class="hero-section">
-      <div class="hero-copy">
-        <div class="hero-badge">China-US Freight Portal</div>
-        <h1>{{ copy.heroTitle }}</h1>
-        <p class="hero-description">{{ copy.heroDescription }}</p>
+    <section id="hero" class="hero-section section-card">
+      <div class="hero-main">
+        <p class="hero-kicker">China-US Freight Forwarding</p>
+        <h1>中美线国际货运代理（FBA头程 / 海运 / 海卡）</h1>
+        <p class="hero-subtitle">稳定渠道 · 控风险 · 不玩极限低价</p>
+
         <div class="hero-actions">
-          <RouterLink to="/get-plan">
-            <a-button type="primary" size="large">{{ copy.heroPrimary }}</a-button>
+          <RouterLink to="/get-plan?remark=来源入口：首页-获取报价">
+            <a-button type="primary" size="large">获取报价</a-button>
           </RouterLink>
-          <RouterLink to="/tool-center">
-            <a-button size="large">{{ copy.heroSecondary }}</a-button>
+          <RouterLink to="/get-plan?remark=来源入口：首页-咨询清关方案">
+            <a-button size="large">咨询清关方案</a-button>
           </RouterLink>
         </div>
+
+        <div class="trust-tags">
+          <span v-for="item in trustTags" :key="item" class="trust-tag">{{ item }}</span>
+        </div>
+
+        <p class="hero-quote">我们不承诺最低价，但尽量让每一票货走得更稳。</p>
       </div>
 
-      <div class="hero-visual">
-        <img class="hero-image" src="/images/home/pier.jpg" :alt="copy.heroTitle" />
-        <div class="hero-panel">
-          <div class="hero-panel__label">{{ copy.coreLabel }}</div>
-          <div class="hero-panel__title">{{ copy.coreTitle }}</div>
-          <div class="hero-panel__desc">{{ copy.coreDesc }}</div>
+      <div class="hero-side">
+        <img class="hero-image" src="/images/home/pier.jpg" alt="中美线物流" />
+        <div class="hero-side-card">
+          <p class="hero-side-card__kicker">销售核心</p>
+          <p class="hero-side-card__title">能报价的很多，能兜底的不多</p>
         </div>
       </div>
     </section>
 
     <nav class="anchor-nav">
-      <a
-        v-for="item in anchorItems"
-        :key="item.href"
-        class="anchor-nav__item"
-        :href="item.href"
-      >
+      <a v-for="item in anchorItems" :key="item.href" class="anchor-nav__item" :href="item.href">
         {{ item.label }}
       </a>
     </nav>
 
-    <section id="stats" class="stats-grid">
-      <div v-for="item in dashboardStats" :key="item.label" class="stat-card">
-        <div class="stat-card__label">{{ item.label }}</div>
-        <div class="stat-card__value">{{ item.value }}</div>
+    <section id="advantage" class="section-card section-block">
+      <div class="section-head">
+        <p class="section-kicker">Why Us</p>
+        <h2>为什么客户选择我们？</h2>
       </div>
-      <div class="stat-card stat-card--accent">
-        <div class="stat-card__label">{{ copy.coverageLabel }}</div>
-        <div class="stat-card__value">{{ copy.coverageValue }}</div>
-      </div>
+      <a-row :gutter="[16, 16]">
+        <a-col v-for="item in advantages" :key="item.title" :xs="24" :md="8">
+          <div class="info-card">
+            <div class="info-card__title">{{ item.title }}</div>
+            <div class="info-card__desc">{{ item.desc }}</div>
+          </div>
+        </a-col>
+      </a-row>
     </section>
 
-    <section id="rates" class="rate-section">
+    <section id="services" class="section-card section-block">
       <div class="section-head">
-        <div>
-          <div class="section-kicker">Ocean Rate Trends</div>
-          <h2 class="section-title">{{ copy.rateTitle }}</h2>
-          <p class="section-desc">{{ copy.rateDesc }}</p>
-        </div>
-        <RouterLink to="/tool-center/ocean-rate-trends">
-          <a-button>{{ copy.rateAction }}</a-button>
-        </RouterLink>
+        <p class="section-kicker">Services</p>
+        <h2>服务范围</h2>
+      </div>
+      <a-row :gutter="[16, 16]">
+        <a-col v-for="item in services" :key="item.title" :xs="24" :md="12" :xl="6">
+          <div class="service-card">
+            <div class="service-card__code">{{ item.code }}</div>
+            <div class="service-card__title">{{ item.title }}</div>
+            <div class="service-card__desc">{{ item.desc }}</div>
+          </div>
+        </a-col>
+      </a-row>
+    </section>
+
+    <section id="risk" class="section-card section-block">
+      <div class="section-head">
+        <p class="section-kicker">Risk Control</p>
+        <h2>海运全流程风险控制</h2>
       </div>
 
-      <div class="rate-panel">
-        <div class="rate-summary">
-          <div class="rate-summary__source">{{ activeTrend.source }}</div>
-          <div class="rate-summary__lane">{{ activeTrend.title }}</div>
-          <div class="rate-summary__price">{{ activeTrend.latestPrice }}</div>
-          <div class="rate-summary__signal">{{ copy.rateSignal }}: {{ activeTrend.signal }}</div>
-        </div>
-        <div class="rate-bars">
+      <div class="risk-flow-chain">
+        <span v-for="(node, index) in riskNodes" :key="node" class="risk-flow-chain__node">
+          {{ node }}<i v-if="index !== riskNodes.length - 1">→</i>
+        </span>
+      </div>
+
+      <div class="risk-layout">
+        <div class="risk-step-list">
           <button
-            v-for="tab in trendTabs"
-            :key="tab.key"
-            class="rate-tab"
-            :class="{ 'is-active': activeTrendKey === tab.key }"
+            v-for="item in riskSteps"
+            :key="item.key"
             type="button"
-            @click="activeTrendKey = tab.key"
+            class="risk-step"
+            :class="{ 'is-active': activeRiskKey === item.key }"
+            @click="activeRiskKey = item.key"
           >
-            {{ tab.label }}
+            {{ item.title }}
           </button>
-          <div class="rate-bars__grid">
-            <div v-for="point in ratePoints" :key="point.label" class="rate-bar-item">
-              <div class="rate-bar-item__wrap">
-                <div class="rate-bar-item__bar" :style="{ height: `${point.percent}%` }"></div>
-              </div>
-              <div class="rate-bar-item__price">{{ point.price }}</div>
-              <div class="rate-bar-item__label">{{ point.label }}</div>
-            </div>
+        </div>
+
+        <div class="risk-detail">
+          <div class="risk-detail__item">
+            <p class="risk-detail__label">风险点</p>
+            <p class="risk-detail__value">{{ activeRisk.risk }}</p>
+          </div>
+          <div class="risk-detail__item">
+            <p class="risk-detail__label">影响</p>
+            <p class="risk-detail__value">{{ activeRisk.impact }}</p>
+          </div>
+          <div class="risk-detail__item">
+            <p class="risk-detail__label">解决方案</p>
+            <p class="risk-detail__value">{{ activeRisk.solution }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="tools" class="quick-section">
+    <section id="contact" class="section-card contact-section">
       <div class="section-head">
-        <div>
-          <div class="section-kicker">Quick Access</div>
-          <h2 class="section-title">{{ copy.quickTitle }}</h2>
-        </div>
+        <p class="section-kicker">Contact</p>
+        <h2>准备出货？现在就聊</h2>
       </div>
-      <a-row :gutter="[16, 16]">
-        <a-col v-for="item in quickEntries" :key="item.title" :xs="24" :md="12" :xl="6">
-          <RouterLink :to="item.to" class="quick-card">
-            <div class="quick-card__icon">{{ item.icon }}</div>
-            <div class="quick-card__title">{{ item.title }}</div>
-            <div class="quick-card__desc">{{ item.description }}</div>
-          </RouterLink>
-        </a-col>
-      </a-row>
+      <p class="contact-desc">留下你的信息，我们按货型、时效、预算给你可落地的运输建议。</p>
+
+      <div class="contact-actions">
+        <RouterLink to="/get-plan?remark=来源入口：首页-底部获取报价">
+          <a-button type="primary" size="large">获取报价</a-button>
+        </RouterLink>
+        <RouterLink to="/get-plan?remark=来源入口：首页-一键咨询">
+          <a-button size="large">一键咨询</a-button>
+        </RouterLink>
+      </div>
+
+      <div class="wechat-card">
+        <p class="wechat-card__label">微信咨询</p>
+        <p class="wechat-card__value">{{ wechatId }}</p>
+      </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { usePortalStore } from '@/stores/portal';
 
-type TrendPoint = { label: string; price: string; raw: number };
-type TrendSeries = { latestPrice: string; points: TrendPoint[]; signal: string; source: string; title: string };
-
-const copy = {
-  coreDesc: '\u4ece\u56fd\u5185\u63d0\u8d27\u5230\u7f8e\u56fd\u7b7e\u6536\uff0c\u5173\u952e\u8282\u70b9\u7edf\u4e00\u8ddf\u8fdb\uff0c\u5f02\u5e38\u4fe1\u606f\u53ca\u65f6\u53cd\u9988\u3002',
-  coreLabel: '\u6838\u5fc3\u4fdd\u969c',
-  coreTitle: '\u8ba2\u8231 + \u6e05\u5173 + \u6d3e\u9001\u8054\u52a8',
-  coverageLabel: '\u670d\u52a1\u8986\u76d6',
-  coverageValue: '\u6d77\u8fd0 / \u7a7a\u8fd0 / \u6e05\u5173 / \u5c3e\u7a0b',
-  heroDescription: '\u805a\u7126\u4e2d\u56fd\u5230\u7f8e\u56fd\u56fd\u9645\u8d27\u8fd0\u3002\u9996\u9875\u5148\u7ed9\u4f60\u770b\u5546\u54c1\u80fd\u529b\u548c\u8fd0\u4ef7\u8d70\u52bf\uff0c\u518d\u518d\u5f15\u5bfc\u8fdb\u5165\u65b9\u6848\u6216\u5de5\u5177\u3002',
-  heroPrimary: '\u83b7\u53d6\u8fd0\u8f93\u65b9\u6848',
-  heroSecondary: '\u8fdb\u5165\u5de5\u5177\u4e2d\u5fc3',
-  heroTitle: '\u4e2d\u56fd\u5230\u7f8e\u56fd\u56fd\u9645\u8d27\u8fd0\uff0c\u4e00\u7ad9\u5f0f\u65b9\u6848\u95e8\u6237',
-  quickTitle: '\u5e38\u7528\u5165\u53e3',
-  rateAction: '\u67e5\u770b\u5b8c\u6574\u884c\u60c5',
-  rateDesc: '\u8fd0\u4ef7\u8d70\u52bf\u653e\u5728\u9996\u9875\uff0c\u66f4\u9002\u5408\u505a\u95e8\u6237\u5c55\u793a\u548c\u8be2\u4ef7\u5f15\u5bfc\u3002',
-  rateSignal: '\u8d8b\u52bf\u5224\u65ad',
-  rateTitle: '\u4e2d\u7f8e\u6d77\u8fd0\u8d39\u8d70\u52bf',
+type RiskItem = {
+  impact: string;
+  key: string;
+  risk: string;
+  solution: string;
+  title: string;
 };
 
 const anchorItems = [
-  { href: '#hero', label: '\u9996\u5c4f' },
-  { href: '#stats', label: '\u6570\u636e\u6982\u89c8' },
-  { href: '#rates', label: '\u8fd0\u4ef7\u8d70\u52bf' },
-  { href: '#tools', label: '\u5e38\u7528\u5165\u53e3' },
+  { href: '#hero', label: '首屏' },
+  { href: '#advantage', label: '为什么选我们' },
+  { href: '#services', label: '服务范围' },
+  { href: '#risk', label: '风险流程' },
+  { href: '#contact', label: '联系我们' },
 ];
 
-const quickEntries = [
-  { description: '\u5feb\u901f\u63d0\u4ea4\u9700\u6c42\uff0c\u83b7\u53d6\u65b9\u6848\u5efa\u8bae\u3002', icon: '01', title: '\u83b7\u53d6\u65b9\u6848', to: '/get-plan' },
-  { description: '\u96c6\u4e2d\u67e5\u770b\u6d4b\u7b97\u3001\u6a21\u62df\u4e0e\u62a5\u4ef7\u5de5\u5177\u3002', icon: '02', title: '\u5de5\u5177\u4e2d\u5fc3', to: '/tool-center' },
-  { description: '\u5148\u770b\u4e2d\u7f8e\u6d77\u8fd0\u884c\u60c5\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u8be2\u4ef7\u6216\u9501\u8231\u3002', icon: '03', title: '\u6d77\u8fd0\u8d39\u8d70\u52bf', to: '/tool-center/ocean-rate-trends' },
-  { description: '\u67e5\u770b\u88c5\u7bb1\u6a21\u62df\u4e0e\u96c6\u88c5\u7bb1\u5de5\u5177\u3002', icon: '04', title: '\u88c5\u7bb1\u6a21\u62df', to: '/tool-center/container-sim' },
+const trustTags = ['可对比航次 / 船期透明', '支持备选渠道（旺季不甩柜）', '异常全流程跟进'];
+
+const advantages = [
+  { title: '稳定优先', desc: '不做极限低价渠道，优先保证时效稳定和可交付。' },
+  { title: '响应及时', desc: '出现异常第一时间响应，明确责任和处理节奏。' },
+  { title: '备选补位', desc: '主方案受限时可快速切换备选渠道，减少断档风险。' },
 ];
 
-const trendTabs = [
-  { key: 'scfi-wc', label: 'SCFI 美西' },
-  { key: 'scfi-ec', label: 'SCFI 美东' },
-  { key: 'fbx-wc', label: 'FBX 美西' },
+const services = [
+  { code: '01', title: 'FBA头程（海派 / 海卡）', desc: '匹配平台入仓要求，平衡成本与时效。' },
+  { code: '02', title: '整柜（FCL）', desc: '适合稳定出货，提供舱位与节点管控。' },
+  { code: '03', title: '拼箱（LCL）', desc: '低起运门槛，支持多批次拼箱出货。' },
+  { code: '04', title: '清关 + 派送', desc: '到港后续流程衔接，减少末端延误。' },
 ];
 
-const trendSeries: Record<string, TrendSeries> = {
-  'fbx-wc': { latestPrice: '$4,820', points: [{ label: 'W1', price: '$5,420', raw: 5420 }, { label: 'W2', price: '$5,160', raw: 5160 }, { label: 'W3', price: '$4,980', raw: 4980 }, { label: 'W4', price: '$4,820', raw: 4820 }], signal: '\u56de\u843d\u4e2d', source: 'FBX', title: '\u4e2d\u56fd / \u4e1c\u4e9a \u2192 \u7f8e\u897f' },
-  'scfi-ec': { latestPrice: '$3,960', points: [{ label: 'W1', price: '$4,220', raw: 4220 }, { label: 'W2', price: '$4,140', raw: 4140 }, { label: 'W3', price: '$4,060', raw: 4060 }, { label: 'W4', price: '$3,960', raw: 3960 }], signal: '\u9ad8\u4f4d\u6574\u7406', source: 'SCFI', title: '\u4e0a\u6d77\u51fa\u53e3 \u2192 \u7f8e\u4e1c' },
-  'scfi-wc': { latestPrice: '$3,280', points: [{ label: 'W1', price: '$3,680', raw: 3680 }, { label: 'W2', price: '$3,520', raw: 3520 }, { label: 'W3', price: '$3,410', raw: 3410 }, { label: 'W4', price: '$3,280', raw: 3280 }], signal: '\u56de\u8c03\u4e2d', source: 'SCFI', title: '\u4e0a\u6d77\u51fa\u53e3 \u2192 \u7f8e\u897f' },
-};
+const riskNodes = ['订舱', '提柜', '装柜', '报关', '装船', '到港', '清关', '派送'];
 
-const portalStore = usePortalStore();
-const activeTrendKey = ref('scfi-wc');
+const riskSteps: RiskItem[] = [
+  {
+    key: 'booking',
+    title: '订舱',
+    risk: '旺季舱位紧张，临时甩柜或改期。',
+    impact: '整体时效延后，后续节点连锁延迟。',
+    solution: '提前锁舱 + 备选船东并行评估，关键货提前预排。',
+  },
+  {
+    key: 'loading',
+    title: '装柜',
+    risk: '装柜计划不合理，超重或空间浪费。',
+    impact: '增加成本并可能触发现场二次调整。',
+    solution: '装柜前预演与复核，明确箱型、重量和装载优先级。',
+  },
+  {
+    key: 'customs',
+    title: '清关',
+    risk: '资料不完整或品名归类不准确。',
+    impact: '查验概率上升，提货与派送延误。',
+    solution: '发运前完成资料校验，敏感货预审并准备补充文件。',
+  },
+  {
+    key: 'delivery',
+    title: '派送',
+    risk: '预约仓不顺或尾程承运衔接不足。',
+    impact: '产生额外仓租、改约费与客户投诉。',
+    solution: '到港前锁定预约窗口，异常件建立升级处理机制。',
+  },
+];
 
-const activeTrend = computed(() => trendSeries[activeTrendKey.value]);
-const ratePoints = computed(() => {
-  const max = Math.max(...activeTrend.value.points.map((item) => item.raw));
-  return activeTrend.value.points.map((item) => ({
-    ...item,
-    percent: Math.max(28, Math.round((item.raw / max) * 100)),
-  }));
+const activeRiskKey = ref(riskSteps[0]!.key);
+
+const activeRisk = computed(() => {
+  return riskSteps.find((item) => item.key === activeRiskKey.value) ?? riskSteps[0]!;
 });
 
-const dashboardStats = computed(() => {
-  const values = portalStore.stats.map((item) => item.value);
-  return [
-    { label: '\u4eca\u65e5\u8be2\u4ef7', value: values[0] ?? '126' },
-    { label: '\u5728\u9014\u7968\u6570', value: values[1] ?? '384' },
-    { label: '\u5f02\u5e38\u9884\u8b66', value: values[2] ?? '7' },
-  ];
-});
-
-onMounted(() => {
-  portalStore.refreshStats();
-});
+const wechatId = import.meta.env.VITE_WECHAT_ID || '请在 .env 中配置 VITE_WECHAT_ID';
 </script>
 
 <style scoped lang="scss">
 .home-page {
-  width: 100%;
-  max-width: 1380px;
+  max-width: 1320px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
-.hero-section,
-.rate-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-  gap: 20px;
+.section-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fff, #f8fafc);
+  box-shadow: 0 20px 50px -42px rgba(15, 23, 42, 0.28);
+}
+
+.section-block {
+  padding: 26px;
 }
 
 .hero-section {
-  padding: 30px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at top left, rgba(14, 165, 233, 0.16), transparent 32%),
-    linear-gradient(135deg, #f8fbff 0%, #ffffff 46%, #f7f4ee 100%);
-  box-shadow: 0 28px 80px -44px rgba(15, 23, 42, 0.32);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+  padding: 28px;
 }
 
-.hero-badge,
+.hero-kicker,
 .section-kicker {
-  display: inline-flex;
-  width: fit-content;
-  padding: 8px 14px;
-  border: 1px solid rgba(37, 99, 235, 0.14);
-  border-radius: 999px;
-  background: rgba(37, 99, 235, 0.06);
+  margin: 0;
   color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.hero-copy h1,
-.section-title {
-  margin: 18px 0 0;
+.hero-main h1,
+.section-head h2 {
+  margin: 12px 0 0;
   color: #0f172a;
-  font-size: 38px;
+  font-size: 34px;
   font-weight: 800;
-  line-height: 1.08;
+  line-height: 1.15;
 }
 
-.hero-description,
-.section-desc {
-  margin-top: 14px;
-  color: #64748b;
-  line-height: 1.9;
+.hero-subtitle {
+  margin: 12px 0 0;
+  color: #334155;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .hero-actions {
+  margin-top: 20px;
   display: flex;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.hero-visual {
+.trust-tags {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trust-tag {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.06);
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hero-quote {
+  margin: 16px 0 0;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.hero-side {
   position: relative;
+  min-height: 320px;
+  border-radius: 18px;
   overflow: hidden;
-  min-height: 360px;
-  border-radius: 24px;
-  background: #0f172a;
 }
 
 .hero-image {
@@ -266,39 +309,27 @@ onMounted(() => {
   object-fit: cover;
 }
 
-.hero-panel {
+.hero-side-card {
   position: absolute;
-  right: 18px;
-  bottom: 18px;
-  max-width: 280px;
-  padding: 18px;
-  border-radius: 18px;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  padding: 14px;
+  border-radius: 14px;
   background: rgba(15, 23, 42, 0.72);
   color: #fff;
 }
 
-.hero-panel__label {
-  font-size: 12px;
+.hero-side-card__kicker {
+  margin: 0;
   opacity: 0.7;
-  text-transform: uppercase;
+  font-size: 12px;
 }
 
-.hero-panel__title {
-  margin-top: 8px;
-  font-size: 22px;
+.hero-side-card__title {
+  margin: 8px 0 0;
+  font-size: 20px;
   font-weight: 700;
-}
-
-.hero-panel__desc {
-  margin-top: 8px;
-  line-height: 1.8;
-  opacity: 0.82;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
 }
 
 .anchor-nav {
@@ -308,234 +339,183 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1px solid rgba(15, 23, 42, 0.07);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 18px 50px -42px rgba(15, 23, 42, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
 }
 
 .anchor-nav__item {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 6px 12px;
   border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
   background: #fff;
   color: #334155;
+  text-decoration: none;
   font-size: 13px;
   font-weight: 600;
-  text-decoration: none;
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.anchor-nav__item:hover {
-  transform: translateY(-1px);
-  border-color: rgba(37, 99, 235, 0.18);
-  color: #1d4ed8;
-}
-
-.stat-card,
-.rate-summary,
-.rate-bars,
-.quick-card {
-  border: 1px solid rgba(15, 23, 42, 0.07);
-  border-radius: 24px;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  box-shadow: 0 20px 56px -44px rgba(15, 23, 42, 0.28);
-}
-
-.stat-card {
-  min-height: 128px;
-  padding: 20px 22px;
-}
-
-.stat-card__label {
-  color: #64748b;
-  font-size: 13px;
-}
-
-.stat-card__value {
-  margin-top: 10px;
-  color: #0f172a;
-  font-size: 30px;
-  font-weight: 800;
-}
-
-.stat-card--accent {
-  background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 34%),
-    linear-gradient(135deg, #f8fbff, #ffffff);
 }
 
 .section-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.section-title {
+.info-card,
+.service-card {
+  height: 100%;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.info-card__title,
+.service-card__title {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.info-card__desc,
+.service-card__desc {
   margin-top: 8px;
-  font-size: 28px;
+  color: #64748b;
+  line-height: 1.7;
 }
 
-.rate-summary,
-.rate-bars {
-  padding: 22px;
-}
-
-.rate-summary__source {
-  color: #2563eb;
+.service-card__code {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
-.rate-summary__lane {
-  margin-top: 10px;
-  color: #0f172a;
-  font-size: 24px;
-  font-weight: 800;
+.risk-flow-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.rate-summary__price {
-  margin-top: 16px;
-  color: #0f172a;
-  font-size: 34px;
-  font-weight: 800;
+.risk-flow-chain__node {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.rate-summary__signal {
-  margin-top: 12px;
-  color: #2563eb;
-  font-weight: 700;
+.risk-flow-chain__node i {
+  margin-left: 8px;
+  color: #94a3b8;
+  font-style: normal;
 }
 
-.rate-bars {
+.risk-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.risk-step-list {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 8px;
 }
 
-.rate-tab {
-  padding: 9px 14px;
-  margin-right: 10px;
+.risk-step {
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 999px;
   background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
   color: #334155;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.rate-tab.is-active {
-  border-color: rgba(37, 99, 235, 0.18);
+.risk-step.is-active {
+  border-color: rgba(37, 99, 235, 0.35);
   background: rgba(37, 99, 235, 0.08);
   color: #1d4ed8;
 }
 
-.rate-bars__grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  align-items: end;
-  min-height: 240px;
-}
-
-.rate-bar-item {
+.risk-detail {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  background: #fff;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 14px;
 }
 
-.rate-bar-item__wrap {
-  display: flex;
-  align-items: end;
-  width: 100%;
-  height: 180px;
-}
-
-.rate-bar-item__bar {
-  width: 100%;
-  border-radius: 18px 18px 10px 10px;
-  background: linear-gradient(180deg, #38bdf8, #2563eb);
-}
-
-.rate-bar-item__price {
-  color: #0f172a;
+.risk-detail__label {
+  margin: 0;
+  color: #64748b;
   font-size: 13px;
-  font-weight: 700;
 }
 
-.rate-bar-item__label {
-  color: #64748b;
-  font-size: 12px;
-}
-
-.quick-card {
-  display: block;
-  height: 100%;
-  padding: 22px;
-  text-decoration: none;
-}
-
-.quick-card__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: #0f172a;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.quick-card__title {
-  margin-top: 18px;
+.risk-detail__value {
+  margin: 4px 0 0;
   color: #0f172a;
-  font-size: 22px;
-  font-weight: 800;
+  line-height: 1.7;
+  font-weight: 600;
 }
 
-.quick-card__desc {
-  margin-top: 10px;
-  color: #64748b;
+.contact-section {
+  padding: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 36%),
+    linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.contact-desc {
+  margin: 0;
+  color: #475569;
   line-height: 1.8;
 }
 
-@media (max-width: 1200px) {
-  .hero-section,
-  .rate-panel,
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+.contact-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
-  .hero-section {
-    padding: 22px;
-  }
+.wechat-card {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.04);
+}
 
-  .hero-copy h1,
-  .section-title {
-    font-size: 30px;
-  }
+.wechat-card__label {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 700;
+}
 
-  .section-head {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.wechat-card__value {
+  margin: 6px 0 0;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 700;
+}
 
-  .rate-bars__grid {
+@media (max-width: 992px) {
+  .hero-section,
+  .risk-layout {
     grid-template-columns: 1fr;
   }
 
