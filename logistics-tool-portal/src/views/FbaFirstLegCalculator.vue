@@ -1,13 +1,13 @@
-<template>
+﻿<template>
   <a-card title="FBA头程价格计算" :bordered="false">
     <a-result
       status="info"
       title="FBA头程价格计算器"
-      sub-title="功能已创建入口，下一步可接入详细参数与实时报价规则。"
+      sub-title="功能入口已建立，下一步可接入详细参数与实时报价规则。"
     >
       <template #extra>
-        <RouterLink to="/get-plan?remark=来源入口：FBA头程价格计算器">
-          <a-button type="primary">先提交需求获取方案</a-button>
+        <RouterLink to="/me">
+          <a-button type="primary">联系顾问获取建议</a-button>
         </RouterLink>
       </template>
     </a-result>
@@ -15,5 +15,5 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink } from 'vue-router';
 </script>

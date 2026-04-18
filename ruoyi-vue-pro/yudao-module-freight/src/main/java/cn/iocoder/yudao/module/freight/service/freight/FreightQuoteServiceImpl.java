@@ -1,4 +1,4 @@
-﻿package cn.iocoder.yudao.module.freight.service.freight;
+package cn.iocoder.yudao.module.freight.service.freight;
 
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote.AdminFreightQuoteCreateReqVO;
 import cn.iocoder.yudao.module.freight.convert.freight.FreightQuoteConvert;

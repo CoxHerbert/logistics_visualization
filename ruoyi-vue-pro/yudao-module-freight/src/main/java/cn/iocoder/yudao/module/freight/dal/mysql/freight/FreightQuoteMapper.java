@@ -1,4 +1,4 @@
-﻿package cn.iocoder.yudao.module.freight.dal.mysql.freight;
+package cn.iocoder.yudao.module.freight.dal.mysql.freight;
 
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.freight.dal.dataobject.freight.FreightQuoteDO;

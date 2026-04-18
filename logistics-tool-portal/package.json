@@ -4,9 +4,12 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "dev": "node server.js",
+    "dev:spa": "vite",
+    "build": "vue-tsc -b && pnpm build:client && pnpm build:server",
+    "build:client": "vite build --outDir dist/client",
+    "build:server": "vite build --ssr src/entry-server.ts --outDir dist/server",
+    "preview": "node server.js --prod"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
@@ -26,3 +29,4 @@
     "vue-tsc": "^2.2.2"
   }
 }
+

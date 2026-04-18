@@ -1,4 +1,4 @@
-﻿package cn.iocoder.yudao.module.freight.enums;
+package cn.iocoder.yudao.module.freight.enums;
 
 import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 

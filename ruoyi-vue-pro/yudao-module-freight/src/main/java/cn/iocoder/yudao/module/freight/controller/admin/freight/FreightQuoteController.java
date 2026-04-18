@@ -1,4 +1,4 @@
-﻿package cn.iocoder.yudao.module.freight.controller.admin.freight;
+package cn.iocoder.yudao.module.freight.controller.admin.freight;
 
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote.AdminFreightQuoteCreateReqVO;

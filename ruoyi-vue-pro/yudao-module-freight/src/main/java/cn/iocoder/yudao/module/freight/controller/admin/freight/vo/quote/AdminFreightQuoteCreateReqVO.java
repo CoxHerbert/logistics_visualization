@@ -1,4 +1,4 @@
-﻿package cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote;
+package cn.iocoder.yudao.module.freight.controller.admin.freight.vo.quote;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

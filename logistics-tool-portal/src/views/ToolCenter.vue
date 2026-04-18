@@ -296,3 +296,4 @@ const existingTools: ToolCard[] = [
   }
 }
 </style>
+

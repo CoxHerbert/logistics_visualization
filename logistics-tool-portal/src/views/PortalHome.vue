@@ -7,11 +7,11 @@
         <p class="hero-subtitle">稳定渠道 · 控风险 · 不玩极限低价</p>
 
         <div class="hero-actions">
-          <RouterLink to="/get-plan?remark=来源入口：首页-获取报价">
-            <a-button type="primary" size="large">获取报价</a-button>
+          <RouterLink to="/me">
+            <a-button type="primary" size="large">联系顾问</a-button>
           </RouterLink>
-          <RouterLink to="/get-plan?remark=来源入口：首页-咨询清关方案">
-            <a-button size="large">咨询清关方案</a-button>
+          <RouterLink to="/me">
+            <a-button size="large">立即咨询</a-button>
           </RouterLink>
         </div>
 
@@ -119,11 +119,11 @@
       <p class="contact-desc">留下你的信息，我们按货型、时效、预算给你可落地的运输建议。</p>
 
       <div class="contact-actions">
-        <RouterLink to="/get-plan?remark=来源入口：首页-底部获取报价">
-          <a-button type="primary" size="large">获取报价</a-button>
+        <RouterLink to="/me">
+          <a-button type="primary" size="large">联系顾问</a-button>
         </RouterLink>
-        <RouterLink to="/get-plan?remark=来源入口：首页-一键咨询">
-          <a-button size="large">一键咨询</a-button>
+        <RouterLink to="/me">
+          <a-button size="large">联系顾问</a-button>
         </RouterLink>
       </div>
 
@@ -214,7 +214,7 @@ const wechatId = import.meta.env.VITE_WECHAT_ID || '请在 .env 中配置 VITE_W
 
 <style scoped lang="scss">
 .home-page {
-  max-width: 1320px;
+  max-width: 1380px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -524,3 +524,5 @@ const wechatId = import.meta.env.VITE_WECHAT_ID || '请在 .env 中配置 VITE_W
   }
 }
 </style>
+
+
