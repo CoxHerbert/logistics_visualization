@@ -34,11 +34,11 @@ npm run preview
 
 ```bash
 VITE_PORTAL_API_PREFIX=/portal-api
-VITE_PROXY_API_TARGET=http://localhost:48080/portal-api
+VITE_PROXY_API_TARGET=http://localhost:48080
 ```
 
 ## 本地代理
 
 开发环境默认代理：
 
-- `/portal-api/*` -> `VITE_PROXY_API_TARGET`（默认 `http://localhost:48080/portal-api`）
+- `/portal-api/*` -> `VITE_PROXY_API_TARGET`（默认 `http://localhost:48080`）

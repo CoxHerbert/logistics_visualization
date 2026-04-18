@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="home-page">
     <section id="hero" class="hero-section section-card">
       <div class="hero-main">
@@ -116,20 +116,12 @@
         <p class="section-kicker">Contact</p>
         <h2>准备出货？现在就聊</h2>
       </div>
-      <p class="contact-desc">留下你的信息，我们按货型、时效、预算给你可落地的运输建议。</p>
-
-      <div class="contact-actions">
-        <RouterLink to="/me">
-          <a-button type="primary" size="large">联系顾问</a-button>
-        </RouterLink>
-        <RouterLink to="/me">
-          <a-button size="large">联系顾问</a-button>
-        </RouterLink>
-      </div>
+      <p class="contact-desc">通过顶部导航的“联系我们”可直接提交咨询；也可以先加微信，沟通出货计划和风险点。</p>
 
       <div class="wechat-card">
         <p class="wechat-card__label">微信咨询</p>
         <p class="wechat-card__value">{{ wechatId }}</p>
+        <p class="wechat-card__hint">匿名提交入口已移动到页面顶部 header，所有页面都可以直接发起咨询。</p>
       </div>
     </section>
   </div>
@@ -484,17 +476,10 @@ const wechatId = import.meta.env.VITE_WECHAT_ID || '请在 .env 中配置 VITE_W
   line-height: 1.8;
 }
 
-.contact-actions {
-  margin-top: 16px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 .wechat-card {
   margin-top: 18px;
-  padding: 14px;
-  border-radius: 12px;
+  padding: 18px;
+  border-radius: 18px;
   border: 1px dashed rgba(37, 99, 235, 0.35);
   background: rgba(37, 99, 235, 0.04);
 }
@@ -513,6 +498,12 @@ const wechatId = import.meta.env.VITE_WECHAT_ID || '请在 .env 中配置 VITE_W
   font-weight: 700;
 }
 
+.wechat-card__hint {
+  margin: 12px 0 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
 @media (max-width: 992px) {
   .hero-section,
   .risk-layout {
@@ -524,5 +515,3 @@ const wechatId = import.meta.env.VITE_WECHAT_ID || '请在 .env 中配置 VITE_W
   }
 }
 </style>
-
-

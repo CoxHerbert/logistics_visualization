@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <a-layout class="portal-layout">
     <a-layout-header class="portal-header">
       <div class="header-inner">
@@ -20,6 +20,9 @@
             </a-menu-item>
             <a-menu-item key="me">
               <RouterLink to="/me">{{ copy.navMe }}</RouterLink>
+            </a-menu-item>
+            <a-menu-item key="contact-us">
+              <RouterLink to="/contact-us">{{ copy.navContact }}</RouterLink>
             </a-menu-item>
           </a-menu>
 
@@ -46,6 +49,7 @@ const copy = {
   adminAction: '进入后台管理',
   brandSub: 'China-US Freight Forwarding Portal',
   brandTitle: '中美货运转运平台',
+  navContact: '联系我们',
   navHome: '首页',
   navMe: '个人中心',
   navToolCenter: '工具中心',
@@ -59,6 +63,7 @@ const goToAdmin = () => {
 const activeKey = computed(() => {
   if (route.path.startsWith('/tool-center')) return 'tool-center';
   if (route.path.startsWith('/me')) return 'me';
+  if (route.path.startsWith('/contact-us')) return 'contact-us';
   return 'home';
 });
 </script>

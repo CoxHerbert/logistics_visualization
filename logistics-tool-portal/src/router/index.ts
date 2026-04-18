@@ -71,6 +71,16 @@ const routes = [
       keywords: '货运顾问,物流咨询,联系方式',
     },
   },
+  {
+    path: '/contact-us',
+    name: 'contact-us',
+    component: () => import('@/views/ContactUs.vue'),
+    meta: {
+      title: '联系我们-中美货运转运平台',
+      description: '无需登录提交咨询需求，获取中美线海运、FBA头程与清关派送建议。',
+      keywords: '联系我们,物流咨询,货运线索,FBA头程咨询',
+    },
+  },
 ];
 
 export function createAppRouter() {
